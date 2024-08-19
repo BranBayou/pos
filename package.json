@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "json-server --watch data/products.json --port 5000"
   },
   "dependencies": {
     "axios": "^1.7.4",
@@ -14,6 +15,7 @@
     "pinia": "^2.1.7",
     "primeicons": "^7.0.0",
     "vue": "^3.4.29",
+    "vue-global-loader": "^0.9.9",
     "vue-router": "^4.3.3",
     "vue-spinner": "^1.0.4",
     "vue-toastification": "^2.0.0-rc.5"
