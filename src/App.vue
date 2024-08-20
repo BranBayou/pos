@@ -6,6 +6,7 @@ import Bottom from './components/LeftNav/Bottom.vue'
 import PulseLoader from 'vue-spinner/src/PulseLoader.vue';
 import RingBarsSpinner from 'vue-global-loader/RingBarsSpinner.vue'
 
+
 import axios from 'axios'
 
 const state = reactive({
@@ -20,7 +21,7 @@ onMounted(async () => {
     try {
         const response = await axios.get('http://localhost:3131/products');
         state.products = response.data;
-        console.log(state.products);
+        // console.log(state.products);
 
         const elapsedTime = Date.now() - startTime; // Calculate the elapsed time
 

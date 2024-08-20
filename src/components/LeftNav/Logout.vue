@@ -1,12 +1,20 @@
 <script setup>
+import { ref } from 'vue'
+import Login from '../Popups/Login.vue'
+
+const modalActive = ref(null);
+const toggleModal = () => {
+    modalActive.value =!modalActive.value;
+}
 
 </script>
 
 <template>
     <div class="my-7">
+        <Login :modalActive="modalActive" @close-modal="toggleModal"/>
         <div class="border border-purple-500 w-fit p-5 rounded-xl flex gap-5">  
             <div class="">
-                <i class="pi pi-desktop text-3xl text-purple-500 flex flex-col"></i>
+                <i @click="toggleModal" class="pi pi-desktop text-3xl text-purple-500 flex flex-col"></i>
                 <p>Cashier</p>
             </div>
             <i class="pi pi-user text-3xl text-purple-500"></i>Cashier Logged out

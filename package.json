@@ -14,6 +14,7 @@
     "json-server": "^1.0.0-beta.1",
     "pinia": "^2.1.7",
     "primeicons": "^7.0.0",
+    "v-tooltip": "^2.1.3",
     "vue": "^3.4.29",
     "vue-global-loader": "^0.9.9",
     "vue-router": "^4.3.3",
