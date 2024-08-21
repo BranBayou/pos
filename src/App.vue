@@ -1,8 +1,7 @@
 <script setup>
 import { reactive, onMounted } from 'vue'
 import Header from './components/Header.vue'
-import Logout from './components/LeftNav/Logout.vue'
-import Bottom from './components/LeftNav/Bottom.vue'
+import Home from './components/Home.vue'
 import PulseLoader from 'vue-spinner/src/PulseLoader.vue';
 import RingBarsSpinner from 'vue-global-loader/RingBarsSpinner.vue'
 
@@ -61,11 +60,10 @@ onMounted(async () => {
             <!-- Product listing when done loading -->
             <div v-else class="w-full">
                 <div class="h-screen flex flex-col justify-between">
-                    <div class="">
+                    <div class="h-full">
                         <Header />
-                        <Logout />
+                        <Home />
                     </div>
-                    <Bottom />
                 </div>
             </div>
         </div>
