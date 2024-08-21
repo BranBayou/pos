@@ -26,13 +26,13 @@ onMounted(() => {
 <template>
     <div class="my-7">
         <Login :modalActive="modalActive" @close-modal="toggleModal"/>
-        <div class="border border-purple-500 w-fit p-5 rounded-xl flex gap-5">  
+        <div class="border border-purple-500 w-6/12 p-5 rounded-xl flex gap-5">  
             <div class="">
                 <button @click="toggleModal" ref="myButton" class="flex flex-col items-center"><i class="pi pi-desktop text-3xl text-purple-500"></i><span>Cashier</span></button>
             </div>
             <i class="pi pi-user text-3xl text-purple-500"></i>Cashier Logged out
         </div>
-        <div class="border border-purple-500 w-72 text-center p-5 rounded-xl flex gap-5 my-5">  
+        <div class="border border-purple-500 w-6/12 text-center p-5 rounded-xl flex gap-5 my-5">  
             <button class="text-center mx-auto">
                 <i class="pi pi-plus text-3xl text-purple-500 bg-green-50 rounded-full"></i>
             </button>

@@ -58,12 +58,10 @@ onMounted(async () => {
             </div>
 
             <!-- Product listing when done loading -->
-            <div v-else class="w-full">
-                <div class="h-screen flex flex-col justify-between">
-                    <div class="h-full">
+            <div v-else class="">
+                <div class="h-screen flex flex-col">
                         <Header />
                         <Home />
-                    </div>
                 </div>
             </div>
         </div>
