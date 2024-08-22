@@ -4,7 +4,7 @@ import Right from './Right/Right.vue'
 </script>
 
 <template>
-    <div class="flex h-full">
+    <div class="flex gap-4 h-full">
        <left />
        <Right /> 
     </div>

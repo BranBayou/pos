@@ -5,7 +5,7 @@ import Bottom from './Bottom.vue'
 </script>
 
 <template>
-    <div class="w-6/12 border border-purple-500 rounded-xl m-5">
+    <div class="w-6/12 border rounded-2xl mt-7 mb-5 shadow-lg">
         <Top />
         <Bottom />
     </div>
