@@ -1,4 +1,7 @@
 <script setup>
+import { useAuthStore } from '@/stores/authStore';
+
+const authStore = useAuthStore();
 
 </script>
 
@@ -8,7 +11,13 @@
             <p>Items: 0</p>
             <p>Skus: 0</p>
         </div>
-        <button class="border border-purple-500 bg-purple-500 w-72 text-center p-5 rounded-xl flex justify-center gap-5 my-5 ml-auto text-white">Checkout</button>
+        <button
+         :disabled="!authStore.isLoggedIn"
+         class="border border-purple-500 bg-purple-500 w-72 text-center p-5 rounded-xl flex justify-center gap-5 my-5 ml-auto text-white"
+         :class="{ 'opacity-50 cursor-not-allowed': !authStore.isLoggedIn }"
+        >
+            Checkout
+        </button>
     </div>
 </template>
 
