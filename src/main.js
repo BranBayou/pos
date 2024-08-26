@@ -1,6 +1,7 @@
 import './assets/main.css'
-import PrimeVue from 'primevue/config';
 import 'primeicons/primeicons.css'
+import PrimeVue from 'primevue/config';
+
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'

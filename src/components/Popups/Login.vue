@@ -1,6 +1,11 @@
 <script setup>
+import { useAuthStore } from '@/stores/authStore';
 import Select from './Base/Select.vue'
 import PassworkField from './Base/PasswordField.vue'
+import TextInput from './Base/TextInput.vue'
+import qrCode from '../../../public/qr-code.svg'
+import casherImg from '../../../public/cashier.png'
+
 defineEmits(["close-modal"]);
 
 defineProps({
@@ -10,6 +15,10 @@ defineProps({
     }
 })
 
+// Toggle user login
+const authStore = useAuthStore();
+
+
 </script>
 
 <template>
@@ -18,13 +27,30 @@ defineProps({
             <div v-show="modalActive"
                 class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
                 <Transition name="modal-inner">
-                    <div v-if="modalActive" class="p-4 bg-white self-start mt-24 w-3/12" style="border-radius: 52px;">
+                    <div v-if="modalActive" class="p-4 bg-white self-start mt-24 w-3/12" style="border-radius: 40px;">
                         <div class="grid grid-cols-3 gap-6 place-items-center">
                             <div class="w-full col-span-3 space-y-3">
-                                <div class="flex gap-x-1">
+                                <div v-if="authStore.isCashierLogin" class="cashier-login flex gap-x-1 my-1">
                                     <Select />
-                                </div>
-
+                                    <img
+                                      ref="qrLogin"
+                                      :src="qrCode"
+                                      alt=""
+                                      class="cursor-pointer bg-purple-100 p-2 rounded-2xl"
+                                      @click="authStore.toggleLogin"
+                                    />
+                                  </div>
+                                  <div v-else class="manager-login flex gap-x-1 my-1">
+                                    <TextInput />
+                                    <img
+                                      ref="qrLogin"
+                                      :src="casherImg"
+                                      alt=""
+                                      class="cursor-pointer bg-purple-100 p-2 rounded-2xl"
+                                      style="width: 44px;"
+                                      @click="authStore.toggleLogin"
+                                    />
+                                  </div>
                                 <div class="">
                                     <PassworkField />
                                 </div>
@@ -51,7 +77,7 @@ defineProps({
                             </button>
                         </div>
                         <button @click="$emit('close-modal')"
-                            class="text-black mt-8 bg-weather-primary rounded-3xl hover:bg-purple-500 hover:text-white py-2 px-6">
+                            class="mt-8 bg-weather-primary rounded-2xl text-white bg-purple-500 hover:bg-purple-400 hover:text-white py-2 px-6">
                             Close
                         </button>
                     </div>

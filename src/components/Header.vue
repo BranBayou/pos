@@ -11,8 +11,9 @@ const authStore = useAuthStore();
         <div class="flex items-center gap-1 col-span-10 bg-gray-100 py-2 px-4 rounded-3xl">
             <i
              :disabled="!authStore.isLoggedIn"
-             class="pi pi-barcode text-3xl text-purple-500"
+             class="pi pi-barcode text-purple-500"
              :class="{ 'opacity-50 cursor-not-allowed': !authStore.isLoggedIn }"
+             style="font-size: 1.875rem;"
             ></i>
             <input 
              :disabled="!authStore.isLoggedIn"
@@ -22,13 +23,15 @@ const authStore = useAuthStore();
         </div>
         <i
          :disabled="!authStore.isLoggedIn" 
-         class="pi pi-bell text-3xl text-center text-purple-500 col-span-1"
+         class="pi pi-bell text-center text-purple-500 col-span-1"
          :class="{ 'opacity-50 cursor-not-allowed': !authStore.isLoggedIn }"
+         style="font-size: 1.875rem;"
         ></i>
         <i 
          :disabled="!authStore.isLoggedIn" 
-         class="pi pi-cog text-3xl text-center text-purple-500 col-span-1"
+         class="pi pi-cog text-center text-purple-500 col-span-1"
          :class="{ 'opacity-50 cursor-not-allowed': !authStore.isLoggedIn }"
+         style="font-size: 1.875rem;"
         ></i>
     </div>
 

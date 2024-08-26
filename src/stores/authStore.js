@@ -13,5 +13,18 @@ export const useAuthStore = defineStore('auth', () => {
         isLoggedIn.value = false;
     }
 
-    return { isLoggedIn, login, logout };
+    //
+    const isCashierLogin = ref(true);
+
+    const toggleLogin = () => {
+        isCashierLogin.value = !isCashierLogin.value;
+    };
+
+    return { isLoggedIn,
+             login,
+             logout,
+             isCashierLogin, 
+             toggleLogin
+           };
+    
 });
