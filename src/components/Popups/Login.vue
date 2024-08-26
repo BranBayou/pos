@@ -1,4 +1,6 @@
 <script setup>
+import Select from './Base/Select.vue'
+import PassworkField from './Base/PasswordField.vue'
 defineEmits(["close-modal"]);
 
 defineProps({
@@ -16,55 +18,40 @@ defineProps({
             <div v-show="modalActive"
                 class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
                 <Transition name="modal-inner">
-                    <div v-if="modalActive" class="p-4 bg-white self-start mt-32 w-3/12" style="border-radius: 52px;">
+                    <div v-if="modalActive" class="p-4 bg-white self-start mt-24 w-3/12" style="border-radius: 52px;">
                         <div class="grid grid-cols-3 gap-6 place-items-center">
                             <div class="w-full col-span-3 space-y-3">
                                 <div class="flex gap-x-1">
-                                    <BaseListSelect v-if="isCashierLogin" type="button" v-model="selectedPersonId"
-                                        :items="cashiers" name="cashiers" />
-                                    <div v-else class="flex items-center flex-1">
-                                        <BaseTextField v-model="barcode" leadingIcon="prime:barcode" type="text"
-                                            placeholder="Scan Manager Barcode" name="barcode" />
-                                    </div>
-                                    <button @click="isCashierLogin = !isCashierLogin" :disabled="isManagerLogin"
-                                        class="inline-flex disabled:cursor-not-allowed min-h-[50px] h-full text-primary bg-primary/10 items-center cursor-pointer px-4 font-medium capitalize rounded-md text-13 dark:hover:text-white dark:text-subtitle-dark hover:text-primary">
-                                        <Icon v-if="isCashierLogin" class="text-lg" name="lucide:scan-barcode" />
-                                        <Icon v-else class="text-lg" name="hugeicons:cashier" />
-                                    </button>
+                                    <Select />
                                 </div>
 
-                                <div class="flex w-full flex-col flex-1 md:flex-row">
-                                    <BaseTextField ref="passwordInput" v-model="password" leadingIcon="uil-lock"
-                                        type="password" name="password" :max-length="6" :rules="{
-                                            required: true,
-                                            numrange: true,
-                                            length: 6,
-                                        }" />
+                                <div class="">
+                                    <PassworkField />
                                 </div>
                             </div>
                             <button @click="password.length < 6 ? (password = password + i) : ''" v-for="i in 9"
                                 :key="i"
-                                class="capitalize hover:bg-primary-hbr border-2	 border-solid border-1 border-primary text-primary bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
+                                class="capitalize hover:bg-purple-500 border-2	 border-solid border-1 border-primary text-primary bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
                                 {{ i }}
                             </button>
 
                             <button @click="password = password.slice(0, -1)"
-                                class="capitalize hover:bg-primary-hbr border-solid border-1 border-primary text-primary bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
+                                class="capitalize hover:bg-purple-500 border-solid border-1 border-primary text-primary bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
                                 <i class="pi pi-delete-left"></i>
                             </button>
 
                             <button @click="password = password + 0"
-                                class="capitalize hover:bg-primary-hbr border-solid border-1 border-primary text-primary bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
+                                class="capitalize hover:bg-purple-500 border-solid border-1 border-primary text-primary bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
                                 0
                             </button>
 
                             <button @click="login" type="submit"
-                                class="capitalize hover:bg-primary-hbr border-solid border-1 border-primary text-primary bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
+                                class="capitalize hover:bg-purple-500 border-solid border-1 border-primary text-primary bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
                                 <i class="pi pi-check"></i>
                             </button>
                         </div>
                         <button @click="$emit('close-modal')"
-                            class="text-black mt-8 bg-weather-primary py-2 px-6">
+                            class="text-black mt-8 bg-weather-primary rounded-3xl hover:bg-purple-500 hover:text-white py-2 px-6">
                             Close
                         </button>
                     </div>

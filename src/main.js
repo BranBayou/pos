@@ -1,4 +1,5 @@
 import './assets/main.css'
+import PrimeVue from 'primevue/config';
 import 'primeicons/primeicons.css'
 
 import { createApp } from 'vue'
@@ -11,5 +12,6 @@ const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
+app.use(PrimeVue)
 
 app.mount('#app')
