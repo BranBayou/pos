@@ -1,25 +1,78 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
-import Select from './Base/Select.vue'
-import PassworkField from './Base/PasswordField.vue'
-import TextInput from './Base/TextInput.vue'
-import qrCode from '/qr-code.svg'
-import casherImg from '/cashier.png'
+import Select from 'primevue/select';
+import Password from 'primevue/password';
+import InputText from 'primevue/inputtext';
+import qrCode from '/qr-code.svg';
+import casherImg from '/cashier.png';
+import { ref } from 'vue';
+import axios from 'axios';
 
-defineEmits(["close-modal"]);
+const emit = defineEmits(["close-modal"]);
 
 defineProps({
     modalActive: {
         type: Boolean,
         default: false,
     }
-})
+});
 
 // Toggle user login
 const authStore = useAuthStore();
 
+const userListRef = ref();
+const usersList = ref([
+    { name: 'Homer-Simpson', role: 'Cashier' },
+    { name: 'Marge-Simpson', role: 'Cashier' },
+    { name: 'Bart-Simpson', role: 'Cashier' },
+    { name: 'Lisa-Simpson', role: 'Cashier' },
+    { name: 'Maggie-Simpson', role: 'Cashier' }
+]);
 
+const username = ref('');
+const password = ref('');
+const storeId = ref(''); // Add this if you need to send store ID in headers
+
+const login = async () => {
+  try {
+    const selectedUser = userListRef.value; // The selected user object
+    const username = selectedUser ? selectedUser.name : ''; // Extract the username
+    const passwordValue = password.value; // Assuming password is a ref
+
+    console.log('Username:', username);
+    console.log('Password:', passwordValue);
+
+    if (!username || !passwordValue) {
+      console.error('Username or password is missing');
+      return;
+    }
+
+    const response = await axios.post('http://localhost:3131/login', {
+      username,
+      password: passwordValue
+    }, {
+      headers: {
+        'store-id': storeId.value // Add store ID header if needed
+      }
+    });
+
+    // Handle successful login
+    const { token } = response.data;
+    localStorage.setItem('token', token); // Store token in local storage
+
+    // Redirect or perform additional actions
+    authStore.login();
+
+    // Close the modal after successful login
+    emit('close-modal');
+
+  } catch (error) {
+    // Handle error
+    console.error('Login failed:', error.response?.data?.error || error.message);
+  }
+};
 </script>
+
 
 <template>
     <Teleport to="body">
@@ -31,20 +84,24 @@ const authStore = useAuthStore();
                         <div class="grid grid-cols-3 gap-6 place-items-center">
                             <div class="w-full col-span-3 space-y-3">
                                 <div v-if="authStore.isCashierLogin" class="cashier-login flex gap-x-1 my-1">
-                                    <Select />
+                                    <div class="card flex justify-center border-2 rounded-2xl w-full px-3">
+                                        <Select v-model="userListRef" :options="usersList" optionLabel="name" placeholder="Cashier Login" checkmark :highlightOnSelect="false" class="w-full py-3" />
+                                    </div>
                                     <img
                                       title="Switch to manager login"
                                       :src="qrCode"
                                       alt=""
                                       class="cursor-pointer bg-purple-100 p-2 rounded-2xl"
                                       @click="authStore.toggleLogin"
-                                      @mouseover="showTooltip"
-                                      @mouseleave="hideTooltip"
-                                      @mousemove="moveTooltip"
                                     />
                                   </div>
                                   <div v-else class="manager-login flex gap-x-1 my-1">
-                                    <TextInput />
+                                    <div class="card flex justify-center w-full">
+                                        <FloatLabel class="border-2 py-3 px-3 w-full rounded-2xl">
+                                            <i class="pi pi-barcode text-purple-500 pr-2"></i>
+                                            <InputText id="username" v-model="username" />
+                                        </FloatLabel>
+                                    </div>
                                     <img
                                       title="Switch to cashier login"
                                       ref="qrLogin"
@@ -56,7 +113,10 @@ const authStore = useAuthStore();
                                     />
                                   </div>
                                 <div class="">
-                                    <PassworkField />
+                                    <div class="card flex justify-center items-center gap-2 border-2 rounded-2xl py-3 px-3">
+                                    <i class="pi pi-lock"></i>
+                                    <Password v-model="password" :feedback="false" placeholder="******" class=" w-full mx-auto" />
+                                </div>
                                 </div>
                             </div>
                             <button @click="password.length < 6 ? (password = password + i) : ''" v-for="i in 9"

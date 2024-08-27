@@ -17,13 +17,14 @@ app.use(cors());
 app.use(express.json());
 
 // Login Route with JWT Authentication
-// Login Route with JWT Authentication
 app.post('/login', (req, res) => {
-  const { username, password } = req.body; // Expect username and password in the body
+  const { username, password } = req.body;
   const storeId = req.headers['store-id'];
 
-  // Find the user by full name
-  const user = users.find(u => u.fullName === username);
+  console.log('Received login request:', { username, storeId }); // Log request details
+
+  // Find the user by username
+  const user = users.find(u => u.username === username);
 
   if (!user) {
     return res.status(400).json({ error: 'User not found' });
@@ -43,7 +44,7 @@ app.post('/login', (req, res) => {
   const token = jwt.sign(
     {
       id: user.id,
-      fullName: user.fullName,
+      username: user.username, // Use username in the token payload
       role: user.role,
       storeId,
     },
@@ -53,7 +54,6 @@ app.post('/login', (req, res) => {
 
   res.json({ message: 'Login successful', token });
 });
-
 
 // Route to get branch users (protected route)
 app.get('/User/BranchUsers', (req, res) => {
@@ -70,10 +70,10 @@ app.get('/User/BranchUsers', (req, res) => {
     
     res.json(allowedUsers);
   } catch (ex) {
+    console.error('Invalid token:', ex.message); // Log error
     res.status(400).json({ error: 'Invalid token.' });
   }
 });
-
 
 // Route to serve products
 app.get('/products', (req, res) => {
@@ -82,22 +82,22 @@ app.get('/products', (req, res) => {
 
 // Route to serve the latest file and related data
 app.get('/Files/GetFiles', (req, res) => {
-  const dirPath = path.join(__dirname, 'path_to_your_directory'); // Replace with your directory path
+  const dirPath = path.join(__dirname, 'your_directory'); // Replace 'your_directory' with the actual directory path
 
-  // Get all files in the directory
   fs.readdir(dirPath, (err, files) => {
     if (err) {
+      console.error('Failed to read directory:', err.message); // Log error
       return res.status(500).json({ error: 'Failed to read directory' });
+    }
+
+    if (files.length === 0) {
+      return res.status(404).json({ error: 'No files found' });
     }
 
     // Sort files by modification time, latest first
     const sortedFiles = files.sort((a, b) => {
       return fs.statSync(path.join(dirPath, b)).mtime - fs.statSync(path.join(dirPath, a)).mtime;
     });
-
-    if (sortedFiles.length === 0) {
-      return res.status(404).json({ error: 'No files found' });
-    }
 
     // Get the latest file details
     const latestFile = sortedFiles[0];
@@ -112,8 +112,8 @@ app.get('/Files/GetFiles', (req, res) => {
   });
 });
 
-// Serve static files if necessary (e.g., serve files from a public directory)
-app.use('/files', express.static(path.join(__dirname, 'path_to_your_directory'))); // Replace with your directory path
+// Serve static files if necessary
+app.use('/files', express.static(path.join(__dirname, 'your_directory'))); // Replace 'your_directory' with the actual directory path
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

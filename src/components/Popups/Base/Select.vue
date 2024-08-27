@@ -4,11 +4,11 @@ import { ref } from "vue";
 
 const selectedCity = ref();
 const cities = ref([
-    { name: 'Homer Simpson', code: 'NY' },
-    { name: 'Marge Simpson', code: 'RM' },
-    { name: 'Bart Simpson', code: 'LDN' },
-    { name: 'Lisa Simpson', code: 'IST' },
-    { name: 'Maggie Simpson', code: 'PRS' }
+    { name: 'Homer-Simpson', code: 'NY' },
+    { name: 'Marge-Simpson', code: 'RM' },
+    { name: 'Bart-Simpson', code: 'LDN' },
+    { name: 'Lisa-Simpson', code: 'IST' },
+    { name: 'Maggie-Simpson', code: 'PRS' }
 ]);
 </script>
 
