@@ -5,7 +5,8 @@ export const useAuthStore = defineStore('auth', () => {
     // LoggedIn State
     const isUserLoggedIn = ref(false);
     const currentUser = ref(''); // Track the current user's name
-    const isLogoutConfirmationVisible = ref(false);
+    const isLogoutConfirmationVisible = ref(false)
+
 
     function login(username) {
         isUserLoggedIn.value = true;
@@ -17,6 +18,7 @@ export const useAuthStore = defineStore('auth', () => {
         isUserLoggedIn.value = false;
         currentUser.value = ''; // Clear the current user's name
         localStorage.removeItem('token'); // Clear the token
+        localStorage.removeItem('currentUser');
     }
 
     // Login input type state

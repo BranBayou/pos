@@ -27,6 +27,16 @@ const username = ref('');
 const password = ref('');
 const storeId = ref(''); 
 
+const token = localStorage.getItem('token');
+const currentUser = localStorage.getItem('currentUser');
+
+onMounted(() => {
+  if (token && currentUser) {
+    authStore.login(currentUser);
+    // You might want to check token validity here
+  }
+});
+
 // Fetch users on component mount api request 
 onMounted(async () => {
   try {
@@ -65,8 +75,9 @@ const login = async () => {
 
     const { token } = response.data;
     localStorage.setItem('token', token);
-
+    localStorage.setItem('currentUser', usernameValue); // Store username as well
     authStore.login(usernameValue);
+    
 
     toast.success(`Welcome back ${usernameValue}`);
 
@@ -95,7 +106,7 @@ const login = async () => {
                     <Select v-model="selectedUser" :options="usersList" optionLabel="username" placeholder="Cashier Login" checkmark :highlightOnSelect="false" class="w-full py-3" />
                   </div>
                   <img
-                    title="Switch to manager login"
+                    title="Switch to barcode login"
                     :src="qrCode"
                     alt=""
                     class="cursor-pointer bg-purple-100 p-2 rounded-2xl"
