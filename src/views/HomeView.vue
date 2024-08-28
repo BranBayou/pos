@@ -1,15 +1,12 @@
 <template>
+    <Home />      
+</template>
 
-    <Home />
-      
-  </template>
-  
-  <script setup>
-  import Home from '@/components/Home.vue'
+<script setup>
+import Home from '@/components/Home.vue'
 
-  
-  </script>
-  
-  <style scoped>
-  
-  </style>
+</script>
+
+<style scoped>
+
+</style>

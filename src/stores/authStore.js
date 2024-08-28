@@ -3,14 +3,18 @@ import { ref } from 'vue';
 
 export const useAuthStore = defineStore('auth', () => {
     // LoggedIn State
-    const isLoggedIn = ref(false);
+    const isUserLoggedIn = ref(false);
+    const currentUser = ref(''); // Track the current user's name
 
-    function login() {
-        isLoggedIn.value = true;
+    function login(username) {
+        isUserLoggedIn.value = true;
+        currentUser.value = username; // Set the current user's name
+        console.log('Current User:', currentUser.value); // Debugging log
     }
 
     function logout() {
-        isLoggedIn.value = false;
+        isUserLoggedIn.value = false;
+        currentUser.value = ''; // Clear the current user's name
     }
 
     //
@@ -20,11 +24,13 @@ export const useAuthStore = defineStore('auth', () => {
         isCashierLogin.value = !isCashierLogin.value;
     };
 
-    return { isLoggedIn,
-             login,
-             logout,
-             isCashierLogin, 
-             toggleLogin
-           };
-    
+    return {
+        isUserLoggedIn,
+        currentUser, // Export currentUser
+        login,
+        logout,
+        isCashierLogin,
+        toggleLogin
+    };
 });
+

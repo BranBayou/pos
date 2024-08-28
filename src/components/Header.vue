@@ -12,25 +12,25 @@ const authStore = useAuthStore();
             <i
              :disabled="!authStore.isLoggedIn"
              class="pi pi-barcode text-purple-500"
-             :class="{ 'opacity-50 cursor-not-allowed': !authStore.isLoggedIn }"
+             :class="{ 'opacity-50 cursor-not-allowed': !authStore.isUserLoggedIn }"
              style="font-size: 1.875rem;"
             ></i>
             <input 
              :disabled="!authStore.isLoggedIn"
              type="text" name="" id="" class="bg-gray-100 border-0 outline-none p-2 rounded-lg w-full"
-             :class="{ 'opacity-50 cursor-not-allowed': !authStore.isLoggedIn }"
+             :class="{ 'opacity-50 cursor-not-allowed': !authStore.isUserLoggedIn }"
              placeholder="Scan QR Code, Type SKU or Name of item">
         </div>
         <i
          :disabled="!authStore.isLoggedIn" 
          class="pi pi-bell text-center text-purple-500 col-span-1"
-         :class="{ 'opacity-50 cursor-not-allowed': !authStore.isLoggedIn }"
+         :class="{ 'opacity-50 cursor-not-allowed': !authStore.isUserLoggedIn }"
          style="font-size: 1.875rem;"
         ></i>
         <i 
          :disabled="!authStore.isLoggedIn" 
          class="pi pi-cog text-center text-purple-500 col-span-1"
-         :class="{ 'opacity-50 cursor-not-allowed': !authStore.isLoggedIn }"
+         :class="{ 'opacity-50 cursor-not-allowed': !authStore.isUserLoggedIn }"
          style="font-size: 1.875rem;"
         ></i>
     </div>

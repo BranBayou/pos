@@ -62,8 +62,8 @@ const login = async () => {
     const { token } = response.data;
     localStorage.setItem('token', token); // Store token in local storage
 
-    // Redirect or perform additional actions
-    authStore.login();
+    authStore.login(username); // Pass the username to the login function
+
     toast.success(`Welcome back ${username}`)
     // Close the modal after successful login
     emit('close-modal');
