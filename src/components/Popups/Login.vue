@@ -6,8 +6,10 @@ import InputText from 'primevue/inputtext';
 import qrCode from '/qr-code.svg';
 import casherImg from '/cashier.png';
 import { ref } from 'vue';
+import { useToast } from 'vue-toastification';
 import axios from 'axios';
 
+const toast = useToast();
 const emit = defineEmits(["close-modal"]);
 
 defineProps({
@@ -62,12 +64,13 @@ const login = async () => {
 
     // Redirect or perform additional actions
     authStore.login();
-
+    toast.success(`Welcome back ${username}`)
     // Close the modal after successful login
     emit('close-modal');
 
   } catch (error) {
     // Handle error
+    toast.error('Login faild!')
     console.error('Login failed:', error.response?.data?.error || error.message);
   }
 };
