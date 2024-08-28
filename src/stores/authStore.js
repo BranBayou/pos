@@ -19,10 +19,10 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     //
-    const isCashierLogin = ref(true);
+    const isCashierLoginInput = ref(true);
 
-    const toggleLogin = () => {
-        isCashierLogin.value = !isCashierLogin.value;
+    const toggleLoginInput = () => {
+        isCashierLoginInput.value = !isCashierLoginInput.value;
     };
 
     return {
@@ -30,8 +30,8 @@ export const useAuthStore = defineStore('auth', () => {
         currentUser, // Export currentUser
         login,
         logout,
-        isCashierLogin,
-        toggleLogin
+        isCashierLoginInput,
+        toggleLoginInput
     };
 });
 

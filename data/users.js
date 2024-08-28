@@ -10,13 +10,13 @@ module.exports = [
     {
       id: '2',
       username: 'Marge-Simpson',
-      role: 'Manager',
+      role: 'Cashier',
       password: 'marge123',
     },
     {
       id: '3',
       username: 'Bart-Simpson',
-      role: 'SalesPerson',
+      role: 'Cashier',
       password: 'bart123',
     },
     {

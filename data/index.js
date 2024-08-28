@@ -112,6 +112,13 @@ app.get('/Files/GetFiles', (req, res) => {
   });
 });
 
+app.get('/users', (req, res) => {
+  // Assuming you want to return all users or just the ones with specific roles
+  const filteredUsers = users.filter(user => user.role === 'Cashier' || user.role === 'Manager');
+
+  res.json(filteredUsers);
+});
+
 // Serve static files if necessary
 app.use('/files', express.static(path.join(__dirname, 'your_directory'))); // Replace 'your_directory' with the actual directory path
 
