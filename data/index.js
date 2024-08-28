@@ -55,26 +55,6 @@ app.post('/login', (req, res) => {
   res.json({ message: 'Login successful', token });
 });
 
-// Route to get branch users (protected route)
-app.get('/User/BranchUsers', (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  
-  if (!token) {
-    return res.status(401).json({ error: 'Access denied. No token provided.' });
-  }
-
-  try {
-    const decoded = jwt.verify(token, SECRET_KEY);
-
-    const allowedUsers = users.filter(user => user.role !== 'SalesPerson');
-    
-    res.json(allowedUsers);
-  } catch (ex) {
-    console.error('Invalid token:', ex.message); // Log error
-    res.status(400).json({ error: 'Invalid token.' });
-  }
-});
-
 // Route to serve products
 app.get('/products', (req, res) => {
   res.json(products);
@@ -112,9 +92,9 @@ app.get('/Files/GetFiles', (req, res) => {
   });
 });
 
-app.get('/users', (req, res) => {
+app.get('/branchusers', (req, res) => {
   // Assuming you want to return all users or just the ones with specific roles
-  const filteredUsers = users.filter(user => user.role === 'Cashier' || user.role === 'Manager');
+  const filteredUsers = users.filter(user => user.role === 'Cashier' || user.role === 'Manager' || user.role === 'SalesPerson');
 
   res.json(filteredUsers);
 });

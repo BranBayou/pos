@@ -18,7 +18,7 @@ export const useAuthStore = defineStore('auth', () => {
         localStorage.removeItem('token'); // Clear the token
     }
 
-    //
+    // Login input type state
     const isCashierLoginInput = ref(true);
 
     const toggleLoginInput = () => {

@@ -16,7 +16,7 @@ module.exports = [
     {
       id: '3',
       username: 'Bart-Simpson',
-      role: 'Cashier',
+      role: 'Manager',
       password: 'bart123',
     },
     {

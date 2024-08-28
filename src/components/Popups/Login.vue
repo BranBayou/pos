@@ -25,20 +25,22 @@ const usersList = ref([]);
 const selectedUser = ref(null);
 const username = ref('');
 const password = ref('');
-const storeId = ref(''); // Add this if you need to send store ID in headers
+const storeId = ref(''); 
 
-// Fetch users on component mount
+// Fetch users on component mount api request 
 onMounted(async () => {
   try {
-    const response = await axios.get('http://localhost:3131/users');
-    usersList.value = response.data;
-    console.log('Fetched Users:', usersList.value); // Debugging log
+    const response = await axios.get('http://localhost:3131/branchusers');
+    const cashiers = response.data.filter(user => user.role === 'Cashier');
+    usersList.value = cashiers; 
+    console.log('Fetched Cashier Users:', usersList.value);
   } catch (error) {
-    toast.error('Failed to load users');
+    toast.error('Failed to load users', error.message);
     console.error('Failed to load users:', error.message);
   }
 });
 
+// Login api request
 const login = async () => {
   try {
     const usernameValue = authStore.isCashierLoginInput ? selectedUser.value?.username : username.value;
