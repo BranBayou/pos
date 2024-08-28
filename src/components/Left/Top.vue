@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue'
 import Login from '../Popups/Login.vue'
+import LogoutConfirmation from '../Popups/LogoutConfirmation.vue'
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css'; // optional for styling
 import 'tippy.js/animations/scale.css';
@@ -15,12 +16,16 @@ const toggleModal = () => {
     modalActive.value = !modalActive.value;
 }
 
+const toggleisLogoutConfirmationVisible = () => {
+    authStore.isLogoutConfirmationVisible = !authStore.isLogoutConfirmationVisible
+}
+
 // Handle login/logout logic
 const handleAuthAction = () => {
     if (authStore.isUserLoggedIn) {
-        authStore.logout();
+        toggleisLogoutConfirmationVisible();
     } else {
-        toggleModal();
+        toggleModal(); // Show login modal
     }
 }
 
@@ -46,6 +51,7 @@ watch(() => authStore.isUserLoggedIn, (newValue) => {
 
 <template>
     <div class="my-7">
+        <LogoutConfirmation />
         <Login 
          @close-modal="toggleModal"
          :modalActive="modalActive"
