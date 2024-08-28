@@ -5,7 +5,7 @@ module.exports = [
       id: '1',
       username: 'Homer-Simpson',
       role: 'Cashier',
-      password: 'homer123', // Add password
+      password: '123456', // Add password
     },
     {
       id: '2',
