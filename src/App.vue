@@ -1,7 +1,7 @@
 <script setup>
 import { reactive, onMounted } from 'vue'
 import Header from './components/Header.vue'
-import Home from './components/Home.vue'
+import { RouterView } from 'vue-router';
 import PulseLoader from 'vue-spinner/src/PulseLoader.vue';
 import RingBarsSpinner from 'vue-global-loader/RingBarsSpinner.vue'
 
@@ -61,7 +61,7 @@ onMounted(async () => {
             <div v-else class="">
                 <div class="h-screen flex flex-col">
                         <Header />
-                        <Home />
+                        <RouterView />
                 </div>
             </div>
         </div>

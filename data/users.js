@@ -5,18 +5,18 @@ module.exports = [
       id: '1',
       username: 'Homer-Simpson',
       role: 'Cashier',
-      password: 'homer123', // Add password
+      password: '123456', // Add password
     },
     {
       id: '2',
       username: 'Marge-Simpson',
-      role: 'Manager',
+      role: 'Cashier',
       password: 'marge123',
     },
     {
       id: '3',
       username: 'Bart-Simpson',
-      role: 'SalesPerson',
+      role: 'Manager',
       password: 'bart123',
     },
     {
