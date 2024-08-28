@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import Login from '../Popups/Login.vue'
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css'; // optional for styling
@@ -12,19 +12,36 @@ const authStore = useAuthStore();
 // Modal control for Login
 const modalActive = ref(null);
 const toggleModal = () => {
-    modalActive.value =!modalActive.value;
+    modalActive.value = !modalActive.value;
+}
+
+// Handle login/logout logic
+const handleAuthAction = () => {
+    if (authStore.isUserLoggedIn) {
+        authStore.logout();
+    } else {
+        toggleModal();
+    }
 }
 
 // Tooltip for login button
 const myButton = ref(null);
+let tooltipInstance = null;
+
 onMounted(() => {
-    tippy(myButton.value, {
-        content: "Login",
+    tooltipInstance = tippy(myButton.value, {
+        content: authStore.isUserLoggedIn ? 'Logout' : 'Login',
         placement: 'top',
         animation: 'fade',
     });
 });
 
+// Watch for changes in the user's logged-in status and update tooltip content
+watch(() => authStore.isUserLoggedIn, (newValue) => {
+    if (tooltipInstance) {
+        tooltipInstance.setContent(newValue ? 'Logout' : 'Login');
+    }
+});
 </script>
 
 <template>
@@ -40,7 +57,7 @@ onMounted(() => {
                     <span>Cashier</span>
                 </button>
             </div>
-            <i @click="toggleModal" ref="myButton" class="pi pi-user text-purple-500 bg-purple-100 p-4 rounded-full cursor-pointer" style="font-size: 1.875rem;"></i>
+            <i @click="handleAuthAction" ref="myButton" class="pi pi-user text-purple-500 bg-purple-100 p-4 rounded-full cursor-pointer" style="font-size: 1.875rem;"></i>
             <span>{{ authStore.isUserLoggedIn ? authStore.currentUser : 'Logged out' }}</span>
         </div>
         <button class="border shadow-lg w-6/12 text-center p-5 rounded-2xl flex gap-5 my-5">

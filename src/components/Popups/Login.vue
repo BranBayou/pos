@@ -37,20 +37,21 @@ const storeId = ref(''); // Add this if you need to send store ID in headers
 
 const login = async () => {
   try {
-    const selectedUser = userListRef.value; // The selected user object
-    const username = selectedUser ? selectedUser.name : ''; // Extract the username
+    // Check if the user is logging in as a cashier or manager
+    const selectedUser = authStore.isCashierLogin ? userListRef.value : null;
+    const usernameValue = selectedUser ? selectedUser.name : username.value; // Extract the username for cashier, use the input value for manager
     const passwordValue = password.value; // Assuming password is a ref
 
-    console.log('Username:', username);
+    console.log('Username:', usernameValue);
     console.log('Password:', passwordValue);
 
-    if (!username || !passwordValue) {
+    if (!usernameValue || !passwordValue) {
       console.error('Username or password is missing');
       return;
     }
 
     const response = await axios.post('http://localhost:3131/login', {
-      username,
+      username: usernameValue,
       password: passwordValue
     }, {
       headers: {
@@ -62,19 +63,21 @@ const login = async () => {
     const { token } = response.data;
     localStorage.setItem('token', token); // Store token in local storage
 
-    authStore.login(username); // Pass the username to the login function
+    authStore.login(usernameValue); // Pass the username to the login function
 
-    toast.success(`Welcome back ${username}`)
+    toast.success(`Welcome back ${usernameValue}`);
     // Close the modal after successful login
     emit('close-modal');
 
   } catch (error) {
     // Handle error
-    toast.error('Login faild!')
+    toast.error('Login failed!');
     console.error('Login failed:', error.response?.data?.error || error.message);
   }
 };
+
 </script>
+
 
 
 <template>
@@ -98,7 +101,7 @@ const login = async () => {
                                       @click="authStore.toggleLogin"
                                     />
                                   </div>
-                                  <div v-else class="manager-login flex gap-x-1 my-1">
+                                <div v-else class="manager-login flex gap-x-1 my-1">
                                     <div class="card flex justify-center w-full">
                                         <FloatLabel class="border-2 py-3 px-3 w-full rounded-2xl">
                                             <i class="pi pi-barcode text-purple-500 pr-2"></i>
@@ -106,15 +109,14 @@ const login = async () => {
                                         </FloatLabel>
                                     </div>
                                     <img
-                                      title="Switch to cashier login"
-                                      ref="qrLogin"
-                                      :src="casherImg"
-                                      alt=""
-                                      class="cursor-pointer bg-purple-100 p-2 rounded-2xl"
-                                      style="width: 44px;"
-                                      @click="authStore.toggleLogin"
+                                        title="Switch to cashier login"
+                                        :src="casherImg"
+                                        alt=""
+                                        class="cursor-pointer bg-purple-100 p-2 rounded-2xl"
+                                        style="width: 44px;"
+                                        @click="authStore.toggleLogin"
                                     />
-                                  </div>
+                                </div>
                                 <div class="">
                                     <div class="card flex justify-center items-center gap-2 border-2 rounded-2xl py-3 px-3">
                                     <i class="pi pi-lock"></i>

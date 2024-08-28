@@ -15,6 +15,7 @@ export const useAuthStore = defineStore('auth', () => {
     function logout() {
         isUserLoggedIn.value = false;
         currentUser.value = ''; // Clear the current user's name
+        localStorage.removeItem('token'); // Clear the token
     }
 
     //
