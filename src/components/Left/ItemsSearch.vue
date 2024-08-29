@@ -4,7 +4,7 @@
 
 <template>
     <div>
-        <button><i class="pi pi-unlock"></i>Open Drawer</button>
+        <button><i class="pi pi-search">Items Search</i></button>
     </div>
 </template>
 
