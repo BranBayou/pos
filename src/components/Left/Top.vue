@@ -2,6 +2,8 @@
 import { onMounted, ref, watch } from 'vue'
 import Login from '../Popups/Login.vue'
 import LogoutConfirmation from '../Popups/LogoutConfirmation.vue'
+import OpenDrawer from './OpenDrawer.vue'
+import ItemsSearch from './ItemsSearch.vue'
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css'; // optional for styling
 import 'tippy.js/animations/scale.css';
@@ -50,13 +52,13 @@ watch(() => authStore.isUserLoggedIn, (newValue) => {
 </script>
 
 <template>
-    <div class="my-7">
+    <div class="my-7 grid grid-cols-2 gap-4">
         <LogoutConfirmation />
         <Login 
          @close-modal="toggleModal"
          :modalActive="modalActive"
          />
-        <div class="flex items-center border shadow-lg w-6/12 p-5 rounded-2xl gap-5">  
+        <div class="flex items-center border shadow-lg w-full p-5 rounded-2xl gap-5">  
             <div>
                 <button class="flex flex-col items-center">
                     <img style="width: 35px;" src="/cashier.png" alt="">
@@ -66,7 +68,9 @@ watch(() => authStore.isUserLoggedIn, (newValue) => {
             <i @click="handleAuthAction" ref="myButton" class="pi pi-user text-purple-500 bg-purple-100 p-4 rounded-full cursor-pointer" style="font-size: 1.875rem;"></i>
             <span>{{ authStore.isUserLoggedIn ? authStore.currentUser : 'Logged out' }}</span>
         </div>
-        <button class="border shadow-lg w-6/12 text-center p-5 rounded-2xl flex gap-5 my-5">
+        <ItemsSearch />
+        <OpenDrawer />
+        <button class="border shadow-lg w-full text-center p-5 rounded-2xl flex gap-5 my-5">
             <span class="text-center mx-auto cursor-pointer">
                 <i 
                  :disabled="!authStore.isUserLoggedIn" 
