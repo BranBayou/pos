@@ -13,8 +13,8 @@ const authStore = useAuthStore();
          class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8"
         >
           <Transition name="modal-inner" class="rounded-2xl">
-            <div v-if="authStore.isAddItemPopup" class="fixed top-44 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                <div class="bg-white rounded-2xl shadow-lg p-6 w-80">
+            <div v-if="authStore.isAddItemPopup" class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-50 w-10/12">
+                <div class="bg-white rounded-2xl shadow-lg p-6 w-full">
                     <input 
                         type="text" name="Search product" id="" class="bg-gray-100 border-0 outline-none p-2 rounded-lg w-full"
                         placeholder="Type Search phrase or sku"
