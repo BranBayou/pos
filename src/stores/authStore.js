@@ -37,6 +37,13 @@ export const useAuthStore = defineStore('auth', () => {
         console.log('show popup', isAddBehaviourPopup.value);
     };
 
+    // Add Item state
+    const isAddItemPopup = ref(false);
+    const toggleAddItemPopup = () => {
+        isAddItemPopup.value =!isAddItemPopup.value;
+        console.log('show popup', isAddItemPopup.value);
+    };
+
     return {
         isUserLoggedIn,
         currentUser, // Export currentUser
@@ -46,7 +53,9 @@ export const useAuthStore = defineStore('auth', () => {
         toggleLoginInput,
         isLogoutConfirmationVisible,
         isAddBehaviourPopup,
-        toggleAddBehaviourPopup
+        toggleAddBehaviourPopup,
+        isAddItemPopup,
+        toggleAddItemPopup
     };
 });
 
