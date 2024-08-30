@@ -1,8 +1,8 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
-import AddComment from '../Left/AddComment.vue';
-import AddManagerApproval from '../Left/AddManagerApproval.vue';
-import WalkInCustomer from '../Left/WalkInCustomer.vue';
+import AddComment from '../Left/AddCommentButton.vue';
+import AddManagerApproval from '../Left/AddManagerApprovalButton.vue';
+import WalkInCustomer from '../Left/WalkInCustomerButton.vue';
 
 const authStore = useAuthStore();
 

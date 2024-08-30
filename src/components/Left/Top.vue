@@ -2,8 +2,8 @@
 import { onMounted, ref, watch } from 'vue'
 import Login from '../Popups/Login.vue'
 import LogoutConfirmation from '../Popups/LogoutConfirmation.vue'
-import OpenDrawer from './OpenDrawer.vue'
-import ItemsSearch from './ItemsSearch.vue'
+import OpenDrawer from './OpenDrawerButton.vue'
+import ItemsSearch from './ItemsSearchButton.vue'
 import AddBehavior from '../Popups/AddBehavior.vue'
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css'; // optional for styling
