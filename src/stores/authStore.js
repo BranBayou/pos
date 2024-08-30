@@ -28,7 +28,14 @@ export const useAuthStore = defineStore('auth', () => {
         isCashierLoginInput.value = !isCashierLoginInput.value;
     };
 
+    // Add behaviour state
 
+    const isAddBehaviourPopup = ref(false);
+
+    const toggleAddBehaviourPopup = () => {
+        isAddBehaviourPopup.value = !isAddBehaviourPopup.value;
+        console.log('show popup', isAddBehaviourPopup.value);
+    };
 
     return {
         isUserLoggedIn,
@@ -37,7 +44,9 @@ export const useAuthStore = defineStore('auth', () => {
         logout,
         isCashierLoginInput,
         toggleLoginInput,
-        isLogoutConfirmationVisible
+        isLogoutConfirmationVisible,
+        isAddBehaviourPopup,
+        toggleAddBehaviourPopup
     };
 });
 

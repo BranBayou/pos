@@ -4,6 +4,7 @@ import Login from '../Popups/Login.vue'
 import LogoutConfirmation from '../Popups/LogoutConfirmation.vue'
 import OpenDrawer from './OpenDrawer.vue'
 import ItemsSearch from './ItemsSearch.vue'
+import AddBehavior from '../Popups/AddBehavior.vue'
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css'; // optional for styling
 import 'tippy.js/animations/scale.css';
@@ -70,7 +71,10 @@ watch(() => authStore.isUserLoggedIn, (newValue) => {
         </div>
         <ItemsSearch />
         <OpenDrawer />
-        <button class="border shadow-lg w-full text-center p-5 rounded-2xl flex gap-5 my-5">
+        <AddBehavior />
+        <button
+         @click="authStore.toggleAddBehaviourPopup"
+         class="border shadow-lg w-full text-center p-5 rounded-2xl flex gap-5 my-5">
             <span class="text-center mx-auto cursor-pointer">
                 <i 
                  :disabled="!authStore.isUserLoggedIn" 
