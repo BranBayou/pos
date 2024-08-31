@@ -52,20 +52,6 @@ watch(() => authStore.isUserLoggedIn, (newValue) => {
 });
 
 // State for buttons moved from the child component
-const parentButtons = ref([]);
-
-onMounted(() => {
-  if (authStore.isUserLoggedIn) {
-    const storedButtons = JSON.parse(localStorage.getItem(`movedButtons-${authStore.currentUser}`)) || [];
-    parentButtons.value = storedButtons.map(buttonName => {
-      return { name: buttonName, component: () => import(`../Left/${buttonName}Button.vue`) };
-    });
-  }
-});
-
-function handleButtonMove({ name, component }) {
-  parentButtons.value.push({ name, component });
-}
 </script>
 
 <template>
@@ -89,11 +75,7 @@ function handleButtonMove({ name, component }) {
         <ItemsSearch v-if="authStore.isUserLoggedIn" />
         <OpenDrawer v-if="authStore.isUserLoggedIn" />
         
-        <AddBehavior @moveButtonToParent="handleButtonMove" />
-
-        <div v-for="button in parentButtons" :key="button.name">
-          <component :is="button.component" />
-        </div>
+        <AddBehavior/>
         
         <button
          @click="authStore.toggleAddBehaviourPopup"
