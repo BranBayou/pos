@@ -19,6 +19,7 @@ const authStore = useAuthStore();
                         type="text" name="Search product" id="" class="bg-gray-100 border-0 outline-none p-2 rounded-lg w-full"
                         placeholder="Type Search phrase or sku"
                     >
+                    <p></p>
                 </div> 
             </div>        
           </Transition>
