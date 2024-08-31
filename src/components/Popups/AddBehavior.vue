@@ -1,10 +1,23 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
+import { ref, defineEmits } from 'vue';
 import AddComment from '../Left/AddCommentButton.vue';
 import AddManagerApproval from '../Left/AddManagerApprovalButton.vue';
 import WalkInCustomer from '../Left/WalkInCustomerButton.vue';
 
 const authStore = useAuthStore();
+
+const emit = defineEmits(['moveButtonToParent']);
+
+const buttons = ref([
+  { name: 'AddComment', component: AddComment },
+  { name: 'AddManagerApproval', component: AddManagerApproval },
+  { name: 'WalkInCustomer', component: WalkInCustomer },
+]);
+
+function moveButtonToParent(buttonName) {
+  emit('moveButtonToParent', buttonName);
+}
 
 </script>
 
@@ -19,9 +32,9 @@ const authStore = useAuthStore();
           <Transition name="modal-inner" class="rounded-2xl">
             <div v-if="authStore.isAddBehaviourPopup" class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-50 w-10/12">
                 <div class="bg-white rounded-2xl shadow-lg p-6 w-full">
-                    <AddComment />
-                    <AddManagerApproval />
-                    <WalkInCustomer />
+                    <div v-for="button in buttons" :key="button.name">
+                      <component :is="button.component" @click="moveButtonToParent(button.name)" />
+                    </div>
                 </div> 
             </div>        
           </Transition>
