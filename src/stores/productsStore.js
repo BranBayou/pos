@@ -1,4 +1,4 @@
-// src/stores/productStore.js
+// src/stores/productsStore.js
 import { defineStore } from 'pinia';
 import axios from 'axios';
 
