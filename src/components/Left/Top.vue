@@ -1,12 +1,12 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue'
-import Login from '../Popups/Login.vue'
-import LogoutConfirmation from '../Popups/LogoutConfirmation.vue'
-import OpenDrawer from './OpenDrawerButton.vue'
-import ItemsSearch from './ItemsSearchButton.vue'
-import AddBehavior from '../Popups/AddBehavior.vue'
+import { onMounted, ref, watch } from 'vue';
+import Login from '../Popups/Login.vue';
+import LogoutConfirmation from '../Popups/LogoutConfirmation.vue';
+import OpenDrawer from './OpenDrawer.vue';
+import ItemsSearch from './ItemsSearch.vue';
+import AddBehavior from '../Popups/AddBehavior.vue';
 import tippy from 'tippy.js';
-import 'tippy.js/dist/tippy.css'; // optional for styling
+import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
 
 import { useAuthStore } from '@/stores/authStore';
@@ -17,11 +17,11 @@ const authStore = useAuthStore();
 const modalActive = ref(null);
 const toggleModal = () => {
     modalActive.value = !modalActive.value;
-}
+};
 
 const toggleisLogoutConfirmationVisible = () => {
-    authStore.isLogoutConfirmationVisible = !authStore.isLogoutConfirmationVisible
-}
+    authStore.isLogoutConfirmationVisible = !authStore.isLogoutConfirmationVisible;
+};
 
 // Handle login/logout logic
 const handleAuthAction = () => {
@@ -30,7 +30,7 @@ const handleAuthAction = () => {
     } else {
         toggleModal(); // Show login modal
     }
-}
+};
 
 // Tooltip for login button
 const myButton = ref(null);
@@ -50,6 +50,22 @@ watch(() => authStore.isUserLoggedIn, (newValue) => {
         tooltipInstance.setContent(newValue ? 'Logout' : 'Login');
     }
 });
+
+// State for buttons moved from the child component
+const parentButtons = ref([]);
+
+onMounted(() => {
+  if (authStore.isUserLoggedIn) {
+    const storedButtons = JSON.parse(localStorage.getItem(`movedButtons-${authStore.currentUser}`)) || [];
+    parentButtons.value = storedButtons.map(buttonName => {
+      return { name: buttonName, component: () => import(`../Left/${buttonName}Button.vue`) };
+    });
+  }
+});
+
+function handleButtonMove({ name, component }) {
+  parentButtons.value.push({ name, component });
+}
 </script>
 
 <template>
@@ -58,7 +74,7 @@ watch(() => authStore.isUserLoggedIn, (newValue) => {
         <Login 
          @close-modal="toggleModal"
          :modalActive="modalActive"
-         />
+        />
         <div class="flex items-center border shadow-lg w-full p-5 rounded-2xl gap-5">  
             <div>
                 <button class="flex flex-col items-center">
@@ -69,9 +85,16 @@ watch(() => authStore.isUserLoggedIn, (newValue) => {
             <i @click="handleAuthAction" ref="myButton" class="pi pi-user text-purple-500 bg-purple-100 p-4 rounded-full cursor-pointer" style="font-size: 1.875rem;"></i>
             <span>{{ authStore.isUserLoggedIn ? authStore.currentUser : 'Logged out' }}</span>
         </div>
-        <ItemsSearch />
-        <OpenDrawer />
-        <AddBehavior />
+        
+        <ItemsSearch v-if="authStore.isUserLoggedIn" />
+        <OpenDrawer v-if="authStore.isUserLoggedIn" />
+        
+        <AddBehavior @moveButtonToParent="handleButtonMove" />
+
+        <div v-for="button in parentButtons" :key="button.name">
+          <component :is="button.component" />
+        </div>
+        
         <button
          @click="authStore.toggleAddBehaviourPopup"
          class="border shadow-lg w-full text-center p-5 rounded-2xl flex gap-5 my-5">
@@ -86,7 +109,6 @@ watch(() => authStore.isUserLoggedIn, (newValue) => {
         </button>
     </div>
 </template>
-
 
 <style scoped>
 
