@@ -6,7 +6,7 @@ import TotalPrice from './TotalPrice.vue';
 </script>
 
 <template>
-    <div>
+    <div class="flex flex-col justify-end" style="min-height: 50%;">
         <OverallDiscount />
         <Tax />
         <TotalPrice />

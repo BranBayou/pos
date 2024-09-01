@@ -3,7 +3,7 @@
 </script>
 
 <template>
-    <div class="flex items-center justify-between rounded-2xl shadow-xl m-3 py-5 px-3">
+    <div class="flex items-center justify-between rounded-2xl shadow-lg mx-3 my-2 py-4 px-3">
         <p>Tax 1.4%</p>
         <p>$</p>
     </div>

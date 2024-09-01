@@ -1,9 +1,10 @@
 <script setup>
-
+import AddedProduct from './AddedProduct.vue';
 </script>
 
 <template>
-    <div>
+    <div class="" style="min-height: 50%;">
+        <AddedProduct />
     </div>
 </template>
 
