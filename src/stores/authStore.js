@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import axios from 'axios';
 import { ref } from 'vue';
 
 export const useAuthStore = defineStore('auth', () => {
@@ -28,7 +29,21 @@ export const useAuthStore = defineStore('auth', () => {
         isCashierLoginInput.value = !isCashierLoginInput.value;
     };
 
+    // Add behaviour state
 
+    const isAddBehaviourPopup = ref(false);
+
+    const toggleAddBehaviourPopup = () => {
+        isAddBehaviourPopup.value = !isAddBehaviourPopup.value;
+        console.log('show popup', isAddBehaviourPopup.value);
+    };
+
+    // Add Item state
+    const isAddItemPopup = ref(false);
+    const toggleAddItemPopup = () => {
+        isAddItemPopup.value =!isAddItemPopup.value;
+        console.log('show popup', isAddItemPopup.value);
+    };
 
     return {
         isUserLoggedIn,
@@ -37,7 +52,11 @@ export const useAuthStore = defineStore('auth', () => {
         logout,
         isCashierLoginInput,
         toggleLoginInput,
-        isLogoutConfirmationVisible
+        isLogoutConfirmationVisible,
+        isAddBehaviourPopup,
+        toggleAddBehaviourPopup,
+        isAddItemPopup,
+        toggleAddItemPopup
     };
 });
 
