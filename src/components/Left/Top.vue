@@ -98,7 +98,7 @@ const buttons = ref([
 
     <!-- Render moved buttons -->
     <div v-for="button in movedButtons" :key="button.name">
-      <component :is="button.component" />
+      <component :is="button.component" class="" />
     </div>
 
     <button

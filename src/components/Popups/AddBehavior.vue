@@ -35,8 +35,13 @@ function moveButtonToParent(buttonName) {
         <Transition name="modal-inner" class="rounded-2xl">
           <div v-if="authStore.isAddBehaviourPopup" class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-50 w-10/12">
             <div class="bg-white rounded-2xl shadow-lg p-6 w-full">
-              <div v-for="button in buttons" :key="button.name">
-                <component :is="button.component" @click="moveButtonToParent(button.name)" />
+              <div v-if="buttons.length > 0">
+                <div v-for="button in buttons" :key="button.name" class="flex">
+                  <component :is="button.component" @click="moveButtonToParent(button.name)" />
+                </div>
+              </div>
+              <div v-else>
+                <p class="text-center text-gray-500">No more behaviour</p>
               </div>
             </div> 
           </div>        
@@ -45,6 +50,7 @@ function moveButtonToParent(buttonName) {
     </Transition>
   </Teleport>
 </template>
+
 
 
 
