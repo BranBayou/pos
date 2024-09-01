@@ -1,6 +1,6 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
-import BarcodeInput from './Header/BarcodeInput.vue';
+import BarcodeInput from '@/components/Header/BarcodeInput.vue';
 const authStore = useAuthStore();
 
 

@@ -1,5 +1,5 @@
 <script setup>
-import AddedProduct from './AddedProduct.vue';
+import AddedProduct from '@/components/Right/AddedProduct.vue';
 </script>
 
 <template>
