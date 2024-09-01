@@ -1,13 +1,13 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
-
+import BarcodeInput from './Header/BarcodeInput.vue';
 const authStore = useAuthStore();
 
 
 </script>
 
 <template> 
-    <div class="grid grid-cols-12 gap-4 items-center mt-5 p-5 shadow-lg rounded-2xl">
+    <div class="grid grid-cols-12 gap-4 items-center mt-5 p-5 shadow-lg rounded-2xl relative">
         <div class="flex items-center gap-1 col-span-9 bg-gray-100 py-2 px-4 rounded-3xl">
             <i
              :disabled="!authStore.isUserLoggedIn"
@@ -15,11 +15,7 @@ const authStore = useAuthStore();
              :class="{ 'opacity-50 cursor-not-allowed': !authStore.isUserLoggedIn }"
              style="font-size: 1.875rem;"
             ></i>
-            <input 
-             :disabled="!authStore.isUserLoggedIn"
-             type="text" name="Search product" id="" class="bg-gray-100 border-0 outline-none p-2 rounded-lg w-full"
-             :class="{ 'opacity-50 cursor-not-allowed': !authStore.isUserLoggedIn }"
-             placeholder="Scan QR Code">
+            <BarcodeInput />
         </div>
         <i 
          :disabled="!authStore.isUserLoggedIn" 
