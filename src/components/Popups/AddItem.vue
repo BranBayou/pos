@@ -51,7 +51,7 @@ const filteredProducts = computed(() => {
                     <div v-else class="overflow-y-auto" style="max-height: 620px;">
                       <table class="min-w-full bg-white border border-gray-200">
                         <tbody>
-                          <tr v-for="product in filteredProducts" :key="product.id" class="border-t">
+                          <tr @click="addItem" v-for="product in filteredProducts" :key="product.id" class="border-t cursor-pointer">
                             <td class="py-1 px-4"><img :src="product.ImageUrl" alt="Product Image" class="w-16 h-16 object-cover"></td>
                             <td class="py-1 px-4">{{ product.Name }}</td>
                             <td class="py-1 px-4">{{ product.Sku }}</td>

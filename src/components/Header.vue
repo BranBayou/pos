@@ -19,7 +19,7 @@ const authStore = useAuthStore();
              :disabled="!authStore.isUserLoggedIn"
              type="text" name="Search product" id="" class="bg-gray-100 border-0 outline-none p-2 rounded-lg w-full"
              :class="{ 'opacity-50 cursor-not-allowed': !authStore.isUserLoggedIn }"
-             placeholder="Scan QR Code, Type SKU or Name of item">
+             placeholder="Scan QR Code">
         </div>
         <i 
          :disabled="!authStore.isUserLoggedIn" 

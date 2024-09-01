@@ -1,6 +1,6 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
-import { ref, defineEmits } from 'vue';
+import { ref } from 'vue';
 import AddComment from '../Left/AddCommentButton.vue';
 import AddManagerApproval from '../Left/AddManagerApprovalButton.vue';
 import WalkInCustomer from '../Left/WalkInCustomerButton.vue';
