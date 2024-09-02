@@ -52,8 +52,10 @@ app.post('/login', (req, res) => {
     { expiresIn: '1h' }
   );
 
-  res.json({ message: 'Login successful', token });
+  // Return the token and role in the response
+  res.json({ message: 'Login successful', token, role: user.role });
 });
+
 
 // Route to serve products
 app.get('/products', (req, res) => {
