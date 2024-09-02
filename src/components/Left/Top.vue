@@ -84,7 +84,7 @@ const buttons = ref([
       <div>
         <button class="flex flex-col items-center">
           <img style="width: 35px;" src="/cashier.png" alt="">
-          <span>Cashier</span>
+          <span>{{ authStore.isUserLoggedIn ? authStore.userRole : 'Cashier' }}</span>
         </button>
       </div>
       <i @click="handleAuthAction" ref="myButton" class="pi pi-user text-purple-500 bg-purple-100 p-4 rounded-full cursor-pointer" style="font-size: 1.875rem;"></i>
