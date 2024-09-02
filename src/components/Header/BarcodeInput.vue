@@ -1,10 +1,12 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
 import { useProductStore } from '@/stores/productsStore';
+import { useOrderStore } from '@/stores/OrderStore';
 import { ref, computed } from 'vue';
 
 const authStore = useAuthStore();
 const store = useProductStore();
+const orderStore = useOrderStore();
 const searchQuery = ref('');
 
 const filteredProducts = computed(() => {
@@ -41,7 +43,7 @@ const filteredProducts = computed(() => {
         <table class="min-w-full bg-white border border-gray-200">
             <tbody>
                 <tr 
-                    @click="addItem(product)" 
+                    @click="orderStore.addOrderItem(product)" 
                     v-for="product in filteredProducts" 
                     :key="product.Sku" 
                     class="border-t cursor-pointer hover:bg-gray-50"
