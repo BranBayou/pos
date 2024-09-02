@@ -60,6 +60,7 @@ const login = async () => {
     console.log('Password:', passwordValue);
 
     if (!usernameValue || !passwordValue) {
+      toast.error('Wrong username or password');
       console.error('Username or password is missing');
       return;
     }
@@ -73,11 +74,11 @@ const login = async () => {
       }
     });
 
-    const { token } = response.data;
+    const { token, role } = response.data; // Destructure role from the response
     localStorage.setItem('token', token);
-    localStorage.setItem('currentUser', usernameValue); // Store username as well
-    authStore.login(usernameValue);
-    
+    localStorage.setItem('currentUser', usernameValue); // Store username
+    localStorage.setItem('userRole', role); // Store role
+    authStore.login(usernameValue, role);
 
     toast.success(`Welcome back ${usernameValue}`);
 
@@ -91,6 +92,7 @@ const login = async () => {
     console.error('Login failed:', error.response?.data?.error || error.message);
   }
 };
+
 </script>
 
 <template>
