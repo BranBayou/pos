@@ -3,6 +3,9 @@ import { useAuthStore } from '@/stores/authStore';
 import { useProductStore } from '@/stores/productsStore';
 import { useOrderStore } from '@/stores/OrderStore';
 import { ref, computed } from 'vue';
+import { useToast } from 'vue-toastification';
+
+const toast = useToast();
 
 const authStore = useAuthStore();
 const store = useProductStore();
@@ -15,13 +18,19 @@ const filteredProducts = computed(() => {
     if (!query) {
         return []; // Return an empty array if the search query is empty
     }
-
     // Filter products based on the barcode and limit to the first 5 matches
     return store.products.filter(product => {
         const barcode = product.BarCode ? product.BarCode.toLowerCase() : '';
         return barcode.includes(query);
     }).slice(0, 5); // Return only the first 5 matches
 });
+
+function handleClick(product) {
+  orderStore.addOrderItem(product);
+  toast.success('Item added');
+  searchQuery.value = '';
+}
+
 </script>
 
 
@@ -45,7 +54,7 @@ const filteredProducts = computed(() => {
         <table class="min-w-full bg-white border border-gray-200">
             <tbody>
                 <tr 
-                    @click="orderStore.addOrderItem(product)" 
+                    @click="handleClick(product)" 
                     v-for="product in filteredProducts" 
                     :key="product.Sku" 
                     class="border-t cursor-pointer hover:bg-gray-50"

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
-import axios from 'axios';
 import { reactive, computed } from 'vue';
+
 
 export const useOrderStore = defineStore('orders', () => {
     // Create a reactive object that contains the orderItems array

@@ -3,7 +3,9 @@ import { useAuthStore } from '@/stores/authStore';
 import { useProductStore } from '@/stores/productsStore';
 import { useOrderStore } from '@/stores/OrderStore';
 import { ref, computed } from 'vue';
+import { useToast } from 'vue-toastification';
 
+const toast = useToast();
 const authStore = useAuthStore();
 const store = useProductStore();
 const orderStore = useOrderStore();
@@ -32,6 +34,12 @@ const filteredProducts = computed(() => {
     // Return the first 5 matches
     return combinedResults.slice(0, 5);
 });
+
+function handleClick(product) {
+  orderStore.addOrderItem(product);
+  toast.success('Item added');
+  searchQuery.value = '';
+}
 </script>
 
 
@@ -57,7 +65,7 @@ const filteredProducts = computed(() => {
                     <div v-else class="overflow-y-auto" style="max-height: 620px;">
                       <table class="min-w-full bg-white border border-gray-200">
                         <tbody>
-                          <tr @click="orderStore.addOrderItem(product)" v-for="product in filteredProducts" :key="product.id" class="border-t cursor-pointer">
+                          <tr @click="handleClick(product)" v-for="product in filteredProducts" :key="product.id" class="border-t cursor-pointer">
                             <td class="py-1 px-4"><img :src="product.ImageUrl" alt="Product Image" class="w-16 h-16 object-cover"></td>
                             <td class="py-1 px-4">{{ product.Name }}</td>
                             <td class="py-1 px-4">{{ product.Sku }}</td>
