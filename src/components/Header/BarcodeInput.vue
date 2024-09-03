@@ -16,12 +16,14 @@ const filteredProducts = computed(() => {
         return []; // Return an empty array if the search query is empty
     }
 
+    // Filter products based on the barcode and limit to the first 5 matches
     return store.products.filter(product => {
         const barcode = product.BarCode ? product.BarCode.toLowerCase() : '';
         return barcode.includes(query);
-    });
+    }).slice(0, 5); // Return only the first 5 matches
 });
 </script>
+
 
 <template>
     <input 

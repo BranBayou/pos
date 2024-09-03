@@ -1,7 +1,7 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
 import { useProductStore } from '@/stores/productsStore';
-import { useOrderStore } from '@/stores/OrderStore'
+import { useOrderStore } from '@/stores/OrderStore';
 import { ref, computed } from 'vue';
 
 const authStore = useAuthStore();
@@ -27,9 +27,13 @@ const filteredProducts = computed(() => {
     ).sort((a, b) => a.Name.localeCompare(b.Name));
 
     // Combine the results, SKU matches first, followed by Name matches
-    return [...productsMatchingSku, ...productsMatchingName];
+    const combinedResults = [...productsMatchingSku, ...productsMatchingName];
+
+    // Return the first 5 matches
+    return combinedResults.slice(0, 5);
 });
 </script>
+
 
 <template>
     <Teleport to="body">

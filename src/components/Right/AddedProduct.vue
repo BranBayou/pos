@@ -20,8 +20,9 @@ const orderStore = useOrderStore();
       </div>
     </div>
     <!-- Display a message if there are no orders -->
-    <div v-else>
-      <h2>No Orders!</h2>
+    <div v-else class="flex justify-center items-center gap-2 py-5">
+      <h2 class="text-3xl">No Orders!</h2>
+      <i class="pi pi-exclamation-triangle text-purple-500" style="font-size: 1.5rem;"></i>
     </div>
   </div>
 </template>

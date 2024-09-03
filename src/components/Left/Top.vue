@@ -103,7 +103,7 @@ const buttons = ref([
 
     <button
       @click="authStore.toggleAddBehaviourPopup"
-      class="border shadow-lg w-full text-center p-5 rounded-2xl flex gap-5 my-5">
+      class="border shadow-lg w-full text-center p-5 rounded-2xl flex gap-5 my-3">
       <span class="text-center mx-auto cursor-pointer">
         <i 
           :disabled="!authStore.isUserLoggedIn" 
