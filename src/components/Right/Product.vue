@@ -38,34 +38,37 @@ function toggleAccordion(index) {
           <p>${{ item.Price }}</p>
         </div>
         <div class="collapse-content flex">
-          <div class="w-6/12">
-            <InputNumber 
-              v-model="value" 
-              showButtons 
-              buttonLayout="horizontal" 
-              :min="0" 
-              :max="99"
-              style="text-align: center !important;" 
-              class="custom-input-number"
-            >
-              <template #incrementbuttonicon>
-                  <span class="pi pi-plus" />
-              </template>
-              <template #decrementbuttonicon>
-                  <span class="pi pi-minus" />
-              </template>
-            </InputNumber>
-            <p>SKU {{ item.Sku }}</p>
+          <div class="collapse-left w-6/12">
+
+            <div class="flex items-center space-x-2">
+              <!-- Minus Button -->
+              <Button class="pi pi-minus p-button-rounded" @click="decrement" />
+
+              <!-- Input Number -->
+              <input
+                type="number"
+                class="w-10 text-center no-arrows border-2 rounded-lg"
+                v-model="value"
+                @input="handleInput"
+              />
+
+              <!-- Plus Button -->
+              <Button class="pi pi-plus p-button-rounded" @click="increment" />
+            </div>
+
+            <p>SKU: {{ item.Sku }}</p>
+
             <div class="flex items-center justify-between">
                 <span class="flex flex-col">
                     <i class="pi pi-shop"></i>
                     {{ item.MaxQty }}
                 </span>
                 <span class="flex flex-col items-center">
-                    <i class="pi pi-user"></i>
-                    <p>Sales Person</p>
+                    <i class="pi pi-user bg-purple-200 p-3 rounded-full"></i>
+                    <p class="">No Sales Person</p>
                 </span>
             </div>
+            
           </div>
           <div class="">
             <span class="flex items-center">
@@ -76,6 +79,9 @@ function toggleAccordion(index) {
                 <i class="pi pi-percentage"></i>
                 <p>0</p>
             </span>
+            <span>
+                <p>0</p>
+            </span>
           </div>
         </div>
       </div>
@@ -84,8 +90,14 @@ function toggleAccordion(index) {
   
 
 <style scoped>
-.p-inputwrapper-filled .p-inputtext {
-    width: 30px;
-    text-align: center;
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 </style>
