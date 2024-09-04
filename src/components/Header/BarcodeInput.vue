@@ -50,7 +50,7 @@ function handleClick(product) {
         <p>No products found.</p>
     </div>
 
-    <div v-else-if="filteredProducts.length > 0" class="absolute top-full left-0 overflow-y-auto w-full bg-white shadow-xl rounded-2xl" style="max-height: 620px;">
+    <div v-else-if="filteredProducts.length > 0" class="absolute top-full left-0 overflow-y-auto w-full bg-white shadow-xl rounded-2xl z-50" style="max-height: 620px;">
         <table class="min-w-full bg-white border border-gray-200">
             <tbody>
                 <tr 
