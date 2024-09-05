@@ -31,16 +31,16 @@ function toggleAccordion(index) {
           :checked="isOpen[index]" 
           @change="toggleAccordion(index)"
         />
-        <div class="collapse-title text-xl font-medium flex justify-between bg-white">
+        <div class="collapse-title text-xl font-medium flex justify-between">
           <span class="absolute top-0 border-2 bg-purple-100 rounded-full w-5 h-5 text-center">1</span>
           <img :src="item.imageUrl" alt="product-img">
           <h2>{{ item.Name }}</h2>
           <p>${{ item.Price }}</p>
         </div>
-        <div class="collapse-content flex">
+        <div class="collapse-content flex bg-white">
           <div class="collapse-left w-6/12">
 
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-2 w-full justify-center gap-5 pt-6">
               <!-- Minus Button -->
               <Button class="pi pi-minus p-button-rounded" @click="decrement" />
 
@@ -56,9 +56,9 @@ function toggleAccordion(index) {
               <Button class="pi pi-plus p-button-rounded" @click="increment" />
             </div>
 
-            <p>SKU: {{ item.Sku }}</p>
+            <p class="flex items-center space-x-2 w-full justify-center py-5">SKU: {{ item.Sku }}</p>
 
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-center gap-5">
                 <span class="flex flex-col">
                     <i class="pi pi-shop"></i>
                     {{ item.MaxQty }}
@@ -70,16 +70,16 @@ function toggleAccordion(index) {
             </div>
             
           </div>
-          <div class="">
-            <span class="flex items-center">
+          <div class="w-6/12 pt-6">
+            <span class="flex items-center justify-center">
                 <i class="pi pi-dollar"></i>
                 <p>1.99</p>
             </span>
-            <span class="flex items-center">
+            <span class="flex items-center justify-center py-5">
                 <i class="pi pi-percentage"></i>
                 <p>0</p>
             </span>
-            <span>
+            <span class="flex items-center justify-center">
                 <p>0</p>
             </span>
           </div>
