@@ -56,7 +56,7 @@ nextTick(() => {
       />
       <div class="collapse-title text-xl font-medium flex justify-between">
         <!-- Show the quantity in the badge -->
-        <span class="absolute top-0 left-0 border-2 bg-purple-100 rounded-full flex items-center justify-center w-5 h-5 text-center m-1 p-1">
+        <span class="absolute top-0 left-0 border-2 bg-purple-100 rounded-full flex items-center justify-center font-semibold w-5 h-5 text-center m-1 p-1">
           {{ item.qty }}
         </span>
         <img 
