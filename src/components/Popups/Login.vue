@@ -132,26 +132,26 @@ const login = async () => {
                   />
                 </div>
                 <div class="">
-                  <div class="card flex justify-center items-center gap-2 border-2 rounded-2xl py-3 px-3">
+                  <div class="flex justify-center items-center gap-2 border-2 rounded-2xl py-3 px-3">
                     <i class="pi pi-lock"></i>
                     <Password v-model="password" :feedback="false" placeholder="******" class=" w-full mx-auto" />
                   </div>
                 </div>
               </div>
               <button @click="password.length < 6 ? (password = password + i) : ''" v-for="i in 9" :key="i"
-                      class="capitalize hover:bg-purple-500 border-2 border-solid border-1 border-primary text-primary bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
+                      class="capitalize hover:bg-purple-500 border-2 border-solid border-1 bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
                 {{ i }}
               </button>
               <button @click="password = password.slice(0, -1)"
-                      class="capitalize hover:bg-purple-500 border-solid border-2 border-primary text-primary bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
+                      class="capitalize hover:bg-purple-500 border-solid border-2 bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
                 <i class="pi pi-delete-left"></i>
               </button>
               <button @click="password = password + 0"
-                      class="capitalize hover:bg-purple-500 border-solid border-2 border-primary text-primary bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
+                      class="capitalize hover:bg-purple-500 border-solid border-2 bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
                 0
               </button>
               <button @click="login" type="submit"
-                      class="capitalize hover:bg-purple-500 border-solid border-2 border-primary text-primary bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
+                      class="capitalize hover:bg-purple-500 border-solid border-2 bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
                 <i class="pi pi-check"></i>
               </button>
             </div>
