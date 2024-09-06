@@ -54,17 +54,19 @@ nextTick(() => {
         :checked="isOpen[index]" 
         @change="toggleAccordion(index)"
       />
-      <div class="collapse-title text-xl font-medium flex justify-between">
+      <div class="collapse-title text-xl font-medium flex justify-between items-center">
         <!-- Show the quantity in the badge -->
         <span class="absolute top-0 left-0 border-2 bg-purple-100 rounded-full flex items-center justify-center font-semibold w-5 h-5 text-center m-1 p-1">
           {{ item.qty }}
         </span>
-        <img 
-         :src="`https://replicagunsca.b-cdn.net/images/products/small/${item.ImageUrl}`"
-         class="w-14 rounded-lg"
-         alt="product-img"
+        <div class="flex items-center gap-4">
+         <img 
+          :src="`https://replicagunsca.b-cdn.net/images/products/small/${item.ImageUrl}`"
+          class="w-14 rounded-lg"
+          alt="product-img"
          >
-        <h2>{{ item.Name }}</h2>
+         <p>{{ item.Name }}</p>
+        </div>
         <p>${{ (item.Price * item.qty).toFixed(2) }}</p>
       </div>
       <div class="collapse-content flex bg-white">
@@ -73,7 +75,7 @@ nextTick(() => {
           <div class="flex items-center space-x-2 w-full justify-center gap-5 pt-6">
             <!-- Minus Button -->
             <Button 
-              class="pi pi-minus p-button-rounded font-black bg-purple-200 p-2 rounded-lg" 
+              class="pi pi-minus p-button-rounded p-2 font-extrabold" 
               @click="orderStore.decrementOrderItem(item)" 
               style="font-size: 20px;" 
             />
@@ -90,7 +92,7 @@ nextTick(() => {
 
             <!-- Plus Button -->
             <Button 
-              class="pi pi-plus p-button-rounded font-black bg-purple-200 p-2 rounded-lg" 
+              class="pi pi-plus p-button-rounded font-extrabold p-2" 
               @click="orderStore.incrementOrderItem(item)" 
               style="font-size: 20px;" 
             />
@@ -99,9 +101,9 @@ nextTick(() => {
           <p class="flex items-center space-x-2 w-full justify-center py-5">SKU: {{ item.Sku }}</p>
 
           <div class="flex items-center justify-center gap-5">
-              <span id="storeQuantity" class="flex flex-col items-center text-[24px]">
-                  <i class="pi pi-shop bg-purple-200 p-2 rounded-lg"></i>
-                  {{ item.MaxQty }}
+              <span id="storeQuantity" class="flex flex-col items-center">
+                  <i class="pi pi-shop" style="font-size: 32px;"></i>
+                  <p>{{ item.MaxQty }}</p>
               </span>
               <span class="flex flex-col items-center">
                   <i class="pi pi-user bg-purple-200 p-3 rounded-full" style="font-size: 20px;"></i>
@@ -110,7 +112,7 @@ nextTick(() => {
           </div>
           
         </div>
-        <div class="w-6/12 pt-6">
+        <div class="w-6/12 pt-6 flex flex-col items-center">
           <span class="flex items-center justify-start gap-2">
               <i class="pi pi-dollar" style="font-size: 24px;"></i>
               <p class="border-2 rounded-lg w-20 text-center py-1">{{ (item.Price * item.qty).toFixed(2) }}</p>
