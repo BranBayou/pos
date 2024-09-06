@@ -59,9 +59,12 @@ nextTick(() => {
         <span class="absolute top-0 left-0 border-2 bg-purple-100 rounded-full flex items-center justify-center w-5 h-5 text-center m-1 p-1">
           {{ item.qty }}
         </span>
-        <img :src="`https://replicagunsca.b-cdn.net/images/products/small/${item.imageUrl}`" alt="product-img">
+        <img 
+         :src="`https://replicagunsca.b-cdn.net/images/products/small/${item.ImageUrl}`"
+         class="w-14 rounded-lg"
+         alt="product-img"
+         >
         <h2>{{ item.Name }}</h2>
-        <!-- Make the price reactive -->
         <p>${{ (item.Price * item.qty).toFixed(2) }}</p>
       </div>
       <div class="collapse-content flex bg-white">

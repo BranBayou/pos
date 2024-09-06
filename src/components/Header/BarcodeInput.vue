@@ -60,7 +60,7 @@ function handleClick(product) {
                     class="border-t cursor-pointer hover:bg-gray-50"
                 >
                     <td class="py-1 px-4">
-                        <img :src="product.ImageUrl" alt="Product Image" class="w-16 h-16 object-cover">
+                        <img :src="`https://replicagunsca.b-cdn.net/images/products/small/${product.ImageUrl}`" alt="Product Image" class="w-16 h-16 object-cover">
                     </td>
                     <td class="py-1 px-4">{{ product.Name }}</td>
                     <td class="py-1 px-4">{{ product.Sku }}</td>
