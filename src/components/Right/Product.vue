@@ -128,7 +128,7 @@ nextTick(() => {
             <!-- Editable Price Input -->
             <input 
               type="number" 
-              step="0.01" 
+              step="" 
               class="border-2 rounded-lg w-20 text-center py-1"
               v-model.number="item.Price"  
               :min="0"               
