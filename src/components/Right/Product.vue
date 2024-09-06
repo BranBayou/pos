@@ -32,7 +32,7 @@ function toggleAccordion(index) {
           @change="toggleAccordion(index)"
         />
         <div class="collapse-title text-xl font-medium flex justify-between">
-          <span class="absolute top-0 left-0 border-2 bg-purple-100 rounded-full w-5 h-5 text-center">1</span>
+          <span class="absolute top-0 left-0 border-2 bg-purple-100 rounded-full w-5 h-5 text-center m-1">1</span>
           <img :src="item.imageUrl" alt="product-img">
           <h2>{{ item.Name }}</h2>
           <p>${{ item.Price }}</p>
