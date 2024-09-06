@@ -32,7 +32,7 @@ function toggleAccordion(index) {
           @change="toggleAccordion(index)"
         />
         <div class="collapse-title text-xl font-medium flex justify-between">
-          <span class="absolute top-0 border-2 bg-purple-100 rounded-full w-5 h-5 text-center">1</span>
+          <span class="absolute top-0 left-0 border-2 bg-purple-100 rounded-full w-5 h-5 text-center">1</span>
           <img :src="item.imageUrl" alt="product-img">
           <h2>{{ item.Name }}</h2>
           <p>${{ item.Price }}</p>
@@ -42,7 +42,7 @@ function toggleAccordion(index) {
 
             <div class="flex items-center space-x-2 w-full justify-center gap-5 pt-6">
               <!-- Minus Button -->
-              <Button class="pi pi-minus p-button-rounded" @click="decrement" />
+              <Button class="pi pi-minus p-button-rounded font-black" @click="decrement" style="font-size: 20px;" />
 
               <!-- Input Number -->
               <input
@@ -53,7 +53,7 @@ function toggleAccordion(index) {
               />
 
               <!-- Plus Button -->
-              <Button class="pi pi-plus p-button-rounded" @click="increment" />
+              <Button class="pi pi-plus p-button-rounded font-black" @click="increment" style="font-size: 20px;" />
             </div>
 
             <p class="flex items-center space-x-2 w-full justify-center py-5">SKU: {{ item.Sku }}</p>
@@ -64,7 +64,7 @@ function toggleAccordion(index) {
                     {{ item.MaxQty }}
                 </span>
                 <span class="flex flex-col items-center">
-                    <i class="pi pi-user bg-purple-200 p-3 rounded-full"></i>
+                    <i class="pi pi-user bg-purple-200 p-3 rounded-full" style="font-size: 20px;"></i>
                     <p class="">No Sales Person</p>
                 </span>
             </div>
@@ -72,11 +72,11 @@ function toggleAccordion(index) {
           </div>
           <div class="w-6/12 pt-6">
             <span class="flex items-center justify-center">
-                <i class="pi pi-dollar"></i>
+                <i class="pi pi-dollar" style="font-size: 24px;"></i>
                 <p>1.99</p>
             </span>
             <span class="flex items-center justify-center py-5">
-                <i class="pi pi-percentage"></i>
+                <i class="pi pi-percentage" style="font-size: 20px;"></i>
                 <p>0</p>
             </span>
             <span class="flex items-center justify-center">
