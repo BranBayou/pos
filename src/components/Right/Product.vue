@@ -19,26 +19,6 @@ function toggleAccordion(index) {
   isOpen.value[index] = !isOpen.value[index];
 }
 
-// Initialize qty with a default value (1) if not already set in the store
-onMounted(() => {
-  props.items.forEach(item => {
-    if (!item.qty) {
-      item.qty = 1; // Set default qty if it's not set
-    }
-    // Add items to the store when mounted
-    orderStore.addOrderItem(item);
-  });
-});
-
-// Methods to interact with the store
-const increment = (item) => {
-  orderStore.incrementOrderItem(item);
-};
-
-const decrement = (item) => {
-  orderStore.decrementOrderItem(item);
-};
-
 const handleInput = (item) => {
   // Ensure qty is within the allowed range
   if (item.qty > item.MaxQty) {
@@ -69,7 +49,7 @@ const handleInput = (item) => {
         <span class="absolute top-0 left-0 border-2 bg-purple-100 rounded-full w-5 h-5 text-center m-1">
           {{ item.qty }}
         </span>
-        <img :src="item.imageUrl" alt="product-img">
+        <img :src="`https://replicagunsca.b-cdn.net/images/products/small/${item.imageUrl}`" alt="product-img">
         <h2>{{ item.Name }}</h2>
         <!-- Make the price reactive -->
         <p>${{ (item.Price * item.qty).toFixed(2) }}</p>
