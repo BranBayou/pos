@@ -84,11 +84,11 @@ const buttons = ref([
       <div>
         <button class="flex flex-col items-center">
           <img style="width: 35px;" src="/cashier.png" alt="">
-          <span>{{ authStore.isUserLoggedIn ? authStore.userRole : 'Cashier' }}</span>
+          <span class="font-semibold">{{ authStore.isUserLoggedIn ? authStore.userRole : 'Cashier' }}</span>
         </button>
       </div>
       <i @click="handleAuthAction" ref="myButton" class="pi pi-user text-purple-500 bg-purple-100 p-4 rounded-full cursor-pointer" style="font-size: 1.875rem;"></i>
-      <span>{{ authStore.isUserLoggedIn ? authStore.currentUser : 'Logged out' }}</span>
+      <span class="font-medium">{{ authStore.isUserLoggedIn ? authStore.currentUser : 'Logged out' }}</span>
     </div>
     
     <ItemsSearch v-if="authStore.isUserLoggedIn" />

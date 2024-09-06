@@ -1,6 +1,9 @@
 <script setup>
+import { ref, nextTick } from 'vue';
 import { useOrderStore } from '@/stores/OrderStore';
-import { ref, onMounted } from 'vue';
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
+import 'tippy.js/animations/scale.css';
 
 // Get the order store
 const orderStore = useOrderStore();
@@ -29,7 +32,14 @@ const handleInput = (item) => {
   }
 };
 
+// Use nextTick to ensure the DOM is updated before initializing tippy
+nextTick(() => {
+  tippy('#storeQuantity', {
+    content: 'In Store Quantity',
+  });
+});
 </script>
+
 
 <template>
   <div class="w-[95%] relative mx-auto flex flex-col gap-2">
@@ -46,7 +56,7 @@ const handleInput = (item) => {
       />
       <div class="collapse-title text-xl font-medium flex justify-between">
         <!-- Show the quantity in the badge -->
-        <span class="absolute top-0 left-0 border-2 bg-purple-100 rounded-full w-5 h-5 text-center m-1">
+        <span class="absolute top-0 left-0 border-2 bg-purple-100 rounded-full flex items-center justify-center w-5 h-5 text-center m-1 p-1">
           {{ item.qty }}
         </span>
         <img :src="`https://replicagunsca.b-cdn.net/images/products/small/${item.imageUrl}`" alt="product-img">
@@ -68,7 +78,7 @@ const handleInput = (item) => {
             <!-- Input Number -->
             <input
               type="number"
-              class="w-10 text-center no-arrows border-2 rounded-lg"
+              class="text-center no-arrows border-2 rounded-lg py-1"
               v-model.number="item.qty"  
               :min="1"                  
               :max="item.MaxQty"         
@@ -86,7 +96,7 @@ const handleInput = (item) => {
           <p class="flex items-center space-x-2 w-full justify-center py-5">SKU: {{ item.Sku }}</p>
 
           <div class="flex items-center justify-center gap-5">
-              <span class="flex flex-col items-center text-[24px]">
+              <span id="storeQuantity" class="flex flex-col items-center text-[24px]">
                   <i class="pi pi-shop bg-purple-200 p-2 rounded-lg"></i>
                   {{ item.MaxQty }}
               </span>
