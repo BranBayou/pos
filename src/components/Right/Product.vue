@@ -132,12 +132,14 @@ nextTick(() => {
         <div class="w-6/12 pt-6 flex flex-col items-center">
           <span class="flex items-center justify-start gap-2">
           <i class="pi pi-dollar" style="font-size: 24px;"></i>
+          <!-- Price input -->
           <input 
             type="number" 
             class="border-2 rounded-lg w-20 text-center py-1"
             v-model.number="item.Price"  
-            :min="0"               
+            :min="0"
             @input="handlePriceInput(item)"
+            @blur="checkManagerPermission(item, 'price')" 
           />
         </span>
 
@@ -149,8 +151,9 @@ nextTick(() => {
             class="border-2 rounded-lg w-28 text-center py-1" 
             v-model.number="item.discountPercentage"  
             :min="0"
-            :max="100" 
+            :max="100"
             @input="handleDiscountInput(item)"
+            @blur="checkManagerPermission(item, 'discount')"
           />
         </span>
           <span class="flex items-center justify-start">
