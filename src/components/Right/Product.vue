@@ -54,6 +54,10 @@ const handleDiscountInput = (item) => {
   item.Price = (item.OriginalPrice * (1 - item.discountPercentage / 100)).toFixed(2);
 };
 
+const checkManagerPermission = function() {
+  console.log('Manager triggerd');
+}
+
 // Use nextTick to ensure the DOM is updated before initializing tippy
 nextTick(() => {
   tippy('#storeQuantity', {
@@ -85,9 +89,17 @@ nextTick(() => {
             class="w-14 rounded-lg"
             alt="product-img"
           >
-          <p>{{ item.Name }}</p>
+          <p class="text-base font-semibold">{{ item.Name }}</p>
         </div>
-        <p>${{ (item.Price * item.qty).toFixed(2) }}</p>
+        <div class="">
+          <p class="font-semibold">${{ (item.Price * item.qty).toFixed(2) }}</p>
+          <p 
+           v-if="item.discountPercentage"
+           class="text-sm"
+          >
+           {{ item.discountPercentage }}% discount applied
+          </p>
+        </div>
       </div>
 
       <div class="collapse-content flex bg-white">
@@ -156,8 +168,12 @@ nextTick(() => {
             @blur="checkManagerPermission(item, 'discount')"
           />
         </span>
-          <span class="flex items-center justify-start">
-            <i style="font-size: 24px;"></i>
+          <span class="flex items-center justify-start gap-2">
+            <p class="font-semibold">GST</p>
+            <p class="border-2 rounded-lg w-28 text-center py-1">0</p>
+          </span>
+          <span class="flex items-center justify-start gap-2">
+            <p class="font-semibold">PST</p>
             <p class="border-2 rounded-lg w-28 text-center py-1">0</p>
           </span>
         </div>
