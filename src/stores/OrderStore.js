@@ -1,31 +1,79 @@
 import { defineStore } from 'pinia';
-import axios from 'axios';
 import { reactive, computed } from 'vue';
 
 export const useOrderStore = defineStore('orders', () => {
-    // Create a reactive object that contains the orderItems array
     const state = reactive({
-        orderItems: []
+        orderItems: [],
+        gst: 0.5, // GST default value
+        pst: 0.7  // PST default value
     });
 
-    // Example: Function to add an item to the orderItems array
     function addOrderItem(item) {
-        state.orderItems.push(item);
-        console.log(state.orderItems);
+        const existingItem = state.orderItems.find(orderItem => 
+            orderItem.id === item.id && orderItem.Sku === item.Sku && orderItem.Price === item.Price
+        );
+        
+        if (existingItem) {
+            existingItem.qty++;
+        } else {
+            state.orderItems.push({ ...item, qty: 1 });
+        }
     }
 
-    // Example: Function to remove an item from the orderItems array
-    function removeOrderItem(index) {
-        state.orderItems.splice(index, 1);
+    function incrementOrderItem(item) {
+        const existingItem = state.orderItems.find(orderItem => 
+            orderItem.id === item.id && orderItem.Sku === item.Sku
+        );
+        if (existingItem && existingItem.qty < existingItem.MaxQty) {
+            existingItem.qty++;
+        }
     }
 
-    // Getter to return the current order items
+    function decrementOrderItem(item) {
+        const existingItem = state.orderItems.find(orderItem => 
+            orderItem.id === item.id && orderItem.Sku === item.Sku
+        );
+        if (existingItem && existingItem.qty > 1) {
+            existingItem.qty--;
+        } else if (existingItem && existingItem.qty === 1) {
+            deleteOrderItem(existingItem);
+        }
+    }
+
+    function deleteOrderItem(item) {
+        const index = state.orderItems.findIndex(orderItem => 
+            orderItem.id === item.id && orderItem.Sku === item.Sku
+        );
+        if (index !== -1) {
+            state.orderItems.splice(index, 1);
+        }
+    }
+
     const getOrderItems = computed(() => state.orderItems);
+
+    const getOrderTotal = computed(() => {
+        return state.orderItems.reduce((total, item) => {
+            return total + (item.Price * item.qty);
+        }, 0);
+    });
+
+    const getGstAmount = computed(() => {
+        return getOrderTotal.value * (state.gst / 100);
+    });
+
+    const getPstAmount = computed(() => {
+        return getOrderTotal.value * (state.pst / 100);
+    });
 
     return {
         state,
         addOrderItem,
-        removeOrderItem,
+        incrementOrderItem,
+        decrementOrderItem,
+        deleteOrderItem,
         getOrderItems,
+        getOrderTotal,
+        getGstAmount,
+        getPstAmount,
     };
 });

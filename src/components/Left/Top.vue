@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 import Login from '../Popups/Login.vue';
 import LogoutConfirmation from '../Popups/LogoutConfirmation.vue';
 import OpenDrawer from './OpenDrawer.vue';
@@ -30,7 +30,7 @@ const handleAuthAction = () => {
   if (authStore.isUserLoggedIn) {
     toggleisLogoutConfirmationVisible();
   } else {
-    toggleModal(); // Show login modal
+    toggleModal();
   }
 };
 
@@ -71,6 +71,58 @@ const buttons = ref([
   { name: 'AddManagerApproval', component: AddManagerApproval },
   { name: 'WalkInCustomer', component: WalkInCustomer },
 ]);
+
+// Countdown and inactivity logic
+const countdown = ref(60); // Start countdown from 60 seconds
+let countdownInterval = null;
+
+const startCountdown = () => {
+  clearInterval(countdownInterval);
+  countdown.value = 60; // Reset countdown to 60 seconds
+
+  countdownInterval = setInterval(() => {
+    if (countdown.value > 0) {
+      countdown.value -= 1; // Decrease by 1 every second
+    } else {
+      clearInterval(countdownInterval);
+      authStore.logout(); // Trigger logout when countdown reaches zero
+    }
+  }, 1000000000);
+};
+
+// Reset countdown on user interaction
+const resetCountdown = () => {
+  startCountdown(); // Restart countdown when there's user activity
+};
+
+// Watch for login status and manage countdown accordingly
+watch(() => authStore.isUserLoggedIn, (isLoggedIn) => {
+  if (isLoggedIn) {
+    startCountdown(); // Start countdown if the user is logged in
+    window.addEventListener('mousemove', resetCountdown);
+    window.addEventListener('keydown', resetCountdown);
+  } else {
+    clearInterval(countdownInterval); // Stop countdown on logout
+    countdown.value = 60; // Reset countdown display to 60
+    window.removeEventListener('mousemove', resetCountdown);
+    window.removeEventListener('keydown', resetCountdown);
+  }
+});
+
+onMounted(() => {
+  if (authStore.isUserLoggedIn) {
+    startCountdown(); // Start countdown if the user is logged in
+    window.addEventListener('mousemove', resetCountdown);
+    window.addEventListener('keydown', resetCountdown);
+  }
+});
+
+onUnmounted(() => {
+  // Clean up interval and event listeners when component unmounts
+  clearInterval(countdownInterval);
+  window.removeEventListener('mousemove', resetCountdown);
+  window.removeEventListener('keydown', resetCountdown);
+});
 </script>
 
 <template>
@@ -80,15 +132,21 @@ const buttons = ref([
       @close-modal="toggleModal"
       :modalActive="modalActive"
     />
-    <div class="flex items-center border shadow-lg w-full p-5 rounded-2xl gap-5">  
+    <div class="relative flex items-center border shadow-lg w-full p-5 rounded-2xl gap-5">  
       <div>
         <button class="flex flex-col items-center">
           <img style="width: 35px;" src="/cashier.png" alt="">
-          <span>{{ authStore.isUserLoggedIn ? authStore.userRole : 'Cashier' }}</span>
+          <span class="font-semibold">{{ authStore.isUserLoggedIn ? authStore.userRole : 'Cashier' }}</span>
         </button>
       </div>
       <i @click="handleAuthAction" ref="myButton" class="pi pi-user text-purple-500 bg-purple-100 p-4 rounded-full cursor-pointer" style="font-size: 1.875rem;"></i>
-      <span>{{ authStore.isUserLoggedIn ? authStore.currentUser : 'Logged out' }}</span>
+      <span class="font-medium">{{ authStore.isUserLoggedIn ? authStore.currentUser : 'Logged out' }}</span>
+
+      <!-- Countdown Timer -->
+      <span v-if="authStore.isUserLoggedIn" class="absolute bottom-2 right-2 flex items-center gap-2">
+        <p>{{ countdown }}</p>
+        <i class="pi pi-clock" style="font-size: 20px;"></i>
+      </span>
     </div>
     
     <ItemsSearch v-if="authStore.isUserLoggedIn" />
@@ -103,7 +161,7 @@ const buttons = ref([
 
     <button
       @click="authStore.toggleAddBehaviourPopup"
-      class="border shadow-lg w-full text-center p-5 rounded-2xl flex gap-5 my-5">
+      class="border shadow-lg w-full text-center p-5 rounded-2xl flex gap-5 my-3">
       <span class="text-center mx-auto cursor-pointer">
         <i 
           :disabled="!authStore.isUserLoggedIn" 
@@ -115,7 +173,6 @@ const buttons = ref([
     </button>
   </div>
 </template>
-
 
 <style scoped>
 
