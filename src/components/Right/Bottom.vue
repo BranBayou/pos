@@ -1,5 +1,8 @@
 <script setup>
+import { useAuthStore } from '@/stores/authStore';
 import { useOrderStore } from '@/stores/OrderStore';
+
+const authStore = useAuthStore();
 import { computed } from 'vue';
 
 const orderStore = useOrderStore();
@@ -10,7 +13,7 @@ const pstAmount = computed(() => orderStore.getPstAmount);
 </script>
 
 <template>
-    <div class="flex flex-col justify-end" style="min-height: 50%;">
+    <div v-if="authStore.isUserLoggedIn" class="flex flex-col justify-end" style="min-height: 50%;">
         <div class="flex items-center justify-between rounded-2xl shadow-lg mx-3 my-2 py-4 px-3">
             <p class="font-semibold">% Overall Discount</p>
             <p class="font-semibold">0%</p>

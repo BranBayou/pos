@@ -16,7 +16,7 @@ const authStore = useAuthStore();
               <div class="flex justify-end gap-4 w-full">
                 <button 
                   class="bg-purple-500 text-white px-4 py-2 hover:bg-purple-700 rounded-xl mx-auto"
-                  @click="confirmLogout"
+                  @click="login"
                 >
                   Manager Override
                 </button>
