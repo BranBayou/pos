@@ -103,7 +103,7 @@ nextTick(() => {
       </div>
 
       <div class="collapse-content flex bg-white">
-        <div class="collapse-left w-6/12">
+        <div class="collapse-left w-6/12 flex flex-col justify-between">
           <div class="flex items-center space-x-2 w-full justify-center gap-5 pt-6">
             <Button 
               class="pi pi-minus p-button-rounded p-2 font-extrabold" 
@@ -147,7 +147,7 @@ nextTick(() => {
           <!-- Price input -->
           <input 
             type="number" 
-            class="border-2 rounded-lg w-20 text-center py-1"
+            class="border-2 rounded-lg w-28 text-center py-1"
             v-model.number="item.Price"  
             :min="0"
             @input="handlePriceInput(item)"
@@ -167,14 +167,14 @@ nextTick(() => {
             @input="handleDiscountInput(item)"
             @blur="checkManagerPermission(item, 'discount')"
           />
-        </span>
-          <span class="flex items-center justify-start gap-2">
-            <p class="font-semibold">GST</p>
-            <p class="border-2 rounded-lg w-28 text-center py-1">0</p>
           </span>
           <span class="flex items-center justify-start gap-2">
+            <p class="font-semibold">GST</p>
+            <p class="border-2 rounded-lg w-28 text-center py-1">0.5</p>
+          </span>
+          <span class="flex items-center justify-start gap-2 pt-5">
             <p class="font-semibold">PST</p>
-            <p class="border-2 rounded-lg w-28 text-center py-1">0</p>
+            <p class="border-2 rounded-lg w-28 text-center py-1">0.7</p>
           </span>
         </div>
       </div>

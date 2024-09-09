@@ -1,11 +1,12 @@
 <script setup>
-
+import { useOrderStore } from '@/stores/OrderStore';
+const orderStore = useOrderStore();
 </script>
 
 <template>
     <div class="flex items-center justify-between rounded-2xl shadow-lg mx-3 my-2 py-4 px-3">
         <p>Total</p>
-        <p>$161</p>
+        <p>${{ orderStore.getOrderTotal }}</p>
     </div>
 </template>
 

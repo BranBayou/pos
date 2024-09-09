@@ -2,28 +2,22 @@ import { defineStore } from 'pinia';
 import { reactive, computed } from 'vue';
 
 export const useOrderStore = defineStore('orders', () => {
-    // Create a reactive object that contains the orderItems array
     const state = reactive({
         orderItems: []
     });
 
-    // Function to add an item to the orderItems array
     function addOrderItem(item) {
-        // Check if an identical item (same id and other properties like SKU) exists
         const existingItem = state.orderItems.find(orderItem => 
             orderItem.id === item.id && orderItem.Sku === item.Sku && orderItem.Price === item.Price
         );
         
         if (existingItem) {
-            // If the exact same item exists, just increase the quantity
             existingItem.qty++;
         } else {
-            // If it's a new item, add it separately with an initial quantity of 1
             state.orderItems.push({ ...item, qty: 1 });
         }
     }
 
-    // Function to increment the quantity of an order item
     function incrementOrderItem(item) {
         const existingItem = state.orderItems.find(orderItem => 
             orderItem.id === item.id && orderItem.Sku === item.Sku
@@ -33,7 +27,6 @@ export const useOrderStore = defineStore('orders', () => {
         }
     }
 
-    // Function to decrement the quantity of an order item
     function decrementOrderItem(item) {
         const existingItem = state.orderItems.find(orderItem => 
             orderItem.id === item.id && orderItem.Sku === item.Sku
@@ -41,12 +34,10 @@ export const useOrderStore = defineStore('orders', () => {
         if (existingItem && existingItem.qty > 1) {
             existingItem.qty--;
         } else if (existingItem && existingItem.qty === 1) {
-            // If quantity reaches 0, remove the item from the order
             deleteOrderItem(existingItem);
         }
     }
 
-    // Function to delete an item from the orderItems array
     function deleteOrderItem(item) {
         const index = state.orderItems.findIndex(orderItem => 
             orderItem.id === item.id && orderItem.Sku === item.Sku
@@ -56,14 +47,23 @@ export const useOrderStore = defineStore('orders', () => {
         }
     }
 
-    // Getter to return the current order items
     const getOrderItems = computed(() => state.orderItems);
 
-    // Getter to calculate the total price of the order items
+    // Compute the total price of all order items
     const getOrderTotal = computed(() => {
         return state.orderItems.reduce((total, item) => {
             return total + (item.Price * item.qty);
         }, 0);
+    });
+
+    // Compute GST (0.5% of the total)
+    const getGstAmount = computed(() => {
+        return getOrderTotal.value * 0.005; // GST is 0.5%
+    });
+
+    // Compute PST (0.7% of the total)
+    const getPstAmount = computed(() => {
+        return getOrderTotal.value * 0.007; // PST is 0.7%
     });
 
     return {
@@ -73,6 +73,8 @@ export const useOrderStore = defineStore('orders', () => {
         decrementOrderItem,
         deleteOrderItem,
         getOrderItems,
-        getOrderTotal
+        getOrderTotal,
+        getGstAmount,
+        getPstAmount
     };
 });
