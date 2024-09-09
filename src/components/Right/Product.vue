@@ -82,9 +82,11 @@ const checkValueChanged = (key, item) => {
 const backupDiscountPercentage = ref(null);
 
 const checkManagerPermission = function(item) {
-  // Backup the discount value before showing the popup
-  backupDiscountPercentage.value = item.discountPercentage;
-  authStore.toggleAddManagerApprovalRequest();
+  if (authStore.userRole !== 'Manager') {
+    // Backup the discount value before showing the popup
+    backupDiscountPercentage.value = item.discountPercentage;
+    authStore.toggleAddManagerApprovalRequest();
+  }
 };
 
 watch(() => authStore.isAddManagerApprovalRequest, (newVal) => {
