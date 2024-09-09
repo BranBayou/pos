@@ -8,6 +8,7 @@ export const useAuthStore = defineStore('auth', () => {
     const currentUser = ref(''); // Track the current user's name
     const userRole = ref(''); // Track the current user's role
     const isLogoutConfirmationVisible = ref(false);
+    const isAddManagerApprovalRequest = ref(false);
 
     // Login Function
     function login(username, role) {
@@ -50,6 +51,12 @@ export const useAuthStore = defineStore('auth', () => {
         console.log('Show popup:', isAddItemPopup.value);
     };
 
+    // Manager approval requset popup
+    const toggleAddManagerApprovalRequest = () => {
+        isAddManagerApprovalRequest.value =!isAddManagerApprovalRequest.value;
+        console.log('Show mng app popup:', isAddManagerApprovalRequest.value);
+    };
+
     return {
         isUserLoggedIn,
         currentUser,
@@ -62,6 +69,8 @@ export const useAuthStore = defineStore('auth', () => {
         isAddBehaviourPopup,
         toggleAddBehaviourPopup,
         isAddItemPopup,
-        toggleAddItemPopup
+        toggleAddItemPopup,
+        isAddManagerApprovalRequest,
+        toggleAddManagerApprovalRequest
     };
 });

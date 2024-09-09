@@ -1,10 +1,13 @@
 <script setup>
-import { ref, nextTick, onMounted } from 'vue';
+import { ref, nextTick, onMounted, watch } from 'vue';
+import { useAuthStore } from '@/stores/authStore';
 import { useOrderStore } from '@/stores/OrderStore';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
+import AddManagerApprovalRequest from '../Popups/AddManagerApprovalRequest.vue';
 
+const authStore = useAuthStore();
 const orderStore = useOrderStore();
 
 const props = defineProps({
@@ -28,6 +31,9 @@ onMounted(() => {
   });
 });
 
+// Backup the original values
+const originalValues = ref({});
+
 const handlePriceInput = (item) => {
   if (item.Price < 0) {
     item.Price = 0;
@@ -46,9 +52,47 @@ const handleDiscountInput = (item) => {
   item.Price = (item.OriginalPrice * (1 - item.discountPercentage / 100)).toFixed(2);
 };
 
-const checkManagerPermission = function() {
-  console.log('Manager triggered');
-}
+// Store original values when input is focused
+const storeOriginalValue = (key, item) => {
+  if (!originalValues.value[item.Name]) {
+    originalValues.value[item.Name] = {};
+  }
+  originalValues.value[item.Name][key] = item[key];
+};
+
+// Function to check if the value has changed on blur or enter
+const checkValueChanged = (key, item) => {
+  if (item[key] !== originalValues.value[item.Name]?.[key]) {
+    checkManagerPermission(item);  // Only trigger if value has changed
+  }
+};
+
+const backupDiscountPercentage = ref(null);
+
+const checkManagerPermission = function(item) {
+  // Backup the discount value before showing the popup
+  backupDiscountPercentage.value = item.discountPercentage;
+  authStore.toggleAddManagerApprovalRequest();
+};
+
+watch(() => authStore.isAddManagerApprovalRequest, (newVal) => {
+  if (!newVal) {
+    // If the popup is closed, reset the discountPercentage to 0
+    props.items.forEach(item => {
+      // Reset discount percentage to 0
+      item.discountPercentage = 0;
+
+      // Ensure OriginalPrice is set and valid
+      if (!item.OriginalPrice) {
+        item.OriginalPrice = item.Price;
+      }
+
+      // Reset Price to OriginalPrice since discountPercentage is reset to 0
+      item.Price = item.OriginalPrice.toFixed(2);
+    });
+  }
+});
+
 
 nextTick(() => {
   tippy('#storeQuantity', {
@@ -59,6 +103,7 @@ nextTick(() => {
 </script>
 
 <template>
+  <AddManagerApprovalRequest />
   <div class="w-[95%] relative mx-auto flex flex-col gap-2">
     <div v-for="(item, index) in items" :key="index" class="collapse bg-base-200 rounded-2xl shadow-xl">
       <input type="checkbox" :checked="isOpen[index]" @change="toggleAccordion(index)" />
@@ -106,14 +151,31 @@ nextTick(() => {
           <!-- Price and Discount Input -->
           <span class="flex items-center justify-start gap-2">
             <i class="pi pi-dollar" style="font-size: 24px;"></i>
-            <input type="number" class="border-2 rounded-lg w-28 text-center py-1" v-model.number="item.Price" :min="0"
-              @input="handlePriceInput(item)" @blur="checkManagerPermission(item, 'price')" />
+            <input 
+              type="number" 
+              class="border-2 rounded-lg w-28 text-center py-1" 
+              v-model.number="item.Price" 
+              :min="0"
+              @focus="storeOriginalValue('Price', item)"  
+              @input="handlePriceInput(item)" 
+              @blur="checkValueChanged('Price', item)"   
+              @keydown.enter="checkValueChanged('Price', item)"  
+            />
           </span>
+          
           <span class="flex items-center justify-start py-5 gap-2">
             <i class="pi pi-percentage" style="font-size: 24px;"></i>
-            <input type="number" class="border-2 rounded-lg w-28 text-center py-1"
-              v-model.number="item.discountPercentage" :min="0" :max="100" @input="handleDiscountInput(item)"
-              @blur="checkManagerPermission(item, 'discount')" />
+            <input 
+              type="number" 
+              class="border-2 rounded-lg w-28 text-center py-1"
+              v-model.number="item.discountPercentage" 
+              :min="0" 
+              :max="100" 
+              @focus="storeOriginalValue('discountPercentage', item)"  
+              @input="handleDiscountInput(item)"
+              @blur="checkValueChanged('discountPercentage', item)"  
+              @keydown.enter="checkValueChanged('discountPercentage', item)"  
+            />
           </span>
 
           <!-- Editable GST input, default set to 0.5 -->
@@ -134,6 +196,7 @@ nextTick(() => {
     </div>
   </div>
 </template>
+
 
 <style scoped>
 input[type="number"]::-webkit-outer-spin-button,

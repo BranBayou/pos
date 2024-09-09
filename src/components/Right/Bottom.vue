@@ -12,22 +12,22 @@ const pstAmount = computed(() => orderStore.getPstAmount);
 <template>
     <div class="flex flex-col justify-end" style="min-height: 50%;">
         <div class="flex items-center justify-between rounded-2xl shadow-lg mx-3 my-2 py-4 px-3">
-            <p>% Overall Discount</p>
-            <p>0%</p>
+            <p class="font-semibold">% Overall Discount</p>
+            <p class="font-semibold">0%</p>
         </div>
         <div>
             <div class="flex items-center justify-between rounded-2xl shadow-lg mx-3 my-2 py-4 px-3">
-                <p>GST</p>
-                <p>${{ gstAmount.toFixed(2) }}</p>
+                <p class="font-semibold">GST</p>
+                <p class="font-semibold">${{ gstAmount.toFixed(2) }}</p>
             </div>
             <div class="flex items-center justify-between rounded-2xl shadow-lg mx-3 my-2 py-4 px-3">
-                <p>PST</p>
-                <p>${{ pstAmount.toFixed(2) }}</p>
+                <p class="font-semibold">PST</p>
+                <p class="font-semibold">${{ pstAmount.toFixed(2) }}</p>
             </div>
         </div>
         <div class="flex items-center justify-between rounded-2xl shadow-lg mx-3 my-2 py-4 px-3">
-            <p>Total</p>
-            <p>${{ orderStore.getOrderTotal }}</p>
+            <p class="font-semibold">Total</p>
+            <p class="font-semibold">${{ orderStore.getOrderTotal }}</p>
         </div>
     </div>
 </template>
