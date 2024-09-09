@@ -18,12 +18,26 @@ const filteredProducts = computed(() => {
     if (!query) {
         return []; // Return an empty array if the search query is empty
     }
-    // Filter products based on the barcode and limit to the first 5 matches
-    return store.products.filter(product => {
+
+    // Create a set to track unique SKUs and filter out duplicate products
+    const uniqueProducts = new Map();
+
+    // Filter products based on the barcode and ensure uniqueness by SKU
+    const result = store.products.filter(product => {
         const barcode = product.BarCode ? product.BarCode.toLowerCase() : '';
-        return barcode.includes(query);
-    }).slice(0, 5); // Return only the first 5 matches
+        const isUnique = !uniqueProducts.has(product.Sku);
+        
+        if (barcode.includes(query) && isUnique) {
+            uniqueProducts.set(product.Sku, true); // Mark SKU as added
+            return true; // Include in the filtered list
+        }
+        return false; // Exclude duplicates
+    });
+
+    // Always limit the results to a maximum of 5 items
+    return result.slice(0, 5);
 });
+
 
 function handleClick(product) {
   orderStore.addOrderItem(product);
