@@ -3,7 +3,9 @@ import { reactive, computed } from 'vue';
 
 export const useOrderStore = defineStore('orders', () => {
     const state = reactive({
-        orderItems: []
+        orderItems: [],
+        gst: 0.5, // GST default value
+        pst: 0.7  // PST default value
     });
 
     function addOrderItem(item) {
@@ -49,21 +51,18 @@ export const useOrderStore = defineStore('orders', () => {
 
     const getOrderItems = computed(() => state.orderItems);
 
-    // Compute the total price of all order items
     const getOrderTotal = computed(() => {
         return state.orderItems.reduce((total, item) => {
             return total + (item.Price * item.qty);
         }, 0);
     });
 
-    // Compute GST (0.5% of the total)
     const getGstAmount = computed(() => {
-        return getOrderTotal.value * 0.005; // GST is 0.5%
+        return getOrderTotal.value * (state.gst / 100);
     });
 
-    // Compute PST (0.7% of the total)
     const getPstAmount = computed(() => {
-        return getOrderTotal.value * 0.007; // PST is 0.7%
+        return getOrderTotal.value * (state.pst / 100);
     });
 
     return {
@@ -75,6 +74,6 @@ export const useOrderStore = defineStore('orders', () => {
         getOrderItems,
         getOrderTotal,
         getGstAmount,
-        getPstAmount
+        getPstAmount,
     };
 });
