@@ -1,76 +1,119 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
 import { ref } from 'vue';
+import { useToast } from 'vue-toastification';
 
 export const useAuthStore = defineStore('auth', () => {
-    // State
-    const isUserLoggedIn = ref(false);
-    const currentUser = ref(''); // Track the current user's name
-    const userRole = ref(''); // Track the current user's role
-    const isLogoutConfirmationVisible = ref(false);
-    const isAddManagerApprovalRequest = ref(false);
+  // State
+  const isUserLoggedIn = ref(localStorage.getItem('token') ? true : false);
+  const currentUser = ref(localStorage.getItem('currentUser') || ''); // Track the current user's name
+  const userRole = ref(localStorage.getItem('userRole') || ''); // Track the current user's role
+  const token = ref(localStorage.getItem('token') || null); // Track the token
+  const usersList = ref([]); // List of users (cashiers)
+  
+  const isLogoutConfirmationVisible = ref(false);
+  const isAddManagerApprovalRequest = ref(false);
+  const isCashierLoginInput = ref(true); // Login input type state
+  const isAddBehaviourPopup = ref(false);
+  const isAddItemPopup = ref(false);
 
-    // Login Function
-    function login(username, role) {
-        isUserLoggedIn.value = true;
-        currentUser.value = username; // Set the current user's name
-        userRole.value = localStorage.getItem('userRole')
-        console.log('Current User:', currentUser.value, 'Role:', userRole.value); // Debugging log
+  // Fetch Cashiers
+  async function fetchCashiers() {
+    const toast = useToast();
+    try {
+      const response = await axios.get('http://localhost:3131/branchusers');
+      const cashiers = response.data.filter(user => user.role === 'Cashier');
+      usersList.value = cashiers;
+      console.log('Fetched Cashier Users:', usersList.value);
+    } catch (error) {
+      toast.error('Failed to load users', error.message);
+      console.error('Failed to load users:', error.message);
     }
+  }
 
-    // Logout Function
-    function logout() {
-        isUserLoggedIn.value = false;
-        currentUser.value = ''; // Clear the current user's name
-        userRole.value = ''; // Clear the current user's role
-        localStorage.removeItem('token'); // Clear the token
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('userRole'); // Clear the role
+  // Login Function
+  async function login(username, password, storeId) {
+    const toast = useToast();
+    try {
+      const response = await axios.post('http://localhost:3131/login', {
+        username,
+        password,
+      }, {
+        headers: {
+          'store-id': storeId,
+        }
+      });
+
+      const { token: authToken, role } = response.data;
+      localStorage.setItem('token', authToken);
+      localStorage.setItem('currentUser', username);
+      localStorage.setItem('userRole', role);
+
+      token.value = authToken;
+      currentUser.value = username;
+      userRole.value = role;
+      isUserLoggedIn.value = true;
+
+      toast.success(`Welcome back ${username}`);
+      console.log('Current User:', currentUser.value, 'Role:', userRole.value);
+    } catch (error) {
+      toast.error('Login failed!');
+      console.error('Login failed:', error.response?.data?.error || error.message);
+      throw error;
     }
+  }
 
-    // Login input type state
-    const isCashierLoginInput = ref(true);
+  // Logout Function
+  function logout() {
+    isUserLoggedIn.value = false;
+    currentUser.value = ''; // Clear the current user's name
+    userRole.value = ''; // Clear the current user's role
+    token.value = null; // Clear the token
+    localStorage.removeItem('token');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('userRole'); // Clear the role
+  }
 
-    const toggleLoginInput = () => {
-        isCashierLoginInput.value = !isCashierLoginInput.value;
-    };
+  // Toggle Login input type
+  function toggleLoginInput() {
+    isCashierLoginInput.value = !isCashierLoginInput.value;
+  }
 
-    // Add behaviour state
-    const isAddBehaviourPopup = ref(false);
+  // Toggle Add behaviour popup
+  function toggleAddBehaviourPopup() {
+    isAddBehaviourPopup.value = !isAddBehaviourPopup.value;
+    console.log('Show popup:', isAddBehaviourPopup.value);
+  }
 
-    const toggleAddBehaviourPopup = () => {
-        isAddBehaviourPopup.value = !isAddBehaviourPopup.value;
-        console.log('Show popup:', isAddBehaviourPopup.value);
-    };
+  // Toggle Add item popup
+  function toggleAddItemPopup() {
+    isAddItemPopup.value = !isAddItemPopup.value;
+    console.log('Show popup:', isAddItemPopup.value);
+  }
 
-    // Add Item state
-    const isAddItemPopup = ref(false);
-    
-    const toggleAddItemPopup = () => {
-        isAddItemPopup.value = !isAddItemPopup.value;
-        console.log('Show popup:', isAddItemPopup.value);
-    };
+  // Toggle Manager approval request popup
+  function toggleAddManagerApprovalRequest() {
+    isAddManagerApprovalRequest.value = !isAddManagerApprovalRequest.value;
+    console.log('Show mng app popup:', isAddManagerApprovalRequest.value);
+  }
 
-    // Manager approval requset popup
-    const toggleAddManagerApprovalRequest = () => {
-        isAddManagerApprovalRequest.value =!isAddManagerApprovalRequest.value;
-        console.log('Show mng app popup:', isAddManagerApprovalRequest.value);
-    };
-
-    return {
-        isUserLoggedIn,
-        currentUser,
-        userRole, // Export userRole
-        login,
-        logout,
-        isCashierLoginInput,
-        toggleLoginInput,
-        isLogoutConfirmationVisible,
-        isAddBehaviourPopup,
-        toggleAddBehaviourPopup,
-        isAddItemPopup,
-        toggleAddItemPopup,
-        isAddManagerApprovalRequest,
-        toggleAddManagerApprovalRequest
-    };
+  return {
+    isUserLoggedIn,
+    currentUser,
+    userRole,
+    token,
+    usersList,
+    fetchCashiers,
+    login,
+    logout,
+    isCashierLoginInput,
+    toggleLoginInput,
+    isLogoutConfirmationVisible,
+    isAddBehaviourPopup,
+    toggleAddBehaviourPopup,
+    isAddItemPopup,
+    toggleAddItemPopup,
+    isAddManagerApprovalRequest,
+    toggleAddManagerApprovalRequest,
+  };
 });

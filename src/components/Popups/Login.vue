@@ -1,13 +1,18 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuthStore } from '@/stores/authStore'; // Now using the combined store
+import { useToast } from 'vue-toastification';
 import Select from 'primevue/select';
 import Password from 'primevue/password';
 import InputText from 'primevue/inputtext';
-import axios from 'axios';
-import { useToast } from 'vue-toastification';
-import casherImg from '/cashier.png'
-import qrCode from '/qr-code.svg'
+import casherImg from '/cashier.png';
+import qrCode from '/qr-code.svg';
+
+const authStore = useAuthStore(); // For login, fetching users, toggling, and state management
+const selectedUser = ref(null);
+const username = ref('');
+const password = ref('');
+const storeId = ref(''); 
 
 const toast = useToast();
 const emit = defineEmits(["close-modal"]);
@@ -19,80 +24,35 @@ defineProps({
   }
 });
 
-const authStore = useAuthStore();
-
-const usersList = ref([]);
-const selectedUser = ref(null);
-const username = ref('');
-const password = ref('');
-const storeId = ref(''); 
-
-const token = localStorage.getItem('token');
-const currentUser = localStorage.getItem('currentUser');
-
 onMounted(() => {
-  if (token && currentUser) {
-    authStore.login(currentUser);
-    // You might want to check token validity here
+  // If the user is already logged in, no need to call the login API
+  if (authStore.token && authStore.currentUser) {
+    console.log('User session restored:', authStore.currentUser);
+  } else {
+    // Fetch users if not logged in
+    authStore.fetchCashiers();
   }
 });
 
-// Fetch users on component mount api request 
-onMounted(async () => {
-  try {
-    const response = await axios.get('http://localhost:3131/branchusers');
-    const cashiers = response.data.filter(user => user.role === 'Cashier');
-    usersList.value = cashiers; 
-    console.log('Fetched Cashier Users:', usersList.value);
-  } catch (error) {
-    toast.error('Failed to load users', error.message);
-    console.error('Failed to load users:', error.message);
-  }
-});
-
-// Login api request
 const login = async () => {
+  const usernameValue = authStore.isCashierLoginInput ? selectedUser.value?.username : username.value;
+  const passwordValue = password.value;
+
+  if (!usernameValue || !passwordValue) {
+    toast.error('Wrong username or password');
+    console.error('Username or password is missing');
+    return;
+  }
+
   try {
-    const usernameValue = authStore.isCashierLoginInput ? selectedUser.value?.username : username.value;
-    const passwordValue = password.value;
-
-    console.log('Username:', usernameValue);
-    console.log('Password:', passwordValue);
-
-    if (!usernameValue || !passwordValue) {
-      toast.error('Wrong username or password');
-      console.error('Username or password is missing');
-      return;
-    }
-
-    const response = await axios.post('http://localhost:3131/login', {
-      username: usernameValue,
-      password: passwordValue
-    }, {
-      headers: {
-        'store-id': storeId.value
-      }
-    });
-
-    const { token, role } = response.data; // Destructure role from the response
-    localStorage.setItem('token', token);
-    localStorage.setItem('currentUser', usernameValue); // Store username
-    localStorage.setItem('userRole', role); // Store role
-    authStore.login(usernameValue, role);
-
-    toast.success(`Welcome back ${usernameValue}`);
-
+    await authStore.login(usernameValue, passwordValue, storeId.value);
+    emit('close-modal');
     username.value = '';
     password.value = '';
-
-    emit('close-modal');
-
   } catch (error) {
-    toast.error('Login failed!');
-    console.error('Login failed:', error.response?.data?.error || error.message);
+    console.error('Login failed:', error);
   }
 };
-
 </script>
 
 <template>
@@ -105,7 +65,7 @@ const login = async () => {
               <div class="w-full col-span-3 space-y-3">
                 <div v-if="authStore.isCashierLoginInput" class="cashier-login flex gap-x-1 my-1">
                   <div class="card flex justify-center border-2 rounded-2xl w-full px-3">
-                    <Select v-model="selectedUser" :options="usersList" optionLabel="username" placeholder="Cashier Login" checkmark :highlightOnSelect="false" class="w-full py-3" />
+                    <Select v-model="selectedUser" :options="authStore.usersList" optionLabel="username" placeholder="Cashier Login" checkmark :highlightOnSelect="false" class="w-full py-3" />
                   </div>
                   <img
                     title="Switch to barcode login"
@@ -165,6 +125,7 @@ const login = async () => {
     </Transition>
   </Teleport>
 </template>
+
 
 <style scoped>
   .modal-outer-enter-active,
