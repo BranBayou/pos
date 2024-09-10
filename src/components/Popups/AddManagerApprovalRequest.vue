@@ -1,6 +1,6 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
-import ManagerLoginPopup from './ManagerLoginPopup.vue';
+import ManagerLoginPopup from './ManagerLogin.vue';
 const authStore = useAuthStore();
 
 // Function to handle click and toggle popups correctly
