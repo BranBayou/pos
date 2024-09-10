@@ -180,11 +180,11 @@ onUnmounted(() => {
     </div>
 
     <button
+      :disabled="!authStore.isUserLoggedIn" 
       @click="authStore.toggleAddBehaviourPopup"
-      class="border shadow-lg w-full text-center p-5 rounded-2xl flex gap-5 my-3">
+      class="border shadow-lg w-full text-center p-5 rounded-2xl flex gap-5 my-3 cursor-pointer">
       <span class="text-center mx-auto cursor-pointer">
         <i 
-          :disabled="!authStore.isUserLoggedIn" 
           class="pi pi-plus text-purple-500 bg-purple-100 p-4 rounded-full"
           :class="{ 'opacity-50 cursor-not-allowed': !authStore.isUserLoggedIn }"
           style="font-size: 1.875rem;"
