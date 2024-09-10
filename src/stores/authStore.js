@@ -10,14 +10,16 @@ export const useAuthStore = defineStore('auth', () => {
   const userRole = ref(localStorage.getItem('userRole') || ''); // Track the current user's role
   const token = ref(localStorage.getItem('token') || null); // Track the token
   const usersList = ref([]); // List of users (cashiers)
+  const managerUsersList = ref([]);
   
   const isLogoutConfirmationVisible = ref(false);
   const isAddManagerApprovalRequest = ref(false);
   const isCashierLoginInput = ref(true); // Login input type state
   const isAddBehaviourPopup = ref(false);
   const isAddItemPopup = ref(false);
+  const isManagerLoginPopupVisible = ref(false);
 
-  // Fetch Cashiers
+  // Fetch Cashiers Function
   async function fetchCashiers() {
     const toast = useToast();
     try {
@@ -31,7 +33,20 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Login Function
+  async function fetchManager() {
+    const toast = useToast();
+    try {
+      const response = await axios.get('http://localhost:3131/branchusers');
+      const cashiers = response.data.filter(user => user.role === 'Manager');
+      managerUsersList.value = cashiers;
+      console.log('Fetched Manager Users:', managerUsersList.value);
+    } catch (error) {
+      toast.error('Failed to load users', error.message);
+      console.error('Failed to load users:', error.message);
+    }
+  }
+
+  // Login Api Function
   async function login(username, password, storeId) {
     const toast = useToast();
     try {
@@ -94,7 +109,12 @@ export const useAuthStore = defineStore('auth', () => {
   // Toggle Manager approval request popup
   function toggleAddManagerApprovalRequest() {
     isAddManagerApprovalRequest.value = !isAddManagerApprovalRequest.value;
-    console.log('Show mng app popup:', isAddManagerApprovalRequest.value);
+    console.log('Show mng request popup:', isAddManagerApprovalRequest.value);
+  }
+
+  function toggleManagerLoginPopup() {
+    isManagerLoginPopupVisible.value = !isManagerLoginPopupVisible.value;
+    console.log('Show login popup:', isManagerLoginPopupVisible.value);
   }
 
   return {
@@ -103,7 +123,9 @@ export const useAuthStore = defineStore('auth', () => {
     userRole,
     token,
     usersList,
+    managerUsersList,
     fetchCashiers,
+    fetchManager,
     login,
     logout,
     isCashierLoginInput,
@@ -115,5 +137,7 @@ export const useAuthStore = defineStore('auth', () => {
     toggleAddItemPopup,
     isAddManagerApprovalRequest,
     toggleAddManagerApprovalRequest,
+    isManagerLoginPopupVisible,
+    toggleManagerLoginPopup
   };
 });

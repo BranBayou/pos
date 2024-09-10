@@ -31,6 +31,7 @@ const handleAuthAction = () => {
     toggleisLogoutConfirmationVisible();
   } else {
     toggleModal();
+    authStore.fetchCashiers();
   }
 };
 

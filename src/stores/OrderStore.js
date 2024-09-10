@@ -16,7 +16,12 @@ export const useOrderStore = defineStore('orders', () => {
         if (existingItem) {
             existingItem.qty++;
         } else {
-            state.orderItems.push({ ...item, qty: 1 });
+            state.orderItems.push({ 
+                ...item, 
+                qty: 1,
+                discountPercentage: item.discountPercentage || 0, // Ensure discount is tracked
+                OriginalPrice: item.Price // Track original price for discount calculations
+            });
         }
     }
 
@@ -49,6 +54,25 @@ export const useOrderStore = defineStore('orders', () => {
         }
     }
 
+    function updateDiscountPercentage(item, discountPercentage) {
+        const existingItem = state.orderItems.find(orderItem => 
+            orderItem.id === item.id && orderItem.Sku === item.Sku
+        );
+        if (existingItem) {
+            existingItem.discountPercentage = discountPercentage;
+            existingItem.Price = (existingItem.OriginalPrice * (1 - discountPercentage / 100)).toFixed(2);
+        }
+    }
+
+    const getTotalDiscountPercentage = computed(() => {
+        if (state.orderItems.length === 0) return 0;
+        
+        return state.orderItems.reduce((totalDiscount, item) => {
+            return totalDiscount + parseFloat(item.discountPercentage || 0);
+        }, 0) / state.orderItems.length;
+    });
+
+
     const getOrderItems = computed(() => state.orderItems);
 
     const getOrderTotal = computed(() => {
@@ -71,6 +95,8 @@ export const useOrderStore = defineStore('orders', () => {
         incrementOrderItem,
         decrementOrderItem,
         deleteOrderItem,
+        updateDiscountPercentage, 
+        getTotalDiscountPercentage,
         getOrderItems,
         getOrderTotal,
         getGstAmount,

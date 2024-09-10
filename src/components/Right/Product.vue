@@ -34,26 +34,17 @@ onMounted(() => {
 // Backup the original values
 const originalValues = ref({});
 
+// Handle Price Input and update in the store
 const handlePriceInput = (item) => {
-  // Ensure price does not drop below 0
   if (item.Price <= 0) {
     item.Price = item.OriginalPrice;  // Reset to OriginalPrice if it drops below or equals 0
   }
-  
-  // Otherwise, calculate the discount percentage based on the new price
-  item.Price = parseFloat(item.Price).toFixed(2);
-  item.discountPercentage = ((item.OriginalPrice - item.Price) / item.OriginalPrice * 100).toFixed(2);
-  
-  // Ensure that the discountPercentage doesn't go below 0 or exceed 100
-  if (item.discountPercentage < 0) {
-    item.discountPercentage = 0;
-  }
-  if (item.discountPercentage > 100) {
-    item.discountPercentage = 100;
-  }
+
+  // Update the discount percentage and price in the store
+  orderStore.updateDiscountPercentage(item, ((item.OriginalPrice - item.Price) / item.OriginalPrice * 100).toFixed(2));
 };
 
-
+// Handle Discount Input and update in the store
 const handleDiscountInput = (item) => {
   if (item.discountPercentage < 0) {
     item.discountPercentage = 0;
@@ -61,7 +52,9 @@ const handleDiscountInput = (item) => {
   if (item.discountPercentage > 100) {
     item.discountPercentage = 100;
   }
-  item.Price = (item.OriginalPrice * (1 - item.discountPercentage / 100)).toFixed(2);
+
+  // Update price and discount percentage in the store
+  orderStore.updateDiscountPercentage(item, item.discountPercentage);
 };
 
 // Store original values when input is focused
@@ -89,31 +82,21 @@ const checkManagerPermission = function(item) {
   }
 };
 
+// Reset discount percentage when manager approval is not granted
 watch(() => authStore.isAddManagerApprovalRequest, (newVal) => {
   if (!newVal) {
-    // If the popup is closed, reset the discountPercentage to 0
     props.items.forEach(item => {
-      // Reset discount percentage to 0
       item.discountPercentage = 0;
-
-      // Ensure OriginalPrice is set and valid
-      if (!item.OriginalPrice) {
-        item.OriginalPrice = item.Price;
-      }
-
-      // Reset Price to OriginalPrice since discountPercentage is reset to 0
       item.Price = item.OriginalPrice.toFixed(2);
     });
   }
 });
-
 
 nextTick(() => {
   tippy('#storeQuantity', {
     content: 'In Store Quantity',
   });
 });
-
 </script>
 
 <template>
@@ -210,7 +193,6 @@ nextTick(() => {
     </div>
   </div>
 </template>
-
 
 <style scoped>
 input[type="number"]::-webkit-outer-spin-button,
