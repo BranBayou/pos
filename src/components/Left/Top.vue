@@ -174,7 +174,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Manager Section -->
-    <div v-show="authStore.isManagerLoggedIn" class="relative flex items-center border shadow-lg w-full p-5 rounded-2xl gap-5 my-3">  
+    <div v-show="authStore.isManagerLoggedIn" class="relative flex items-center border shadow-lg w-full p-2 rounded-2xl gap-5 my-3">  
       <div>
         <button class="flex flex-col items-center">
           <img style="width: 30px;" src="/manager.svg" alt="Manager Image">
@@ -184,11 +184,13 @@ onUnmounted(() => {
       <i @click="handleAuthAction('Manager')" ref="myButton" class="pi pi-user text-purple-500 bg-purple-100 p-4 rounded-full cursor-pointer" style="font-size: 1.875rem;"></i>
       <span class="font-medium">{{ authStore.isManagerLoggedIn ? authStore.managerUser : 'Logged out' }}</span>
 
-      <!-- Countdown Timer -->
+      <!-- Countdown Timer 
       <span v-if="authStore.isManagerLoggedIn" class="absolute bottom-2 right-2 flex items-center gap-2">
         <p>{{ countdown }}</p>
         <i class="pi pi-clock" style="font-size: 20px;"></i>
       </span>
+      -->
+      <i class="pi pi-envelope bg-green-500 cursor-pointer" style="font-size: 42px;"></i>
     </div>
 
     <ItemsSearch v-if="authStore.isUserLoggedIn" />
