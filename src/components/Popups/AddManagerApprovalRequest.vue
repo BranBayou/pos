@@ -5,12 +5,9 @@ const authStore = useAuthStore();
 
 // Function to handle click and toggle popups correctly
 const handleClick = () => {
-  // First, close the Manager Approval Request popup, then open Manager Login Popup
   if (authStore.isAddManagerApprovalRequest) {
-    authStore.toggleAddManagerApprovalRequest(); // Close this popup
+    authStore.toggleAddManagerApprovalRequest();
   }
-
-  // Now, toggle the Manager Login Popup
   authStore.toggleManagerLoginPopup();
 };
 </script>

@@ -8,7 +8,7 @@ const orderStore = useOrderStore();
 </script>
 
 <template>
-  <div v-if="authStore.isUserLoggedIn">
+  <div v-if="(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)">
     <div v-if="orderStore.getOrderItems.length > 0" class="flex justify-center items-center gap-2 py-5">
       <Product :items="orderStore.getOrderItems" />
     </div>

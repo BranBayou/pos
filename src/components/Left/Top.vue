@@ -36,7 +36,7 @@ const handleAuthAction = (role) => {
     toggleisLogoutConfirmationVisible('Manager');
   } else {
     toggleModal();
-    authStore.fetchCashiers();
+    // authStore.fetchCashiers();
   }
 };
 
@@ -99,6 +99,19 @@ const startCountdown = () => {
 // Reset countdown on user interaction
 const resetCountdown = () => {
   startCountdown(); // Restart countdown when there's user activity
+};
+
+const handleManagerApproval = () => {
+  console.log('Manager approval triggerd successfully!');
+  // Add your logic here
+};
+const handleWalkInCustomer = () => {
+  console.log('Walk-in customer triggerd successfully!');
+  // Add your logic here
+};
+const handleCommentAdded = () => {
+  console.log('Comment added triggerd successfully!');
+  // Add your logic here
 };
 
 // Watch for login status and manage countdown accordingly
@@ -183,7 +196,12 @@ onUnmounted(() => {
 
     <!-- Render moved buttons -->
     <div v-for="button in movedButtons" :key="button.name">
-      <component :is="button.component" />
+      <component
+        :is="button.component"
+        @commentAdded="handleCommentAdded"
+        @managerApproval="handleManagerApproval"
+        @walkInCustomer="handleWalkInCustomer"
+      />
     </div>
 
     <!-- Add Behavior Popup Button -->

@@ -13,7 +13,7 @@ const discountPercentage = computed(() => orderStore.getTotalDiscountPercentage)
 </script>
 
 <template>
-    <div v-if="authStore.isUserLoggedIn" class="flex flex-col justify-end" style="min-height: 50%;">
+    <div v-if="(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" class="flex flex-col justify-end" style="min-height: 50%;">
         <div class="flex items-center justify-between rounded-2xl shadow-lg mx-3 my-2 py-4 px-3">
             <p class="font-semibold">Overall Discount</p>
             <p class="font-semibold">{{ discountPercentage }}%</p>

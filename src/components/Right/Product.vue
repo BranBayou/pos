@@ -75,7 +75,7 @@ const checkValueChanged = (key, item) => {
 const backupDiscountPercentage = ref(null);
 
 const checkManagerPermission = function(item) {
-  if (authStore.userRole !== 'Manager') {
+  if (authStore.managerRole !== 'Manager') {
     // Backup the discount value before showing the popup
     backupDiscountPercentage.value = item.discountPercentage;
     authStore.toggleAddManagerApprovalRequest();

@@ -12,9 +12,9 @@ const authStore = useAuthStore();
             <p class="font-semibold">Skus: 0</p>
         </div>
         <button
-         :disabled="!authStore.isUserLoggedIn"
+         :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)"
          class="font-semibold border border-purple-500 hover:bg-purple-700 bg-purple-500 w-72 text-center p-5 rounded-xl flex justify-center gap-5 my-5 ml-auto text-white"
-         :class="{ 'opacity-50 cursor-not-allowed': !authStore.isUserLoggedIn }"
+         :class="{ 'opacity-50 cursor-not-allowed': !(authStore.isUserLoggedIn || authStore.isManagerLoggedIn) }"
         >
             Checkout
         </button>

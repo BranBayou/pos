@@ -23,6 +23,13 @@ onMounted(async () => {
 // Function to handle manager login
 const loginManager = async () => {
   try {
+    // Check if the manager is already logged in
+    if (authStore.isManagerLoggedIn) {
+      toast.error('Manager is already logged in');
+      authStore.isManagerLoginPopupVisible = false;
+      return;
+    }
+
     const usernameValue = selectedUser.value?.username;
     const passwordValue = password.value;
 
