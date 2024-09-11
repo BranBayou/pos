@@ -156,7 +156,6 @@ nextTick(() => {
               @focus="storeOriginalValue('Price', item)"  
               @input="handlePriceInput(item)" 
               @blur="checkValueChanged('Price', item)"   
-              @keydown.enter="checkValueChanged('Price', item)"  
             />
           </span>
           
@@ -171,7 +170,6 @@ nextTick(() => {
               @focus="storeOriginalValue('discountPercentage', item)"  
               @input="handleDiscountInput(item)"
               @blur="checkValueChanged('discountPercentage', item)"  
-              @keydown.enter="checkValueChanged('discountPercentage', item)"  
             />
           </span>
 

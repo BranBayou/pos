@@ -15,20 +15,25 @@ import { useAuthStore } from '@/stores/authStore';
 
 const authStore = useAuthStore();
 
+const logoutRole = ref(null); // Track which role is triggering logout confirmation
+
 // Modal control for Login
 const modalActive = ref(null);
 const toggleModal = () => {
   modalActive.value = !modalActive.value;
 };
 
-const toggleisLogoutConfirmationVisible = () => {
+const toggleisLogoutConfirmationVisible = (role) => {
+  logoutRole.value = role; // Set the role for logout confirmation
   authStore.isLogoutConfirmationVisible = !authStore.isLogoutConfirmationVisible;
 };
 
 // Handle login/logout logic
-const handleAuthAction = () => {
-  if (authStore.isUserLoggedIn) {
-    toggleisLogoutConfirmationVisible();
+const handleAuthAction = (role) => {
+  if (role === 'Cashier' && authStore.isUserLoggedIn) {
+    toggleisLogoutConfirmationVisible('Cashier');
+  } else if (role === 'Manager' && authStore.isManagerLoggedIn) {
+    toggleisLogoutConfirmationVisible('Manager');
   } else {
     toggleModal();
     authStore.fetchCashiers();
@@ -128,11 +133,13 @@ onUnmounted(() => {
 
 <template>
   <div class="my-7 grid grid-cols-2 gap-4 overflow-y-auto" style="max-height: 450px;">
-    <LogoutConfirmation />
-    <Login 
-      @close-modal="toggleModal"
-      :modalActive="modalActive"
-    />
+    <!-- Pass the logoutRole to the LogoutConfirmation modal -->
+    <LogoutConfirmation v-if="authStore.isLogoutConfirmationVisible" :role="logoutRole" />
+
+    <!-- Login Modal -->
+    <Login @close-modal="toggleModal" :modalActive="modalActive" />
+
+    <!-- Cashier Section -->
     <div class="relative flex items-center border shadow-lg w-full p-5 rounded-2xl gap-5 my-3">  
       <div>
         <button class="flex flex-col items-center">
@@ -140,7 +147,7 @@ onUnmounted(() => {
           <span class="font-semibold">{{ authStore.isUserLoggedIn ? authStore.userRole : 'Cashier' }}</span>
         </button>
       </div>
-      <i @click="handleAuthAction" ref="myButton" class="pi pi-user text-purple-500 bg-purple-100 p-4 rounded-full cursor-pointer" style="font-size: 1.875rem;"></i>
+      <i @click="handleAuthAction('Cashier')" ref="myButton" class="pi pi-user text-purple-500 bg-purple-100 p-4 rounded-full cursor-pointer" style="font-size: 1.875rem;"></i>
       <span class="font-medium">{{ authStore.isUserLoggedIn ? authStore.currentUser : 'Logged out' }}</span>
 
       <!-- Countdown Timer -->
@@ -150,7 +157,7 @@ onUnmounted(() => {
       </span>
     </div>
 
-    <!-- When Manager Logs In Show -->
+    <!-- Manager Section -->
     <div v-show="authStore.isManagerLoggedIn" class="relative flex items-center border shadow-lg w-full p-5 rounded-2xl gap-5 my-3">  
       <div>
         <button class="flex flex-col items-center">
@@ -158,9 +165,9 @@ onUnmounted(() => {
           <span class="font-semibold">{{ authStore.isManagerLoggedIn ? authStore.managerRole : 'Manager' }}</span>
         </button>
       </div>
-      <i @click="handleAuthAction" ref="myButton" class="pi pi-user text-purple-500 bg-purple-100 p-4 rounded-full cursor-pointer" style="font-size: 1.875rem;"></i>
+      <i @click="handleAuthAction('Manager')" ref="myButton" class="pi pi-user text-purple-500 bg-purple-100 p-4 rounded-full cursor-pointer" style="font-size: 1.875rem;"></i>
       <span class="font-medium">{{ authStore.isManagerLoggedIn ? authStore.managerUser : 'Logged out' }}</span>
-    
+
       <!-- Countdown Timer -->
       <span v-if="authStore.isManagerLoggedIn" class="absolute bottom-2 right-2 flex items-center gap-2">
         <p>{{ countdown }}</p>
@@ -168,31 +175,29 @@ onUnmounted(() => {
       </span>
     </div>
 
-    
     <ItemsSearch v-if="authStore.isUserLoggedIn" />
     <OpenDrawer v-if="authStore.isUserLoggedIn" />
-    
-    <AddBehavior @moveButtonToParent="moveButtonToParent"/>
+
+    <!-- Add Behavior -->
+    <AddBehavior @moveButtonToParent="moveButtonToParent" />
 
     <!-- Render moved buttons -->
     <div v-for="button in movedButtons" :key="button.name">
-      <component :is="button.component" class="" />
+      <component :is="button.component" />
     </div>
 
+    <!-- Add Behavior Popup Button -->
     <button
       :disabled="!authStore.isUserLoggedIn" 
       @click="authStore.toggleAddBehaviourPopup"
       class="border shadow-lg w-full text-center p-5 rounded-2xl flex gap-5 my-3 cursor-pointer">
       <span class="text-center mx-auto cursor-pointer">
-        <i 
-          class="pi pi-plus text-purple-500 bg-purple-100 p-4 rounded-full"
-          :class="{ 'opacity-50 cursor-not-allowed': !authStore.isUserLoggedIn }"
-          style="font-size: 1.875rem;"
-        ></i>
+        <i class="pi pi-plus text-purple-500 bg-purple-100 p-4 rounded-full" :class="{ 'opacity-50 cursor-not-allowed': !authStore.isUserLoggedIn }" style="font-size: 1.875rem;"></i>
       </span>
     </button>
   </div>
 </template>
+
 
 <style scoped>
 

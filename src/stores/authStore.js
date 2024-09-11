@@ -101,25 +101,28 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // Logout Function
-  function logout() {
-    isUserLoggedIn.value = false;
-    currentUser.value = ''; 
-    userRole.value = ''; 
-    token.value = null;
-    localStorage.removeItem('token');
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('userRole');
-
-    // Optionally log out the manager as well
-    isManagerLoggedIn.value = false;
-    managerUser.value = '';
-    managerRole.value = '';
-    managerToken.value = null;
-    localStorage.removeItem('managerToken');
-    localStorage.removeItem('managerUser');
-    localStorage.removeItem('managerRole');
+  function logout(role) {
+    if (role === 'Cashier') {
+      // Only log out the cashier
+      isUserLoggedIn.value = false;
+      currentUser.value = '';
+      userRole.value = '';
+      token.value = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('userRole');
+    } else if (role === 'Manager') {
+      // Only log out the manager
+      isManagerLoggedIn.value = false;
+      managerUser.value = '';
+      managerRole.value = '';
+      managerToken.value = null;
+      localStorage.removeItem('managerToken');
+      localStorage.removeItem('managerUser');
+      localStorage.removeItem('managerRole');
+    }
   }
-
+  
   // Toggle Login input type
   function toggleLoginInput() {
     isCashierLoginInput.value = !isCashierLoginInput.value;
