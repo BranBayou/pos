@@ -8,6 +8,7 @@ import AddBehavior from '../Popups/AddBehavior.vue';
 import AddComment from './AddCommentButton.vue';
 import AddManagerApproval from './AddManagerApprovalButton.vue';
 import WalkInCustomer from './WalkInCustomerButton.vue';
+import ManagerLogin from '../Popups/ManagerLogin.vue';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
@@ -103,7 +104,7 @@ const resetCountdown = () => {
 
 const handleManagerApproval = () => {
   console.log('Manager approval triggerd successfully!');
-  // Add your logic here
+  authStore.toggleManagerLoginPopup();
 };
 const handleWalkInCustomer = () => {
   console.log('Walk-in customer triggerd successfully!');
@@ -151,6 +152,8 @@ onUnmounted(() => {
 
     <!-- Login Modal -->
     <Login @close-modal="toggleModal" :modalActive="modalActive" />
+
+    <ManagerLogin />
 
     <!-- Cashier Section -->
     <div class="relative flex items-center border shadow-lg w-full p-5 rounded-2xl gap-5 my-3">  
