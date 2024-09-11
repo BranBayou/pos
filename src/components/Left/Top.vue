@@ -108,11 +108,11 @@ const handleManagerApproval = () => {
 };
 const handleWalkInCustomer = () => {
   console.log('Walk-in customer triggerd successfully!');
-  // Add your logic here
+
 };
 const handleCommentAdded = () => {
   console.log('Comment added triggerd successfully!');
-  // Add your logic here
+
 };
 
 // Watch for login status and manage countdown accordingly

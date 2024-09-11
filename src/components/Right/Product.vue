@@ -6,6 +6,7 @@ import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
 import AddManagerApprovalRequest from '../Popups/AddManagerApprovalRequest.vue';
+import CommentPopup from '../Popups/CommentPopup.vue';
 
 const authStore = useAuthStore();
 const orderStore = useOrderStore();
@@ -18,6 +19,8 @@ const props = defineProps({
 });
 
 const isOpen = ref(Array(props.items.length).fill(false));
+const showCommentPopup = ref(false);  // Control to show AddComment popup
+const selectedItemForComment = ref(null);  // Track the selected item for which the comment is being added
 
 function toggleAccordion(index) {
   isOpen.value[index] = !isOpen.value[index];
@@ -31,20 +34,17 @@ onMounted(() => {
   });
 });
 
-// Backup the original values
 const originalValues = ref({});
 
 // Handle Price Input and update in the store
 const handlePriceInput = (item) => {
   if (item.Price <= 0) {
-    item.Price = item.OriginalPrice;  // Reset to OriginalPrice if it drops below or equals 0
+    item.Price = item.OriginalPrice;
   }
 
-  // Update the discount percentage and price in the store
   orderStore.updateDiscountPercentage(item, ((item.OriginalPrice - item.Price) / item.OriginalPrice * 100).toFixed(2));
 };
 
-// Handle Discount Input and update in the store
 const handleDiscountInput = (item) => {
   if (item.discountPercentage < 0) {
     item.discountPercentage = 0;
@@ -53,11 +53,9 @@ const handleDiscountInput = (item) => {
     item.discountPercentage = 100;
   }
 
-  // Update price and discount percentage in the store
   orderStore.updateDiscountPercentage(item, item.discountPercentage);
 };
 
-// Store original values when input is focused
 const storeOriginalValue = (key, item) => {
   if (!originalValues.value[item.Name]) {
     originalValues.value[item.Name] = {};
@@ -65,24 +63,38 @@ const storeOriginalValue = (key, item) => {
   originalValues.value[item.Name][key] = item[key];
 };
 
-// Function to check if the value has changed on blur or enter
 const checkValueChanged = (key, item) => {
   if (item[key] !== originalValues.value[item.Name]?.[key]) {
-    checkManagerPermission(item);  // Only trigger if value has changed
+    checkManagerPermission(item);  // Trigger if value has changed
   }
 };
 
-const backupDiscountPercentage = ref(null);
-
+// Trigger comment popup when manager approval is needed
 const checkManagerPermission = function(item) {
-  if (authStore.managerRole !== 'Manager') {
-    // Backup the discount value before showing the popup
-    backupDiscountPercentage.value = item.discountPercentage;
+  if (authStore.managerRole !== 'Manager'){
     authStore.toggleAddManagerApprovalRequest();
+    selectedItemForComment.value = item;  // Store the item for later comment
+  } else {
+    showCommentPopup.value = true;  // Show the AddComment popup
+    selectedItemForComment.value = item;  // Set the selected item for the comment
   }
 };
 
-// Reset discount percentage when manager approval is not granted
+// Watch for manager login status and show comment popup
+watch(() => authStore.isManagerLoggedIn, (newVal) => {
+  if (newVal && selectedItemForComment.value) {
+    showCommentPopup.value = true;  // Automatically show the comment popup after login
+  }
+});
+
+// Handle the comment submission and approval
+const handleCommentSubmitted = (data) => {
+  console.log('Comment Submitted:', data);
+  // Add logic here to handle discount approval after the comment is submitted
+  showCommentPopup.value = false;
+};
+
+// Reset discount percentage if approval is not granted
 watch(() => authStore.isAddManagerApprovalRequest, (newVal) => {
   if (!newVal) {
     props.items.forEach(item => {
@@ -99,8 +111,10 @@ nextTick(() => {
 });
 </script>
 
+
 <template>
   <AddManagerApprovalRequest />
+  <CommentPopup v-if="showCommentPopup" :item="selectedItemForComment" @commentSubmitted="handleCommentSubmitted" @close="showCommentPopup = false" />
   <div class="w-[95%] relative mx-auto flex flex-col gap-2">
     <div v-for="(item, index) in items" :key="index" class="collapse bg-base-200 rounded-2xl shadow-xl">
       <input type="checkbox" :checked="isOpen[index]" @change="toggleAccordion(index)" />

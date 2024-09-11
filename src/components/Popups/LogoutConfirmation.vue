@@ -56,14 +56,14 @@ const confirmLogout = () => {
                   class="bg-purple-500 text-white px-4 py-2 hover:bg-purple-700 rounded-xl"
                   @click="confirmLogout"
                 >
-                  Logout Cashier
+                  Logout
                 </button>
                 <button
                   v-if="props.role === 'Manager'"
                   class="bg-purple-500 text-white px-4 py-2 hover:bg-purple-700 rounded-xl"
                   @click="confirmLogout"
                 >
-                  Logout Manager
+                  Logout
                 </button>
               </div>
             </div>
