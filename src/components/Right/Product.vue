@@ -11,6 +11,7 @@ import CommentPopup from '../Popups/CommentPopup.vue';
 const authStore = useAuthStore();
 const orderStore = useOrderStore();
 
+// Props
 const props = defineProps({
   items: {
     type: Array,
@@ -21,6 +22,7 @@ const props = defineProps({
 const isOpen = ref(Array(props.items.length).fill(false));
 const showCommentPopup = ref(false);  // Control to show AddComment popup
 const selectedItemForComment = ref(null);  // Track the selected item for which the comment is being added
+const backupDiscountPercentage = ref(null);  // Backup discount percentage
 
 function toggleAccordion(index) {
   isOpen.value[index] = !isOpen.value[index];
@@ -71,7 +73,8 @@ const checkValueChanged = (key, item) => {
 
 // Trigger comment popup when manager approval is needed
 const checkManagerPermission = function(item) {
-  if (authStore.managerRole !== 'Manager'){
+  if (authStore.managerRole !== 'Manager') {
+    backupDiscountPercentage.value = item.discountPercentage;  // Backup the current discount
     authStore.toggleAddManagerApprovalRequest();
     selectedItemForComment.value = item;  // Store the item for later comment
   } else {
@@ -83,6 +86,7 @@ const checkManagerPermission = function(item) {
 // Watch for manager login status and show comment popup
 watch(() => authStore.isManagerLoggedIn, (newVal) => {
   if (newVal && selectedItemForComment.value) {
+    selectedItemForComment.value.discountPercentage = backupDiscountPercentage.value;  // Restore the discount percentage
     showCommentPopup.value = true;  // Automatically show the comment popup after login
   }
 });
@@ -110,7 +114,6 @@ nextTick(() => {
   });
 });
 </script>
-
 
 <template>
   <AddManagerApprovalRequest />
@@ -205,6 +208,7 @@ nextTick(() => {
     </div>
   </div>
 </template>
+
 
 <style scoped>
 input[type="number"]::-webkit-outer-spin-button,

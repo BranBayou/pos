@@ -1,5 +1,5 @@
-<!-- AddComment.vue -->
 <script setup>
+import msgIcon from '/message.svg'
 import { ref } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from 'vue-toastification';
@@ -21,27 +21,42 @@ const props = defineProps({
 // Emit event when the comment is submitted
 const emit = defineEmits(['close', 'commentSubmitted']);
 
+// Function to save comment to local storage
+const saveCommentToLocalStorage = (commentData) => {
+  const existingComments = JSON.parse(localStorage.getItem('comments')) || [];
+  existingComments.push(commentData);
+  localStorage.setItem('comments', JSON.stringify(existingComments));
+  console.log('Comment saved to Local Storage:', commentData);
+};
+
 const submitComment = async () => {
-  if (!comment.value) {
-    toast.error('Comment is required');
-    return;
-  }
-
   isSubmitting.value = true;
-  
-  // Simulate saving the comment (can be replaced with actual API call)
-  await new Promise(resolve => setTimeout(resolve, 1000));
 
-  // Emit the comment data and close the modal
-  emit('commentSubmitted', {
-    item: props.item,
-    comment: comment.value,
+  // Prepare the comment data
+  const commentData = {
+    item: {
+      name: props.item.Name,
+      price: props.item.Price,
+      imageUrl: props.item.ImageUrl,
+      sku: props.item.Sku,
+    },
+    comment: comment.value, // This can be empty now
     timestamp: new Date().toISOString(),
     manager: authStore.managerUser,
-  });
+  };
+
+  // Simulate saving (can be replaced with actual API call)
+  await new Promise(resolve => setTimeout(resolve, 1000));
+
+  // Save the comment data to local storage
+  saveCommentToLocalStorage(commentData);
+
+  // Emit the comment data and close the modal
+  emit('commentSubmitted', commentData);
+  emit('close');
 
   isSubmitting.value = false;
-  emit('close');
+  toast.success('Comment submitted successfully!');
 };
 </script>
 
@@ -52,7 +67,7 @@ const submitComment = async () => {
                 <Transition name="modal-inner" class="rounded-2xl">
                     <div class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-50 w-10/12">
                         <div class="collapse bg-white rounded-lg p-6 w-full shadow-lg">
-                            <input type="checkbox" />
+                            <input type="checkbox" checked="checked" />
                             <!-- Item Info -->
                             <div class="collapse-title gap-4 mb-4">
                                 <h3 class="text-lg font-semibold mb-4">Manager Approval Comment</h3>
@@ -65,8 +80,10 @@ const submitComment = async () => {
                                             <p class="text-sm text-gray-500">Price: ${{ props.item.Price }}</p>
                                         </div>
                                     </div>
-                                    <p class="text-sm text-gray-500 mt-2">Comment by: <span class="font-semibold">{{
-                                            authStore.managerUser }}</span></p>
+                                    <div class="flex">
+                                        <p class="text-sm text-gray-500 mt-2">Comment by: <span class="font-semibold">{{ authStore.managerUser }}</span></p>
+                                        <img class="bg-green-500 rounded-md" :src="msgIcon" alt="">
+                                    </div>
                                 </div>
                             </div>
 
@@ -92,6 +109,7 @@ const submitComment = async () => {
         </Transition>
     </Teleport>
 </template>
+
   
 
 <style scoped>
