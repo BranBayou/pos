@@ -2,9 +2,11 @@
 import msgIcon from '/message.svg'
 import { ref } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
+import { useOrderStore } from '@/stores/orderStore';
 import { useToast } from 'vue-toastification';
 
 const authStore = useAuthStore();
+const orderStore = useOrderStore(); // Import the order store
 const toast = useToast();
 
 const comment = ref('');
@@ -58,6 +60,15 @@ const submitComment = async () => {
   isSubmitting.value = false;
   toast.success('Comment submitted successfully!');
 };
+
+// Function to handle cancel and reset the discount
+const cancelComment = () => {
+  // Call resetDiscount to reset the item's discount percentage
+  orderStore.resetDiscount(props.item);
+
+  // Emit close event to close the popup
+  emit('close');
+};
 </script>
 
 <template>
@@ -92,9 +103,9 @@ const submitComment = async () => {
                                 <textarea v-model="comment" rows="4" class="w-full border rounded-lg p-2"
                                     placeholder="Enter your comment"></textarea>
 
-                                <!-- Submit Button -->
+                                <!-- Submit and Cancel Buttons -->
                                 <div class="mt-4 flex justify-end gap-4">
-                                    <button @click="emit('close')"
+                                    <button @click="cancelComment"
                                         class="px-4 py-2 bg-gray-300 rounded-lg">Cancel</button>
                                     <button @click="submitComment" :disabled="isSubmitting"
                                         class="px-4 py-2 bg-purple-600 text-white rounded-lg">
@@ -109,6 +120,7 @@ const submitComment = async () => {
         </Transition>
     </Teleport>
 </template>
+
 
   
 

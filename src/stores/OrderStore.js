@@ -64,6 +64,17 @@ export const useOrderStore = defineStore('orders', () => {
         }
     }
 
+    // New function to reset discount percentage
+    function resetDiscount(item) {
+        const existingItem = state.orderItems.find(orderItem => 
+            orderItem.id === item.id && orderItem.Sku === item.Sku
+        );
+        if (existingItem) {
+            existingItem.discountPercentage = 0; // Reset discount to 0
+            existingItem.Price = existingItem.OriginalPrice; // Restore original price
+        }
+    }
+
     const getTotalDiscountPercentage = computed(() => {
         if (state.orderItems.length === 0) return 0;
         
@@ -71,7 +82,6 @@ export const useOrderStore = defineStore('orders', () => {
             return totalDiscount + parseFloat(item.discountPercentage || 0);
         }, 0) / state.orderItems.length;
     });
-
 
     const getOrderItems = computed(() => state.orderItems);
 
@@ -95,7 +105,8 @@ export const useOrderStore = defineStore('orders', () => {
         incrementOrderItem,
         decrementOrderItem,
         deleteOrderItem,
-        updateDiscountPercentage, 
+        updateDiscountPercentage,
+        resetDiscount,  // Expose this method for resetting discount
         getTotalDiscountPercentage,
         getOrderItems,
         getOrderTotal,
