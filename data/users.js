@@ -19,7 +19,7 @@ module.exports = [
     id: '3',
     username: 'Bart-Simpson',
     role: 'Manager',
-    password: 'bart123',
+    password: '123456',
     storeId: 'store2', 
   },
   {

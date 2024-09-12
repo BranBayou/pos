@@ -1,67 +1,182 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
 import { ref } from 'vue';
+import { useToast } from 'vue-toastification';
 
 export const useAuthStore = defineStore('auth', () => {
-    // State
-    const isUserLoggedIn = ref(false);
-    const currentUser = ref(''); // Track the current user's name
-    const userRole = ref(''); // Track the current user's role
-    const isLogoutConfirmationVisible = ref(false);
+  // Cashier State
+  const isUserLoggedIn = ref(localStorage.getItem('token') ? true : false);
+  const currentUser = ref(localStorage.getItem('currentUser') || ''); // Track the cashier's name
+  const userRole = ref(localStorage.getItem('userRole') || ''); // Track the cashier's role
+  const token = ref(localStorage.getItem('token') || null); // Track the cashier's token
+  
+  // Manager State
+  const isManagerLoggedIn = ref(localStorage.getItem('managerToken') ? true : false);
+  const managerUser = ref(localStorage.getItem('managerUser') || ''); // Track the manager's name
+  const managerRole = ref(localStorage.getItem('managerRole') || ''); // Track the manager's role
+  const managerToken = ref(localStorage.getItem('managerToken') || null); // Track the manager's token
 
-    // Login Function
-    function login(username, role) {
+  const usersList = ref([]); // List of users (cashiers)
+  const managerUsersList = ref([]);
+
+  const isLogoutConfirmationVisible = ref(false);
+  const isAddManagerApprovalRequest = ref(false);
+  const isCashierLoginInput = ref(true); // Login input type state
+  const isAddBehaviourPopup = ref(false);
+  const isAddItemPopup = ref(false);
+  const isManagerLoginPopupVisible = ref(false);
+
+  // Fetch Cashiers Function
+  async function fetchCashiers() {
+    const toast = useToast();
+    try {
+      const response = await axios.get('http://localhost:3131/branchusers');
+      const cashiers = response.data.filter(user => user.role === 'Cashier');
+      usersList.value = cashiers;
+      console.log('Fetched Cashier Users:', usersList.value);
+    } catch (error) {
+      toast.error('Failed to load users', error.message);
+      console.error('Failed to load users:', error.message);
+    }
+  }
+
+  // Fetch Managers Function
+  async function fetchManager() {
+    const toast = useToast();
+    try {
+      const response = await axios.get('http://localhost:3131/branchusers');
+      const managers = response.data.filter(user => user.role === 'Manager');
+      managerUsersList.value = managers;
+      console.log('Fetched Manager Users:', managerUsersList.value);
+    } catch (error) {
+      toast.error('Failed to load users', error.message);
+      console.error('Failed to load users:', error.message);
+    }
+  }
+
+  // Login API function for both cashier and manager
+  async function login(username, password, storeId) {
+    const toast = useToast();
+    try {
+      const response = await axios.post('http://localhost:3131/login', {
+        username,
+        password,
+      }, {
+        headers: {
+          'store-id': storeId,
+        }
+      });
+
+      const { token: authToken, role } = response.data;
+
+      // If cashier logs in
+      if (role === 'Cashier') {
+        localStorage.setItem('token', authToken);
+        localStorage.setItem('currentUser', username);
+        localStorage.setItem('userRole', role);
+        token.value = authToken;
+        currentUser.value = username;
+        userRole.value = role;
         isUserLoggedIn.value = true;
-        currentUser.value = username; // Set the current user's name
-        userRole.value = localStorage.getItem('userRole')
-        console.log('Current User:', currentUser.value, 'Role:', userRole.value); // Debugging log
+      }
+
+      // If manager logs in
+      if (role === 'Manager') {
+        localStorage.setItem('managerToken', authToken);
+        localStorage.setItem('managerUser', username);
+        localStorage.setItem('managerRole', role);
+        managerToken.value = authToken;
+        managerUser.value = username;
+        managerRole.value = role;
+        isManagerLoggedIn.value = true;
+      }
+
+      toast.success(`Welcome back ${username}`);
+      console.log('Current User:', currentUser.value, 'Role:', userRole);
+    } catch (error) {
+      toast.error('Login failed!');
+      console.error('Login failed:', error.response?.data?.error || error.message);
+      throw error;
     }
+  }
 
-    // Logout Function
-    function logout() {
-        isUserLoggedIn.value = false;
-        currentUser.value = ''; // Clear the current user's name
-        userRole.value = ''; // Clear the current user's role
-        localStorage.removeItem('token'); // Clear the token
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('userRole'); // Clear the role
+  // Logout Function
+  function logout(role) {
+    if (role === 'Cashier') {
+      // Only log out the cashier
+      isUserLoggedIn.value = false;
+      currentUser.value = '';
+      userRole.value = '';
+      token.value = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('userRole');
+    } else if (role === 'Manager') {
+      // Only log out the manager
+      isManagerLoggedIn.value = false;
+      managerUser.value = '';
+      managerRole.value = '';
+      managerToken.value = null;
+      localStorage.removeItem('managerToken');
+      localStorage.removeItem('managerUser');
+      localStorage.removeItem('managerRole');
     }
+  }
+  
+  // Toggle Login input type
+  function toggleLoginInput() {
+    isCashierLoginInput.value = !isCashierLoginInput.value;
+  }
 
-    // Login input type state
-    const isCashierLoginInput = ref(true);
+  // Toggle Manager login popup
+  function toggleManagerLoginPopup() {
+    isManagerLoginPopupVisible.value = !isManagerLoginPopupVisible.value;
+    console.log('Show login popup:', isManagerLoginPopupVisible.value);
+  }
 
-    const toggleLoginInput = () => {
-        isCashierLoginInput.value = !isCashierLoginInput.value;
-    };
+  // Toggle Add behaviour popup
+  function toggleAddBehaviourPopup() {
+    isAddBehaviourPopup.value = !isAddBehaviourPopup.value;
+    console.log('Show popup:', isAddBehaviourPopup.value);
+  }
 
-    // Add behaviour state
-    const isAddBehaviourPopup = ref(false);
+  // Toggle Add item popup
+  function toggleAddItemPopup() {
+    isAddItemPopup.value = !isAddItemPopup.value;
+    console.log('Show popup:', isAddItemPopup.value);
+  }
 
-    const toggleAddBehaviourPopup = () => {
-        isAddBehaviourPopup.value = !isAddBehaviourPopup.value;
-        console.log('Show popup:', isAddBehaviourPopup.value);
-    };
+  // Toggle Manager approval request popup
+  function toggleAddManagerApprovalRequest() {
+    isAddManagerApprovalRequest.value = !isAddManagerApprovalRequest.value;
+    console.log('Show mng request popup:', isAddManagerApprovalRequest.value);
+  }
 
-    // Add Item state
-    const isAddItemPopup = ref(false);
-    
-    const toggleAddItemPopup = () => {
-        isAddItemPopup.value = !isAddItemPopup.value;
-        console.log('Show popup:', isAddItemPopup.value);
-    };
-
-    return {
-        isUserLoggedIn,
-        currentUser,
-        userRole, // Export userRole
-        login,
-        logout,
-        isCashierLoginInput,
-        toggleLoginInput,
-        isLogoutConfirmationVisible,
-        isAddBehaviourPopup,
-        toggleAddBehaviourPopup,
-        isAddItemPopup,
-        toggleAddItemPopup
-    };
+  return {
+    isUserLoggedIn,
+    currentUser,
+    userRole,
+    token,
+    usersList,
+    isManagerLoggedIn,
+    managerUser,
+    managerRole,
+    managerToken,
+    managerUsersList,
+    fetchCashiers,
+    fetchManager,
+    login,
+    logout,
+    isCashierLoginInput,
+    toggleLoginInput,
+    isLogoutConfirmationVisible,
+    toggleAddBehaviourPopup,
+    isAddBehaviourPopup,
+    isAddItemPopup,
+    toggleAddItemPopup,
+    isAddManagerApprovalRequest,
+    toggleAddManagerApprovalRequest,
+    isManagerLoginPopupVisible,
+    toggleManagerLoginPopup,
+  };
 });

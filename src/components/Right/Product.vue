@@ -1,12 +1,17 @@
 <script setup>
-import { ref, nextTick, onMounted } from 'vue';
+import { ref, nextTick, onMounted, watch } from 'vue';
+import { useAuthStore } from '@/stores/authStore';
 import { useOrderStore } from '@/stores/OrderStore';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
+import AddManagerApprovalRequest from '../Popups/AddManagerApprovalRequest.vue';
+import CommentPopup from '../Popups/CommentPopup.vue';
 
+const authStore = useAuthStore();
 const orderStore = useOrderStore();
 
+// Props
 const props = defineProps({
   items: {
     type: Array,
@@ -15,6 +20,9 @@ const props = defineProps({
 });
 
 const isOpen = ref(Array(props.items.length).fill(false));
+const showCommentPopup = ref(false);  // Control to show AddComment popup
+const selectedItemForComment = ref(null);  // Track the selected item for which the comment is being added
+const backupDiscountPercentage = ref(null);  // Backup discount percentage
 
 function toggleAccordion(index) {
   isOpen.value[index] = !isOpen.value[index];
@@ -28,12 +36,15 @@ onMounted(() => {
   });
 });
 
+const originalValues = ref({});
+
+// Handle Price Input and update in the store
 const handlePriceInput = (item) => {
-  if (item.Price < 0) {
-    item.Price = 0;
+  if (item.Price <= 0) {
+    item.Price = item.OriginalPrice;
   }
-  item.Price = parseFloat(item.Price).toFixed(2);
-  item.discountPercentage = ((item.OriginalPrice - item.Price) / item.OriginalPrice * 100).toFixed(2);
+
+  orderStore.updateDiscountPercentage(item, ((item.OriginalPrice - item.Price) / item.OriginalPrice * 100).toFixed(2));
 };
 
 const handleDiscountInput = (item) => {
@@ -43,22 +54,70 @@ const handleDiscountInput = (item) => {
   if (item.discountPercentage > 100) {
     item.discountPercentage = 100;
   }
-  item.Price = (item.OriginalPrice * (1 - item.discountPercentage / 100)).toFixed(2);
+
+  orderStore.updateDiscountPercentage(item, item.discountPercentage);
 };
 
-const checkManagerPermission = function() {
-  console.log('Manager triggered');
-}
+const storeOriginalValue = (key, item) => {
+  if (!originalValues.value[item.Name]) {
+    originalValues.value[item.Name] = {};
+  }
+  originalValues.value[item.Name][key] = item[key];
+};
+
+const checkValueChanged = (key, item) => {
+  if (item[key] !== originalValues.value[item.Name]?.[key]) {
+    checkManagerPermission(item);  // Trigger if value has changed
+  }
+};
+
+// Trigger comment popup when manager approval is needed
+const checkManagerPermission = function(item) {
+  if (authStore.managerRole !== 'Manager') {
+    backupDiscountPercentage.value = item.discountPercentage;  // Backup the current discount
+    authStore.toggleAddManagerApprovalRequest();
+    selectedItemForComment.value = item;  // Store the item for later comment
+  } else {
+    showCommentPopup.value = true;  // Show the AddComment popup
+    selectedItemForComment.value = item;  // Set the selected item for the comment
+  }
+};
+
+// Watch for manager login status and show comment popup
+watch(() => authStore.isManagerLoggedIn, (newVal) => {
+  if (newVal && selectedItemForComment.value) {
+    selectedItemForComment.value.discountPercentage = backupDiscountPercentage.value;  // Restore the discount percentage
+    showCommentPopup.value = true;  // Automatically show the comment popup after login
+  }
+});
+
+// Handle the comment submission and approval
+const handleCommentSubmitted = (data) => {
+  console.log('Comment Submitted:', data);
+  // Add logic here to handle discount approval after the comment is submitted
+  showCommentPopup.value = false;
+};
+
+// Reset discount percentage if approval is not granted
+watch(() => authStore.isAddManagerApprovalRequest, (newVal) => {
+  if (!newVal) {
+    props.items.forEach(item => {
+      item.discountPercentage = 0;
+      item.Price = item.OriginalPrice.toFixed(2);
+    });
+  }
+});
 
 nextTick(() => {
   tippy('#storeQuantity', {
     content: 'In Store Quantity',
   });
 });
-
 </script>
 
 <template>
+  <AddManagerApprovalRequest />
+  <CommentPopup v-if="showCommentPopup" :item="selectedItemForComment" @commentSubmitted="handleCommentSubmitted" @close="showCommentPopup = false" />
   <div class="w-[95%] relative mx-auto flex flex-col gap-2">
     <div v-for="(item, index) in items" :key="index" class="collapse bg-base-200 rounded-2xl shadow-xl">
       <input type="checkbox" :checked="isOpen[index]" @change="toggleAccordion(index)" />
@@ -106,14 +165,29 @@ nextTick(() => {
           <!-- Price and Discount Input -->
           <span class="flex items-center justify-start gap-2">
             <i class="pi pi-dollar" style="font-size: 24px;"></i>
-            <input type="number" class="border-2 rounded-lg w-28 text-center py-1" v-model.number="item.Price" :min="0"
-              @input="handlePriceInput(item)" @blur="checkManagerPermission(item, 'price')" />
+            <input 
+              type="number" 
+              class="border-2 rounded-lg w-28 text-center py-1" 
+              v-model.number="item.Price" 
+              :min="0"
+              @focus="storeOriginalValue('Price', item)"  
+              @input="handlePriceInput(item)" 
+              @blur="checkValueChanged('Price', item)"   
+            />
           </span>
+          
           <span class="flex items-center justify-start py-5 gap-2">
             <i class="pi pi-percentage" style="font-size: 24px;"></i>
-            <input type="number" class="border-2 rounded-lg w-28 text-center py-1"
-              v-model.number="item.discountPercentage" :min="0" :max="100" @input="handleDiscountInput(item)"
-              @blur="checkManagerPermission(item, 'discount')" />
+            <input 
+              type="number" 
+              class="border-2 rounded-lg w-28 text-center py-1"
+              v-model.number="item.discountPercentage" 
+              :min="0" 
+              :max="100" 
+              @focus="storeOriginalValue('discountPercentage', item)"  
+              @input="handleDiscountInput(item)"
+              @blur="checkValueChanged('discountPercentage', item)"  
+            />
           </span>
 
           <!-- Editable GST input, default set to 0.5 -->
@@ -134,6 +208,7 @@ nextTick(() => {
     </div>
   </div>
 </template>
+
 
 <style scoped>
 input[type="number"]::-webkit-outer-spin-button,

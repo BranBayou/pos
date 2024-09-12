@@ -51,12 +51,12 @@ function handleClick(product) {
 <template>
     <input 
         v-model="searchQuery"
-        :disabled="!authStore.isUserLoggedIn"
+        :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" 
         type="text" 
         name="barcode-search" 
         id="barcode-search" 
         class="bg-gray-100 border-0 outline-none p-2 rounded-lg w-full"
-        :class="{ 'opacity-50 cursor-not-allowed': !authStore.isUserLoggedIn }"
+        :class="{ 'opacity-50 cursor-not-allowed': !(authStore.isUserLoggedIn || authStore.isManagerLoggedIn) }"
         placeholder="Scan or Enter Barcode"
     >
 
@@ -85,6 +85,7 @@ function handleClick(product) {
         </table>
     </div>
 </template>
+
 
 
 
