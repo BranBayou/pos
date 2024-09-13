@@ -66,7 +66,7 @@ const emit = defineEmits(['close']);
                     <img :src="`https://replicagunsca.b-cdn.net/images/products/small/${comment.item.imageUrl}`"
                       class="w-14 rounded-lg" alt="product-img" />
                     <div class="ml-4">
-                      <p class="font-semibold">{{ comment.item.name }}</p>
+                      <p class="font-semibold">Approved {{ comment.item.discountPercentage }}% discount on {{ comment.item.name }}</p>
                       <p class="text-sm text-gray-500">Price: ${{ comment.item.price }}</p>
                       <p class="text-sm text-gray-500">SKU: {{ comment.item.sku }}</p>
                     </div>
@@ -96,7 +96,10 @@ const emit = defineEmits(['close']);
                 </div>
 
                 <!-- Display comment if it exists and is not being edited -->
-                <p v-else class="text-sm">{{ comment.comment }}</p>
+                
+                <div v-else class="text-sm">
+                  <p>Reason: {{ comment.comment }}</p>
+                </div>
                 
                 <!-- Edit button to allow editing if the comment is empty -->
                 <div v-if="!comment.comment && !isEditing[index]" class="mt-2 flex justify-end">

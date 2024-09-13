@@ -12,6 +12,7 @@ const toast = useToast();
 const comment = ref('');
 const isSubmitting = ref(false);
 
+
 // Props to accept the item information
 const props = defineProps({
   item: {
@@ -19,6 +20,8 @@ const props = defineProps({
     required: true,
   },
 });
+const discountPercentage = ref(props.item.discountPercentage || 0); // Track discount percentage
+
 
 // Emit event when the comment is submitted
 const emit = defineEmits(['close', 'commentSubmitted']);
@@ -41,16 +44,18 @@ const submitComment = async () => {
 
   // Prepare the comment data
   const commentData = {
-    item: {
-      name: props.item.Name,
-      price: props.item.Price,
-      imageUrl: props.item.ImageUrl,
-      sku: props.item.Sku,
-    },
+  item: {
+    name: props.item.Name,
+    price: props.item.Price,
+    imageUrl: props.item.ImageUrl,
+    sku: props.item.Sku,
+    discountPercentage: discountPercentage.value, // Include discount percentage
+  },
     comment: comment.value,
     timestamp: new Date().toISOString(),
     manager: authStore.managerUser,
   };
+
 
   // Simulate saving (can be replaced with actual API call)
   await new Promise(resolve => setTimeout(resolve, 1000));
@@ -94,6 +99,7 @@ const cancelComment = () => {
                                       <div>
                                           <p class="font-semibold">{{ props.item.Name }}</p>
                                           <p class="text-sm text-gray-500">Price: ${{ props.item.Price }}</p>
+                                          <p class="text-sm text-gray-500">Discount: {{ discountPercentage }}%</p>
                                       </div>
                                   </div>
                                   <div class="flex">
