@@ -7,6 +7,7 @@ import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
 import AddManagerApprovalRequest from '../Popups/AddManagerApprovalRequest.vue';
 import CommentPopup from '../Popups/CommentPopup.vue';
+import AddSales from '../Popups/AddSales.vue';
 
 const authStore = useAuthStore();
 const orderStore = useOrderStore();
@@ -117,6 +118,7 @@ nextTick(() => {
 
 <template>
   <AddManagerApprovalRequest />
+  <AddSales />
   <CommentPopup v-if="showCommentPopup" :item="selectedItemForComment" @commentSubmitted="handleCommentSubmitted" @close="showCommentPopup = false" />
   <div class="w-[95%] relative mx-auto flex flex-col gap-2">
     <div v-for="(item, index) in items" :key="index" class="collapse bg-base-200 rounded-2xl shadow-xl">
@@ -154,10 +156,13 @@ nextTick(() => {
               <i class="pi pi-shop" style="font-size: 32px;"></i>
               <p>{{ item.MaxQty }}</p>
             </span>
-            <span class="flex flex-col items-center">
+            <button 
+             @click="authStore.toggleAddSalesPopup"
+             class="flex flex-col items-center"
+            >
               <i class="pi pi-user bg-purple-200 p-3 rounded-full" style="font-size: 20px;"></i>
-              <p class="">No Sales Person</p>
-            </span>
+              <p>{{ orderStore.selectedSalesPerson ? orderStore.selectedSalesPerson.name : 'No Salesperson Selected' }}</p>
+            </button>
           </div>
         </div>
 

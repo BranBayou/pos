@@ -1,3 +1,4 @@
+import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import { reactive, computed } from 'vue';
 
@@ -7,6 +8,12 @@ export const useOrderStore = defineStore('orders', () => {
         gst: 0.5, // GST default value
         pst: 0.7  // PST default value
     });
+
+    const selectedSalesPerson = ref(null); 
+
+    function setSelectedSalesPerson(salesPerson) {
+        this.selectedSalesPerson = salesPerson;
+    }
 
     function addOrderItem(item) {
         const existingItem = state.orderItems.find(orderItem => 
@@ -112,5 +119,7 @@ export const useOrderStore = defineStore('orders', () => {
         getOrderTotal,
         getGstAmount,
         getPstAmount,
+        selectedSalesPerson,
+        setSelectedSalesPerson,
     };
 });
