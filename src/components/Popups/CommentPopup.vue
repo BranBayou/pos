@@ -36,7 +36,7 @@ const saveCommentToLocalStorage = (commentData) => {
 
 // Computed property to dynamically change image background color
 const imageBackgroundColor = computed(() => {
-  return comment.value.trim() ? 'bg-green-500' : 'bg-red-500';
+  return comment.value.trim() ? 'bg-green-400' : 'bg-red-400';
 });
 
 const submitComment = async () => {
@@ -51,9 +51,9 @@ const submitComment = async () => {
     sku: props.item.Sku,
     discountPercentage: discountPercentage.value, // Include discount percentage
   },
-    comment: comment.value,
-    timestamp: new Date().toISOString(),
-    manager: authStore.managerUser,
+  comment: comment.value,
+  timestamp: new Date().toISOString(),
+  manager: authStore.managerUser,
   };
 
 
@@ -103,7 +103,7 @@ const cancelComment = () => {
                                       </div>
                                   </div>
                                   <div class="flex">
-                                      <p class="text-sm text-gray-500 mt-2">Comment by: <span class="font-semibold">{{ authStore.managerUser }}</span></p>
+                                      <p class="text-sm text-gray-500 mt-2">Approved by: <span class="font-semibold">{{ authStore.managerUser }}</span></p>
                                       <!-- Dynamically set background color of the image -->
                                       <img :src="msgIcon" :class="imageBackgroundColor" class="rounded-md p-1" alt="Comment Icon">
                                   </div>

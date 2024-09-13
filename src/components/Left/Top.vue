@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted, ref, watch } from 'vue';
+import { onMounted, onUnmounted, computed, ref, watch } from 'vue';
 import Login from '../Popups/Login.vue';
 import LogoutConfirmation from '../Popups/LogoutConfirmation.vue';
 import OpenDrawer from './OpenDrawer.vue';
@@ -9,7 +9,7 @@ import AddComment from './AddCommentButton.vue';
 import AddManagerApproval from './AddManagerApprovalButton.vue';
 import WalkInCustomer from './WalkInCustomerButton.vue';
 import ManagerLogin from '../Popups/ManagerLogin.vue';
-import Comments from '../Popups/Comments.vue'; // Import the Comments component
+import Comments from '../Popups/Comments.vue';
 import msgIcon from '/message.svg';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
