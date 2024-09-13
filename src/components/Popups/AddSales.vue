@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useToast } from 'vue-toastification';
 import { salesPersons } from '../../sales';
 import Select from 'primevue/select';
@@ -7,12 +7,19 @@ import { useAuthStore } from '@/stores/authStore';
 import { useOrderStore } from '@/stores/OrderStore';
 
 const authStore = useAuthStore();
-const orderStore = useOrderStore(); // Access the order store
+const orderStore = useOrderStore();
+const applyToAllItems = ref(false); // Track if the user wants to apply to all items
 
 // Method to handle the button click
 const addSalesPerson = () => {
   if (orderStore.selectedSalesPerson) {
-    orderStore.setSelectedSalesPerson(orderStore.selectedSalesPerson); // Set the selected person in the store
+    if (applyToAllItems.value) {
+      // Apply the selected salesperson to all items in the order
+      orderStore.applySalesPersonToAllItems(orderStore.selectedSalesPerson);
+    } else {
+      // Only set the selected person in the store (if needed)
+      orderStore.setSelectedSalesPerson(orderStore.selectedSalesPerson);
+    }
     authStore.toggleAddSalesPopup(); // Optionally close the popup
   }
 };
@@ -41,23 +48,23 @@ const addSalesPerson = () => {
                                 <i class="pi pi-user rounded-full bg-purple-200 p-3"></i>
                                 <div class="">
                                     <p>{{ orderStore.selectedSalesPerson ? orderStore.selectedSalesPerson.name : 'No Salesperson Selected' }}</p>
-                                    <p>{{ orderStore.selectedSalesPerson ? orderStore.selectedSalesPerson.department : '' }}</p>
+                                    <p>{{ orderStore.selectedSalesPerson ? orderStore.selectedSalesPerson.region : '' }}</p>
                                 </div>
                             </div>
+                            <!-- Checkbox for applying salesperson to all items -->
                             <div class="flex items-center gap-2">
                                 <div class="form-control">
                                     <label class="label cursor-pointer">
-                                        <input type="checkbox" class="toggle toggle-primary" />
+                                        <input type="checkbox" v-model="applyToAllItems" class="toggle toggle-primary" />
                                     </label>
                                 </div>
-                                <span class="label-text">Add to all items</span>
+                                <span class="label-text">Apply to all items</span>
                             </div>
                         </div>
                         <div class="mt-4 w-6/12 flex flex-col justify-between items-center">
                             <h1 class="py-4 text-2xl font-semibold">Select Sales Person</h1>
-                            <button 
-                             @click="addSalesPerson"
-                             class="mb-5 bg-purple-200 rounded-2xl py-2 px-4 flex items-center gap-2"
+                            <button @click="addSalesPerson"
+                              class="mb-5 bg-purple-200 rounded-2xl py-2 px-4 flex items-center gap-2"
                             >
                                 <i class="pi pi-arrow-circle-right"></i>
                                 <span>Add Sales Person</span>
@@ -69,6 +76,7 @@ const addSalesPerson = () => {
         </Transition>
     </Teleport>
 </template>
+
 
 
 
