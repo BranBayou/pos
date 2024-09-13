@@ -52,7 +52,7 @@ const emit = defineEmits(['close']);
       <div class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
         <Transition name="modal-inner" class="rounded-2xl">
           <div class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-50 w-10/12">
-            <div class="bg-white rounded-lg p-6 w-full shadow-lg">
+            <div class="bg-white rounded-2xl p-6 w-full shadow-lg">
               <h3 class="text-lg font-semibold mb-4">Saved Comments</h3>
               
               <div v-if="comments.length === 0" class="text-center text-gray-500">
@@ -66,18 +66,18 @@ const emit = defineEmits(['close']);
                     <img :src="`https://replicagunsca.b-cdn.net/images/products/small/${comment.item.imageUrl}`"
                       class="w-14 rounded-lg" alt="product-img" />
                     <div class="ml-4">
-                      <p class="font-semibold">{{ comment.item.name }}</p>
+                      <p class="font-semibold">Approved {{ comment.item.discountPercentage }}% discount on {{ comment.item.name }}</p>
                       <p class="text-sm text-gray-500">Price: ${{ comment.item.price }}</p>
                       <p class="text-sm text-gray-500">SKU: {{ comment.item.sku }}</p>
                     </div>
                   </div>
                   <div class="text-right flex gap-3">
                     <div class="">
-                      <p class="text-sm text-gray-500">Comment by: <span class="font-semibold">{{ comment.manager }}</span></p>
+                      <p class="text-sm text-gray-500">Approved by: <span class="font-semibold">{{ comment.manager }}</span></p>
                       <p class="text-sm text-gray-500">{{ new Date(comment.timestamp).toLocaleString() }}</p>
                     </div>
                     <!-- Dynamically apply background color based on comment existence -->
-                    <img :src="msgIcon" :class="comment.comment ? 'bg-green-500' : 'bg-red-500'" class="rounded-md p-1" alt="Comment Icon">
+                    <img :src="msgIcon" :class="comment.comment ? 'bg-green-400' : 'bg-red-400'" class="rounded-md p-1" alt="Comment Icon">
                   </div>
                 </div>
 
@@ -96,12 +96,16 @@ const emit = defineEmits(['close']);
                 </div>
 
                 <!-- Display comment if it exists and is not being edited -->
-                <p v-else class="text-sm">{{ comment.comment }}</p>
                 
-                <!-- Edit button to allow editing if the comment is empty -->
-                <div v-if="!comment.comment && !isEditing[index]" class="mt-2 flex justify-end">
-                  <button @click="handleEdit(index)" class="px-4 py-2 bg-blue-500 text-white rounded-lg">Add Comment</button>
+                <div v-else class="text-sm">
+                  <p>Reason: {{ comment.comment }}</p>
                 </div>
+                
+                <!-- Edit button to allow editing if the comment is empty
+                  <div v-if="!comment.comment && !isEditing[index]" class="mt-2 flex justify-end">
+                    <button @click="handleEdit(index)" class="px-4 py-2 bg-blue-500 text-white rounded-lg">Add Comment</button>
+                  </div>
+                -->
               </div>
 
               <!-- Close Button -->
@@ -117,14 +121,6 @@ const emit = defineEmits(['close']);
 </template>
 
 <style scoped>
-
-.bg-green-500 {
-  background-color: #10B981;
-}
-
-.bg-red-500 {
-  background-color: #EF4444;
-}
 .modal-outer-enter-active,
 .modal-outer-leave-active {
   transition: opacity 0.3s cubic-bezier(0.52, 0.02, 0.19, 1.12);
