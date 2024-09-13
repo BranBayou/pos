@@ -52,7 +52,7 @@ const emit = defineEmits(['close']);
       <div class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
         <Transition name="modal-inner" class="rounded-2xl">
           <div class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-50 w-10/12">
-            <div class="bg-white rounded-lg p-6 w-full shadow-lg">
+            <div class="bg-white rounded-2xl p-6 w-full shadow-lg">
               <h3 class="text-lg font-semibold mb-4">Saved Comments</h3>
               
               <div v-if="comments.length === 0" class="text-center text-gray-500">
