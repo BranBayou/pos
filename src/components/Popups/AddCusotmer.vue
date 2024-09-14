@@ -108,7 +108,7 @@ const resetForm = () => {
                             </span>
                           </p>
                         </div>
-                        <i class="pi pi-arrow-circle-right bg-purple-200 rounded-full p-2 cursor-pointer" style="font-size: 24px;"></i>
+                        <i class="pi pi-arrow-circle-right bg-purple-500 text-white hover:bg-purple-700 rounded-full p-2 cursor-pointer" style="font-size: 24px;"></i>
                       </li>
                     </ul>
                   </div>
@@ -140,7 +140,7 @@ const resetForm = () => {
                   </div>
                   <div class="w-full flex justify-end">
                     <!-- Icon triggers form submission -->
-                    <i class="pi pi-arrow-circle-right bg-purple-200 rounded-full p-2 cursor-pointer" style="font-size: 24px;" @click="submitNewCustomer"></i>
+                    <i class="pi pi-arrow-circle-right bg-purple-500 hover:bg-purple-700 rounded-full p-2 cursor-pointer text-white" style="font-size: 24px;" @click="submitNewCustomer"></i>
                   </div>
                 </form>
               </div>
