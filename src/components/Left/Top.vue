@@ -74,12 +74,6 @@ const moveButtonToParent = (buttonName) => {
   }
 };
 
-//
-const selectedCustomer = ref(null);
-const updateCustomer = (customer) => {
-  selectedCustomer.value = customer;
-};
-
 // Initial buttons array
 const buttons = ref([
   { name: 'AddComment', component: AddComment },

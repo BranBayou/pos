@@ -19,6 +19,7 @@ export const useAuthStore = defineStore('auth', () => {
   const usersList = ref([]); // List of users (cashiers)
   const managerUsersList = ref([]);
   const customersList = ref([]); // List of customers
+  const selectedCustomer = ref(null);
 
   const isLogoutConfirmationVisible = ref(false);
   const isAddManagerApprovalRequest = ref(false);
@@ -180,6 +181,11 @@ export const useAuthStore = defineStore('auth', () => {
     console.log('Show Customers popup:', !isAddSalesPopupVisible.value);
   }
 
+   // Function to set selected customer
+   const setSelectedCustomer = (customer) => {
+     selectedCustomer.value = customer;
+   };
+
   return {
     isUserLoggedIn,
     currentUser,
@@ -212,6 +218,8 @@ export const useAuthStore = defineStore('auth', () => {
     toggleAddSalesPopup,
     isAddCustomerPopupVisible,
     toggleAddCustomerPopup,
+    selectedCustomer,
+    setSelectedCustomer,
   };
 });
 

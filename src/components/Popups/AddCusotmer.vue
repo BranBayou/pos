@@ -3,15 +3,10 @@ import { useAuthStore } from '@/stores/authStore';
 import { ref, computed, onMounted } from 'vue';
 import InputMask from 'primevue/inputmask';
 
-// Define the emit function
-
 const authStore = useAuthStore();
 
 const value = ref('');
-const mask = ref('999-999-9999');
 
-// State to hold the selected customer and search query
-const selectedCustomer = ref(null);
 const searchQuery = ref(''); // Search query
 
 // New customer form fields
@@ -21,12 +16,6 @@ const newCustomer = ref({
   email: '',
   note: ''
 });
-
-// Function to emit the selected customer to the parent
-const selectCustomer = (customer) => {
-  selectedCustomer.value = customer; // Store the selected customer
-  emit('customer-selected', customer); // Emit the customer details to the parent
-};
 
 onMounted(() => {
   authStore.fetchCustomers();
@@ -44,6 +33,12 @@ const filteredCustomers = computed(() => {
       customer.email.toLowerCase().includes(searchQuery.value.toLowerCase()))
     .slice(0, 3);
 });
+
+// Function to handle customer selection
+const selectCustomer = (customer) => {
+  authStore.setSelectedCustomer(customer); // Store the selected customer in the store
+  authStore.toggleAddCustomerPopup();
+};
 
 // Function to add a new customer
 const addNewCustomer = () => {
@@ -89,8 +84,9 @@ const resetForm = () => {
                   <div>
                     <ul class="flex flex-col gap-3">
                       <li v-for="customer in filteredCustomers" :key="customer.name"
-                        class="flex items-center justify-between py-3 px-4 border-2 rounded-2xl cursor-pointer"
-                        @click="selectCustomer(customer)">
+                        @click="selectCustomer(customer)"
+                        class="flex items-center justify-between py-3 px-4 border-2 rounded-2xl"
+                      >
                         <div>
                           <p>{{ customer.name }}</p>
                           <p class="flex gap-4">{{ customer.phone }}
@@ -99,8 +95,7 @@ const resetForm = () => {
                             </span>
                           </p>
                         </div>
-                        <i class="pi pi-arrow-circle-right bg-purple-200 rounded-full p-2 cursor-pointer"
-                          style="font-size: 24px;"></i>
+                        <i class="pi pi-arrow-circle-right bg-purple-200 rounded-full p-2 cursor-pointer" style="font-size: 24px;"></i>
                       </li>
                     </ul>
                   </div>
@@ -118,7 +113,7 @@ const resetForm = () => {
                   </div>
                   <div class="card flex justify-center">
                     <label class="block mb-1">Phone</label>
-                    <InputMask v-model="newCustomer.phone" mask="+19 999-999-999" placeholder="+19 999-999-999" class="w-full !p-2 !bg-gray-100 !rounded custom-input" />
+                    <InputMask v-model="value" mask="+19 999-999-999" placeholder="+19 999-999-999" class="w-full !p-2 !bg-gray-100 !rounded custom-input" />
                   </div>
                   <div class="mb-4">
                     <label class="block mb-1">Email</label>
@@ -131,8 +126,7 @@ const resetForm = () => {
                       placeholder="Notes"></textarea>
                   </div>
                   <div class="w-full flex justify-end">
-                    <i class="pi pi-arrow-circle-right bg-purple-200 rounded-full p-2 cursor-pointer"
-                      style="font-size: 24px;"></i>
+                    <i class="pi pi-arrow-circle-right bg-purple-200 rounded-full p-2 cursor-pointer" style="font-size: 24px;"></i>
                   </div>
                 </form>
               </div>
@@ -145,7 +139,6 @@ const resetForm = () => {
     </Transition>
   </Teleport>
 </template>
-
 
 <style scoped>
   .modal-outer-enter-active,
