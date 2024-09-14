@@ -5,7 +5,7 @@ import InputMask from 'primevue/inputmask';
 
 const authStore = useAuthStore();
 
-const value = ref('');
+const value = ref(''); // Phone mask value
 
 const searchQuery = ref(''); // Search query
 
@@ -17,33 +17,45 @@ const newCustomer = ref({
   note: ''
 });
 
+// Temporary storage for the displayed customer (form submission result)
+const displayedCustomer = ref(null);
+
+// Fetch customers when component mounts
 onMounted(() => {
   authStore.fetchCustomers();
 });
 
-// Computed property to filter the customers list based on the search query
+// Computed property to filter customers based on the search query
 const filteredCustomers = computed(() => {
   if (!searchQuery.value) {
-    return authStore.customersList.slice(0, 3); // If no search query, show first three customers
+    return authStore.customersList.slice(0, 3); // Show first 3 customers by default
   }
-  return authStore.customersList
-    .filter(customer => 
-      customer.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
-      customer.phone.includes(searchQuery.value) || 
-      customer.email.toLowerCase().includes(searchQuery.value.toLowerCase()))
-    .slice(0, 3);
+  return authStore.customersList.filter(customer => 
+    customer.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
+    customer.phone.includes(searchQuery.value) || 
+    customer.email.toLowerCase().includes(searchQuery.value.toLowerCase())
+  ).slice(0, 3);
 });
 
-// Function to handle customer selection
+// Function to handle customer selection from the list
 const selectCustomer = (customer) => {
   authStore.setSelectedCustomer(customer); // Store the selected customer in the store
-  authStore.toggleAddCustomerPopup();
+  authStore.toggleAddCustomerPopup(); // Close the popup
 };
 
-// Function to add a new customer
-const addNewCustomer = () => {
+// Function to handle form submission (adding new customer for display only)
+const submitNewCustomer = () => {
   if (newCustomer.value.name && newCustomer.value.phone && newCustomer.value.email) {
-    authStore.customersList.push({ ...newCustomer.value });
+    // Store the new customer locally (for display)
+    displayedCustomer.value = { ...newCustomer.value };
+
+    // Set it as the selected customer (for consistency with the listed customer selection)
+    authStore.setSelectedCustomer(displayedCustomer.value);
+
+    // Close the popup
+    authStore.toggleAddCustomerPopup();
+
+    // Reset the form after submission
     resetForm();
   } else {
     alert('Please fill in all fields');
@@ -72,6 +84,7 @@ const resetForm = () => {
             class="flex p-4 my-10 w-10/12 bg-white self-start rounded-2xl">
             <div class="p-8 flex gap-3 w-full">
 
+              <!-- Customer List and Search -->
               <div class="w-6/12">
                 <!-- Search Input -->
                 <div class="mb-4 mr-20">
@@ -105,7 +118,7 @@ const resetForm = () => {
               <!-- Form to Add New Customer -->
               <div class="mt-6 w-6/12">
                 <h3 class="text-xl font-bold mb-4">Add New Customer</h3>
-                <form @submit.prevent="addNewCustomer">
+                <form @submit.prevent="submitNewCustomer">
                   <div class="mb-4">
                     <label class="block mb-1">Name</label>
                     <input type="text" v-model="newCustomer.name" class="w-full bg-gray-100 p-2 rounded focus:outline-none"
@@ -113,7 +126,7 @@ const resetForm = () => {
                   </div>
                   <div class="card flex justify-center">
                     <label class="block mb-1">Phone</label>
-                    <InputMask v-model="value" mask="+19 999-999-999" placeholder="+19 999-999-999" class="w-full !p-2 !bg-gray-100 !rounded custom-input" />
+                    <InputMask v-model="newCustomer.phone" mask="+19 999-999-999" placeholder="+19 999-999-999" class="w-full !p-2 !bg-gray-100 !rounded custom-input" />
                   </div>
                   <div class="mb-4">
                     <label class="block mb-1">Email</label>
@@ -126,13 +139,13 @@ const resetForm = () => {
                       placeholder="Notes"></textarea>
                   </div>
                   <div class="w-full flex justify-end">
-                    <i class="pi pi-arrow-circle-right bg-purple-200 rounded-full p-2 cursor-pointer" style="font-size: 24px;"></i>
+                    <!-- Icon triggers form submission -->
+                    <i class="pi pi-arrow-circle-right bg-purple-200 rounded-full p-2 cursor-pointer" style="font-size: 24px;" @click="submitNewCustomer"></i>
                   </div>
                 </form>
               </div>
 
             </div>
-
           </div>
         </Transition>
       </div>
