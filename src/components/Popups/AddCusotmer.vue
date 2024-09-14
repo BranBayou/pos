@@ -8,32 +8,17 @@ import { useOrderStore } from '@/stores/OrderStore';
 
 const authStore = useAuthStore();
 const orderStore = useOrderStore();
-const applyToAllItems = ref(false); // Track if the user wants to apply the salesperson to all items
 
-// Method to handle the button click
-const addSalesPerson = () => {
-  if (orderStore.selectedSalesPerson) {
-    if (applyToAllItems.value) {
-      // Apply the selected salesperson to all items in the order
-      orderStore.applySalesPersonToAllItems(orderStore.selectedSalesPerson);
-    } else {
-      // Only set the selected person in the store (no apply to all items)
-      orderStore.setSelectedSalesPerson(orderStore.selectedSalesPerson);
-    }
-    authStore.toggleAddSalesPopup(); // Optionally close the popup
-  }
-};
 </script>
 
 <template>
     <Teleport to="body">
         <Transition name="modal-outer">
-            <div v-show="authStore.isAddSalesPopupVisible"
-                 @click="authStore.toggleAddSalesPopup"
+            <div 
                 class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
                 <Transition name="modal-inner">
                     <!-- Prevent popup from closing when clicking inside -->
-                    <div v-if="authStore.isAddSalesPopupVisible" @click.stop class="flex p-4 w-5/12 bg-white self-start mt-24 rounded-2xl">
+                    <div>
                         <div class="p-8 w-6/12">
                             <div class="w-full space-y-3">
                                 <div class="flex gap-x-1 my-1">
@@ -55,7 +40,7 @@ const addSalesPerson = () => {
                             <div class="flex items-center gap-2">
                                 <div class="form-control">
                                     <label class="label cursor-pointer">
-                                        <input type="checkbox" v-model="applyToAllItems" class="" />
+                                        <input type="checkbox" class="" />
                                     </label>
                                 </div>
                                 <span class="label-text">Apply to all items</span>
@@ -63,7 +48,7 @@ const addSalesPerson = () => {
                         </div>
                         <div class="mt-4 w-6/12 flex flex-col justify-between items-center">
                             <h1 class="py-4 text-2xl font-semibold">Select Sales Person</h1>
-                            <button @click="addSalesPerson"
+                            <button 
                               class="mb-5 bg-purple-200 rounded-2xl py-2 px-4 flex items-center gap-2"
                             >
                                 <i class="pi pi-arrow-circle-right"></i>

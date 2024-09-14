@@ -25,6 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAddBehaviourPopup = ref(false);
   const isAddItemPopup = ref(false);
   const isManagerLoginPopupVisible = ref(false);
+  const isAddSalesPopupVisible = ref(false);
 
   // Fetch Cashiers Function
   async function fetchCashiers() {
@@ -152,6 +153,12 @@ export const useAuthStore = defineStore('auth', () => {
     console.log('Show mng request popup:', isAddManagerApprovalRequest.value);
   }
 
+  // 
+  function toggleAddSalesPopup () {
+    isAddSalesPopupVisible.value = !isAddSalesPopupVisible.value;
+    console.log('Show sales popup:', isAddSalesPopupVisible.value);
+  }
+
   return {
     isUserLoggedIn,
     currentUser,
@@ -178,5 +185,7 @@ export const useAuthStore = defineStore('auth', () => {
     toggleAddManagerApprovalRequest,
     isManagerLoginPopupVisible,
     toggleManagerLoginPopup,
+    isAddSalesPopupVisible,
+    toggleAddSalesPopup,
   };
 });
