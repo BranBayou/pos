@@ -7,7 +7,7 @@ import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
 import AddManagerApprovalRequest from '../Popups/AddManagerApprovalRequest.vue';
 import CommentPopup from '../Popups/CommentPopup.vue';
-import AddSales from '../Popups/AddSales.vue';
+import AddSales from '../Popups/AddSalesPerson.vue';
 
 const authStore = useAuthStore();
 const orderStore = useOrderStore();

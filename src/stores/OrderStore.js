@@ -8,19 +8,19 @@ export const useOrderStore = defineStore('orders', () => {
     pst: 0.7  // PST default value
   });
 
-  const selectedSalesPerson = ref(null); // Store the selected salesperson
+  const selectedSalesPerson = ref(null);
 
-  // Set the selected salesperson
   function setSelectedSalesPerson(salesPerson) {
-    selectedSalesPerson.value = salesPerson; // Update the ref directly
+    selectedSalesPerson.value = salesPerson; // Set the salesperson for individual items or globally
   }
 
-  // Apply the selected salesperson to all items in the order
   function applySalesPersonToAllItems(salesPerson) {
-    state.orderItems.forEach(item => {
-      item.salesPerson = salesPerson; // Add the selected salesperson to each item
+    // Apply the selected salesperson to all items in the order
+    state.orderItems.forEach((item) => {
+      item.salesPerson = salesPerson;
     });
   }
+
 
   // Add an order item to the list or increment the quantity if it exists
   function addOrderItem(item) {
