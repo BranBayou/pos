@@ -10,6 +10,7 @@ import AddManagerApproval from './AddManagerApprovalButton.vue';
 import WalkInCustomer from './WalkInCustomerButton.vue';
 import ManagerLogin from '../Popups/ManagerLogin.vue';
 import Comments from '../Popups/Comments.vue';
+import AddCustomer from '../Popups/AddCusotmer.vue'
 import msgIcon from '/message.svg';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
@@ -103,11 +104,12 @@ const resetCountdown = () => {
 };
 
 const handleManagerApproval = () => {
-  console.log('Manager approval triggered successfully!');
   authStore.toggleManagerLoginPopup();
+  console.log('Manager approval triggered successfully!');
 };
 
 const handleWalkInCustomer = () => {
+  authStore.toggleAddCustomerPopup();
   console.log('Walk-in customer triggered successfully!');
 };
 
@@ -152,6 +154,8 @@ onUnmounted(() => {
 
     <ManagerLogin />
 
+    <AddCustomer />
+    
     <!-- Cashier Section -->
     <div class="relative flex items-center border shadow-lg w-full p-5 rounded-2xl gap-5 my-3">  
       <div>

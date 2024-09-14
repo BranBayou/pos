@@ -18,6 +18,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const usersList = ref([]); // List of users (cashiers)
   const managerUsersList = ref([]);
+  const customersList = ref([]); // List of customers
 
   const isLogoutConfirmationVisible = ref(false);
   const isAddManagerApprovalRequest = ref(false);
@@ -26,6 +27,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAddItemPopup = ref(false);
   const isManagerLoginPopupVisible = ref(false);
   const isAddSalesPopupVisible = ref(false);
+  const isAddCustomerPopupVisible = ref(false);
 
   // Fetch Cashiers Function
   async function fetchCashiers() {
@@ -52,6 +54,19 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (error) {
       toast.error('Failed to load users', error.message);
       console.error('Failed to load users:', error.message);
+    }
+  }
+
+  // Fetch Customers Function
+  async function fetchCustomers() {
+    const toast = useToast();
+    try {
+      const response = await axios.get('http://localhost:3131/customers');
+      customersList.value = response.data;
+      console.log('Fetched Customers:', customersList.value);
+    } catch (error) {
+      toast.error('Failed to load customers', error.message);
+      console.error('Failed to load customers:', error.message);
     }
   }
 
@@ -159,6 +174,12 @@ export const useAuthStore = defineStore('auth', () => {
     console.log('Show sales popup:', isAddSalesPopupVisible.value);
   }
 
+  //
+  function toggleAddCustomerPopup () {
+    isAddCustomerPopupVisible.value = !isAddCustomerPopupVisible.value;
+    console.log('Show Customers popup:', !isAddSalesPopupVisible.value);
+  }
+
   return {
     isUserLoggedIn,
     currentUser,
@@ -170,8 +191,10 @@ export const useAuthStore = defineStore('auth', () => {
     managerRole,
     managerToken,
     managerUsersList,
+    customersList, // Add customersList to the return statement
     fetchCashiers,
     fetchManager,
+    fetchCustomers, // Add fetchCustomers to the return statement
     login,
     logout,
     isCashierLoginInput,
@@ -187,5 +210,8 @@ export const useAuthStore = defineStore('auth', () => {
     toggleManagerLoginPopup,
     isAddSalesPopupVisible,
     toggleAddSalesPopup,
+    isAddCustomerPopupVisible,
+    toggleAddCustomerPopup,
   };
 });
+

@@ -5,6 +5,7 @@ const path = require('path');
 const jwt = require('jsonwebtoken');
 const products = require('./new-products');
 const users = require('./users'); // Import the users list
+const customers = require('./customers'); // Import the customers list
 
 const app = express();
 const PORT = 3131;
@@ -56,7 +57,6 @@ app.post('/login', (req, res) => {
   res.json({ message: 'Login successful', token, role: user.role });
 });
 
-
 // Route to serve products
 app.get('/products', (req, res) => {
   res.json(products);
@@ -101,9 +101,16 @@ app.get('/branchusers', (req, res) => {
   res.json(filteredUsers);
 });
 
+// New endpoint to fetch customers
+app.get('/customers', (req, res) => {
+  res.json(customers); // Make sure this is returning the correct customer data
+});
+
+
 // Serve static files if necessary
 app.use('/files', express.static(path.join(__dirname, 'your_directory'))); // Replace 'your_directory' with the actual directory path
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
