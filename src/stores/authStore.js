@@ -29,6 +29,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isManagerLoginPopupVisible = ref(false);
   const isAddSalesPopupVisible = ref(false);
   const isAddCustomerPopupVisible = ref(false);
+  const isCheckoutPopupVisible = ref(false);
 
   // Fetch Cashiers Function
   async function fetchCashiers() {
@@ -186,6 +187,12 @@ export const useAuthStore = defineStore('auth', () => {
      selectedCustomer.value = customer;
    };
 
+   //
+   function toggleCheckoutPopup () {
+     isCheckoutPopupVisible.value =!isCheckoutPopupVisible.value;
+     console.log('Show checkout popup:', !isCheckoutPopupVisible.value);
+   }
+
   return {
     isUserLoggedIn,
     currentUser,
@@ -220,6 +227,8 @@ export const useAuthStore = defineStore('auth', () => {
     toggleAddCustomerPopup,
     selectedCustomer,
     setSelectedCustomer,
+    isCheckoutPopupVisible,
+    toggleCheckoutPopup
   };
 });
 
