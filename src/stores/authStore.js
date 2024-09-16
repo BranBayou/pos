@@ -6,24 +6,24 @@ import { useToast } from 'vue-toastification';
 export const useAuthStore = defineStore('auth', () => {
   // Cashier State
   const isUserLoggedIn = ref(localStorage.getItem('token') ? true : false);
-  const currentUser = ref(localStorage.getItem('currentUser') || ''); // Track the cashier's name
-  const userRole = ref(localStorage.getItem('userRole') || ''); // Track the cashier's role
-  const token = ref(localStorage.getItem('token') || null); // Track the cashier's token
+  const currentUser = ref(localStorage.getItem('currentUser') || '');
+  const userRole = ref(localStorage.getItem('userRole') || ''); 
+  const token = ref(localStorage.getItem('token') || null);
   
   // Manager State
   const isManagerLoggedIn = ref(localStorage.getItem('managerToken') ? true : false);
-  const managerUser = ref(localStorage.getItem('managerUser') || ''); // Track the manager's name
-  const managerRole = ref(localStorage.getItem('managerRole') || ''); // Track the manager's role
-  const managerToken = ref(localStorage.getItem('managerToken') || null); // Track the manager's token
+  const managerUser = ref(localStorage.getItem('managerUser') || ''); 
+  const managerRole = ref(localStorage.getItem('managerRole') || ''); 
+  const managerToken = ref(localStorage.getItem('managerToken') || null); 
 
-  const usersList = ref([]); // List of users (cashiers)
+  const usersList = ref([]);
   const managerUsersList = ref([]);
-  const customersList = ref([]); // List of customers
+  const customersList = ref([]);
   const selectedCustomer = ref(null);
 
   const isLogoutConfirmationVisible = ref(false);
   const isAddManagerApprovalRequest = ref(false);
-  const isCashierLoginInput = ref(true); // Login input type state
+  const isCashierLoginInput = ref(true); 
   const isAddBehaviourPopup = ref(false);
   const isAddItemPopup = ref(false);
   const isManagerLoginPopupVisible = ref(false);

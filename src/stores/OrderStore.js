@@ -11,7 +11,7 @@ export const useOrderStore = defineStore('orders', () => {
   const selectedSalesPerson = ref(null);
 
   function setSelectedSalesPerson(salesPerson) {
-    selectedSalesPerson.value = salesPerson; // Set the salesperson for individual items or globally
+    selectedSalesPerson.value = salesPerson; 
   }
 
   function applySalesPersonToAllItems(salesPerson) {
@@ -130,7 +130,7 @@ export const useOrderStore = defineStore('orders', () => {
     decrementOrderItem,
     deleteOrderItem,
     updateDiscountPercentage,
-    resetDiscount,  // Expose this method for resetting discount
+    resetDiscount, 
     getTotalDiscountPercentage,
     getOrderItems,
     getOrderTotal,

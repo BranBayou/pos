@@ -53,6 +53,17 @@ const login = async () => {
     console.error('Login failed:', error);
   }
 };
+
+// Handle password input to prevent more than 6 characters and auto-login
+const handlePasswordInput = (num) => {
+  if (password.value.length < 6) {
+    password.value += num;
+  }
+  if (password.value.length === 6) {
+    login();
+  }
+};
+
 </script>
 
 <template>
@@ -98,7 +109,8 @@ const login = async () => {
                   </div>
                 </div>
               </div>
-              <button @click="password.length < 6 ? (password = password + i) : ''" v-for="i in 9" :key="i"
+              <!-- Number buttons for entering password -->
+              <button @click="handlePasswordInput(i)" v-for="i in 9" :key="i"
                       class="capitalize hover:bg-purple-500 border-2 border-solid border-1 bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
                 {{ i }}
               </button>
@@ -106,7 +118,7 @@ const login = async () => {
                       class="capitalize hover:bg-purple-500 border-solid border-2 bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
                 <i class="pi pi-delete-left"></i>
               </button>
-              <button @click="password = password + 0"
+              <button @click="handlePasswordInput(0)"
                       class="capitalize hover:bg-purple-500 border-solid border-2 bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
                 0
               </button>
@@ -125,6 +137,7 @@ const login = async () => {
     </Transition>
   </Teleport>
 </template>
+
 
 
 <style scoped>
