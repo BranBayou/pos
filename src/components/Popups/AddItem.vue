@@ -14,7 +14,7 @@ const searchInput = ref(null);
 
 const filteredProducts = computed(() => {
   if (!store.products || !searchQuery.value) {
-    return []; // Return an empty array if products or search query is empty
+    return []; 
   }
 
   const query = searchQuery.value.toLowerCase();
@@ -27,7 +27,6 @@ const filteredProducts = computed(() => {
     product.Name && product.Name.toLowerCase().includes(query)
   ).sort((a, b) => a.Name.localeCompare(b.Name));
 
-  // Combine and deduplicate results
   const combinedResults = [...new Set([...productsMatchingSku, ...productsMatchingName])];
 
   return combinedResults.slice(0, 5);

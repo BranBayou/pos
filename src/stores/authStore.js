@@ -170,13 +170,14 @@ export const useAuthStore = defineStore('auth', () => {
     console.log('Show mng request popup:', isAddManagerApprovalRequest.value);
   }
 
-  // 
+  // Toggle Add sales popup
   function toggleAddSalesPopup () {
     isAddSalesPopupVisible.value = !isAddSalesPopupVisible.value;
     console.log('Show sales popup:', isAddSalesPopupVisible.value);
   }
 
-  //
+  // Toggle Add customer popup
+
   function toggleAddCustomerPopup () {
     isAddCustomerPopupVisible.value = !isAddCustomerPopupVisible.value;
     console.log('Show Customers popup:', !isAddSalesPopupVisible.value);
@@ -204,10 +205,10 @@ export const useAuthStore = defineStore('auth', () => {
     managerRole,
     managerToken,
     managerUsersList,
-    customersList, // Add customersList to the return statement
+    customersList, 
     fetchCashiers,
     fetchManager,
-    fetchCustomers, // Add fetchCustomers to the return statement
+    fetchCustomers,
     login,
     logout,
     isCashierLoginInput,
