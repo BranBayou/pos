@@ -4,8 +4,8 @@ import { defineStore } from 'pinia';
 export const useOrderStore = defineStore('orders', () => {
   const state = reactive({
     orderItems: [],
-    gst: 0.5, // GST default value
-    pst: 0.7  // PST default value
+    gst: 5, // GST default value
+    pst: 7  // PST default value
   });
 
   const selectedSalesPerson = ref(null);
@@ -29,7 +29,7 @@ export const useOrderStore = defineStore('orders', () => {
     );
 
     if (existingItem) {
-      existingItem.qty++; // Increment quantity if the item already exists
+      existingItem.qty++; 
     } else {
       state.orderItems.push({
         ...item,
