@@ -30,6 +30,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAddSalesPopupVisible = ref(false);
   const isAddCustomerPopupVisible = ref(false);
   const isCheckoutPopupVisible = ref(false);
+  const showCommentsModal = ref(false); 
 
   // Fetch Cashiers Function
   async function fetchCashiers() {
@@ -194,6 +195,12 @@ export const useAuthStore = defineStore('auth', () => {
      console.log('Show checkout popup:', !isCheckoutPopupVisible.value);
    }
 
+   // 
+   function toggleShowCommentsModal () {
+     showCommentsModal.value = !showCommentsModal.value;
+     console.log('Show comments modal:', !showCommentsModal.value);
+   }
+
   return {
     isUserLoggedIn,
     currentUser,
@@ -229,7 +236,9 @@ export const useAuthStore = defineStore('auth', () => {
     selectedCustomer,
     setSelectedCustomer,
     isCheckoutPopupVisible,
-    toggleCheckoutPopup
+    toggleCheckoutPopup,
+    showCommentsModal,
+    toggleShowCommentsModal
   };
 });
 

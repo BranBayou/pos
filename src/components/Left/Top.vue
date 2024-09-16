@@ -18,7 +18,7 @@ import 'tippy.js/animations/scale.css';
 import { useAuthStore } from '@/stores/authStore';
 
 const authStore = useAuthStore();
-const showCommentsModal = ref(false); // State to control the display of Comments modal
+
 
 const logoutRole = ref(null); // Track which role is triggering logout confirmation
 
@@ -114,7 +114,7 @@ const handleWalkInCustomer = () => {
 };
 
 const handleCommentAdded = () => {
-  console.log('Comment added successfully!');
+  authStore.toggleShowCommentsModal();
 };
 
 // Watch for login status and manage countdown accordingly
@@ -185,7 +185,7 @@ onUnmounted(() => {
       <i @click="handleAuthAction('Manager')" ref="myButton" class="pi pi-user text-purple-500 bg-purple-100 p-4 rounded-full cursor-pointer" style="font-size: 1.875rem;"></i>
       <span class="font-medium">{{ authStore.isManagerLoggedIn ? authStore.managerUser : 'Logged out' }}</span>
 
-      <img :src="msgIcon" class="rounded-md cursor-pointer" alt="" @click="showCommentsModal = true">
+      <img :src="msgIcon" class="rounded-md cursor-pointer" alt="" @click="authStore.toggleShowCommentsModal">
     </div>
 
     <ItemsSearch v-if="authStore.isUserLoggedIn" />
@@ -213,7 +213,7 @@ onUnmounted(() => {
     </button>
 
     <!-- Comments Modal -->
-    <Comments v-if="showCommentsModal" @close="showCommentsModal = false" />
+    <Comments v-if="authStore.showCommentsModal" @close="authStore.toggleShowCommentsModal" />
   </div>
 </template>
 
