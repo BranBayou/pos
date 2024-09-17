@@ -4,14 +4,14 @@ import { defineStore } from 'pinia';
 export const useOrderStore = defineStore('orders', () => {
   const state = reactive({
     orderItems: [],
-    gst: 0.5, // GST default value
-    pst: 0.7  // PST default value
+    gst: 5, // GST default value
+    pst: 7  // PST default value
   });
 
   const selectedSalesPerson = ref(null);
 
   function setSelectedSalesPerson(salesPerson) {
-    selectedSalesPerson.value = salesPerson; // Set the salesperson for individual items or globally
+    selectedSalesPerson.value = salesPerson; 
   }
 
   function applySalesPersonToAllItems(salesPerson) {
@@ -29,7 +29,7 @@ export const useOrderStore = defineStore('orders', () => {
     );
 
     if (existingItem) {
-      existingItem.qty++; // Increment quantity if the item already exists
+      existingItem.qty++; 
     } else {
       state.orderItems.push({
         ...item,
@@ -130,7 +130,7 @@ export const useOrderStore = defineStore('orders', () => {
     decrementOrderItem,
     deleteOrderItem,
     updateDiscountPercentage,
-    resetDiscount,  // Expose this method for resetting discount
+    resetDiscount, 
     getTotalDiscountPercentage,
     getOrderItems,
     getOrderTotal,

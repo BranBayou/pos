@@ -16,10 +16,9 @@ const filteredProducts = computed(() => {
     const query = searchQuery.value.trim().toLowerCase();
     
     if (!query) {
-        return []; // Return an empty array if the search query is empty
+        return [];
     }
 
-    // Create a set to track unique SKUs and filter out duplicate products
     const uniqueProducts = new Map();
 
     // Filter products based on the barcode and ensure uniqueness by SKU
@@ -28,10 +27,10 @@ const filteredProducts = computed(() => {
         const isUnique = !uniqueProducts.has(product.Sku);
         
         if (barcode.includes(query) && isUnique) {
-            uniqueProducts.set(product.Sku, true); // Mark SKU as added
-            return true; // Include in the filtered list
+            uniqueProducts.set(product.Sku, true);
+            return true; 
         }
-        return false; // Exclude duplicates
+        return false; 
     });
 
     // Always limit the results to a maximum of 5 items

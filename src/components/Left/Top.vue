@@ -10,6 +10,7 @@ import AddManagerApproval from './AddManagerApprovalButton.vue';
 import WalkInCustomer from './WalkInCustomerButton.vue';
 import ManagerLogin from '../Popups/ManagerLogin.vue';
 import Comments from '../Popups/Comments.vue';
+import AddCustomer from '../Popups/AddCusotmer.vue'
 import msgIcon from '/message.svg';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
@@ -17,7 +18,7 @@ import 'tippy.js/animations/scale.css';
 import { useAuthStore } from '@/stores/authStore';
 
 const authStore = useAuthStore();
-const showCommentsModal = ref(false); // State to control the display of Comments modal
+
 
 const logoutRole = ref(null); // Track which role is triggering logout confirmation
 
@@ -103,16 +104,17 @@ const resetCountdown = () => {
 };
 
 const handleManagerApproval = () => {
-  console.log('Manager approval triggered successfully!');
   authStore.toggleManagerLoginPopup();
+  console.log('Manager approval triggered successfully!');
 };
 
 const handleWalkInCustomer = () => {
+  authStore.toggleAddCustomerPopup();
   console.log('Walk-in customer triggered successfully!');
 };
 
 const handleCommentAdded = () => {
-  console.log('Comment added successfully!');
+  authStore.toggleShowCommentsModal();
 };
 
 // Watch for login status and manage countdown accordingly
@@ -152,8 +154,10 @@ onUnmounted(() => {
 
     <ManagerLogin />
 
+    <AddCustomer />
+    
     <!-- Cashier Section -->
-    <div class="relative flex items-center border shadow-lg w-full p-5 rounded-2xl gap-5 my-3">  
+    <div class="relative flex items-center bg-white w-full p-5 rounded-2xl gap-5 my-3">  
       <div>
         <button class="flex flex-col items-center">
           <img style="width: 30px;" src="/cashier.png" alt="">
@@ -171,7 +175,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Manager Section -->
-    <div v-show="authStore.isManagerLoggedIn" class="relative flex items-center border shadow-lg w-full p-2 rounded-2xl gap-5 my-3">  
+    <div v-show="authStore.isManagerLoggedIn" class="relative flex items-center bg-white w-full p-2 rounded-2xl gap-5 my-3">  
       <div>
         <button class="flex flex-col items-center">
           <img style="width: 30px;" src="/manager.svg" alt="Manager Image">
@@ -181,7 +185,7 @@ onUnmounted(() => {
       <i @click="handleAuthAction('Manager')" ref="myButton" class="pi pi-user text-purple-500 bg-purple-100 p-4 rounded-full cursor-pointer" style="font-size: 1.875rem;"></i>
       <span class="font-medium">{{ authStore.isManagerLoggedIn ? authStore.managerUser : 'Logged out' }}</span>
 
-      <img :src="msgIcon" class="rounded-md cursor-pointer" alt="" @click="showCommentsModal = true">
+      <img :src="msgIcon" class="rounded-md cursor-pointer" alt="" @click="authStore.toggleShowCommentsModal">
     </div>
 
     <ItemsSearch v-if="authStore.isUserLoggedIn" />
@@ -202,14 +206,14 @@ onUnmounted(() => {
     <button
       :disabled="!authStore.isUserLoggedIn" 
       @click="authStore.toggleAddBehaviourPopup"
-      class="border shadow-lg w-full text-center p-5 rounded-2xl flex gap-5 my-3 cursor-pointer">
+      class="bg-white w-full text-center p-5 rounded-2xl flex gap-5 my-3 cursor-pointer">
       <span class="text-center mx-auto cursor-pointer">
         <i class="pi pi-plus text-purple-500 bg-purple-100 p-4 rounded-full" :class="{ 'opacity-50 cursor-not-allowed': !authStore.isUserLoggedIn }" style="font-size: 1.875rem;"></i>
       </span>
     </button>
 
     <!-- Comments Modal -->
-    <Comments v-if="showCommentsModal" @close="showCommentsModal = false" />
+    <Comments v-if="authStore.showCommentsModal" @close="authStore.toggleShowCommentsModal" />
   </div>
 </template>
 

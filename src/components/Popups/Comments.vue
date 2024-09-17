@@ -60,7 +60,7 @@ const emit = defineEmits(['close']);
               </div>
               
               <!-- Iterate through the comments and display them -->
-              <div v-for="(comment, index) in comments" :key="index" class="mb-4 border-b pb-4">
+              <div v-for="(comment, index) in comments" :key="index" class="mb-4 pb-4 bg-[#f4f5f7] p-3 rounded-md">
                 <div class="flex items-center justify-between mb-2">
                   <div class="flex">
                     <img :src="`https://replicagunsca.b-cdn.net/images/products/small/${comment.item.imageUrl}`"

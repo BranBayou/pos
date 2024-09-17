@@ -6,26 +6,31 @@ import { useToast } from 'vue-toastification';
 export const useAuthStore = defineStore('auth', () => {
   // Cashier State
   const isUserLoggedIn = ref(localStorage.getItem('token') ? true : false);
-  const currentUser = ref(localStorage.getItem('currentUser') || ''); // Track the cashier's name
-  const userRole = ref(localStorage.getItem('userRole') || ''); // Track the cashier's role
-  const token = ref(localStorage.getItem('token') || null); // Track the cashier's token
+  const currentUser = ref(localStorage.getItem('currentUser') || '');
+  const userRole = ref(localStorage.getItem('userRole') || ''); 
+  const token = ref(localStorage.getItem('token') || null);
   
   // Manager State
   const isManagerLoggedIn = ref(localStorage.getItem('managerToken') ? true : false);
-  const managerUser = ref(localStorage.getItem('managerUser') || ''); // Track the manager's name
-  const managerRole = ref(localStorage.getItem('managerRole') || ''); // Track the manager's role
-  const managerToken = ref(localStorage.getItem('managerToken') || null); // Track the manager's token
+  const managerUser = ref(localStorage.getItem('managerUser') || ''); 
+  const managerRole = ref(localStorage.getItem('managerRole') || ''); 
+  const managerToken = ref(localStorage.getItem('managerToken') || null); 
 
-  const usersList = ref([]); // List of users (cashiers)
+  const usersList = ref([]);
   const managerUsersList = ref([]);
+  const customersList = ref([]);
+  const selectedCustomer = ref(null);
 
   const isLogoutConfirmationVisible = ref(false);
   const isAddManagerApprovalRequest = ref(false);
-  const isCashierLoginInput = ref(true); // Login input type state
+  const isCashierLoginInput = ref(true); 
   const isAddBehaviourPopup = ref(false);
   const isAddItemPopup = ref(false);
   const isManagerLoginPopupVisible = ref(false);
   const isAddSalesPopupVisible = ref(false);
+  const isAddCustomerPopupVisible = ref(false);
+  const isCheckoutPopupVisible = ref(false);
+  const showCommentsModal = ref(false); 
 
   // Fetch Cashiers Function
   async function fetchCashiers() {
@@ -52,6 +57,19 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (error) {
       toast.error('Failed to load users', error.message);
       console.error('Failed to load users:', error.message);
+    }
+  }
+
+  // Fetch Customers Function
+  async function fetchCustomers() {
+    const toast = useToast();
+    try {
+      const response = await axios.get('http://localhost:3131/customers');
+      customersList.value = response.data;
+      console.log('Fetched Customers:', customersList.value);
+    } catch (error) {
+      toast.error('Failed to load customers', error.message);
+      console.error('Failed to load customers:', error.message);
     }
   }
 
@@ -153,11 +171,35 @@ export const useAuthStore = defineStore('auth', () => {
     console.log('Show mng request popup:', isAddManagerApprovalRequest.value);
   }
 
-  // 
+  // Toggle Add sales popup
   function toggleAddSalesPopup () {
     isAddSalesPopupVisible.value = !isAddSalesPopupVisible.value;
     console.log('Show sales popup:', isAddSalesPopupVisible.value);
   }
+
+  // Toggle Add customer popup
+
+  function toggleAddCustomerPopup () {
+    isAddCustomerPopupVisible.value = !isAddCustomerPopupVisible.value;
+    console.log('Show Customers popup:', !isAddSalesPopupVisible.value);
+  }
+
+   // Function to set selected customer
+   const setSelectedCustomer = (customer) => {
+     selectedCustomer.value = customer;
+   };
+
+   //
+   function toggleCheckoutPopup () {
+     isCheckoutPopupVisible.value =!isCheckoutPopupVisible.value;
+     console.log('Show checkout popup:', !isCheckoutPopupVisible.value);
+   }
+
+   // 
+   function toggleShowCommentsModal () {
+     showCommentsModal.value = !showCommentsModal.value;
+     console.log('Show comments modal:', !showCommentsModal.value);
+   }
 
   return {
     isUserLoggedIn,
@@ -170,8 +212,10 @@ export const useAuthStore = defineStore('auth', () => {
     managerRole,
     managerToken,
     managerUsersList,
+    customersList, 
     fetchCashiers,
     fetchManager,
+    fetchCustomers,
     login,
     logout,
     isCashierLoginInput,
@@ -187,5 +231,14 @@ export const useAuthStore = defineStore('auth', () => {
     toggleManagerLoginPopup,
     isAddSalesPopupVisible,
     toggleAddSalesPopup,
+    isAddCustomerPopupVisible,
+    toggleAddCustomerPopup,
+    selectedCustomer,
+    setSelectedCustomer,
+    isCheckoutPopupVisible,
+    toggleCheckoutPopup,
+    showCommentsModal,
+    toggleShowCommentsModal
   };
 });
+

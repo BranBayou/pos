@@ -4,11 +4,12 @@ const fs = require('fs');
 const path = require('path');
 const jwt = require('jsonwebtoken');
 const products = require('./new-products');
-const users = require('./users'); // Import the users list
+const users = require('./users'); 
+const customers = require('./customers'); 
 
 const app = express();
 const PORT = 3131;
-const SECRET_KEY = 'your_secret_key'; // Replace with your own secret key
+const SECRET_KEY = 'your_secret_key'; 
 
 // Use CORS middleware
 app.use(cors());
@@ -21,7 +22,7 @@ app.post('/login', (req, res) => {
   const { username, password } = req.body;
   const storeId = req.headers['store-id'];
 
-  console.log('Received login request:', { username, storeId }); // Log request details
+  console.log('Received login request:', { username, storeId });
 
   // Find the user by username
   const user = users.find(u => u.username === username);
@@ -44,7 +45,7 @@ app.post('/login', (req, res) => {
   const token = jwt.sign(
     {
       id: user.id,
-      username: user.username, // Use username in the token payload
+      username: user.username, 
       role: user.role,
       storeId,
     },
@@ -56,7 +57,6 @@ app.post('/login', (req, res) => {
   res.json({ message: 'Login successful', token, role: user.role });
 });
 
-
 // Route to serve products
 app.get('/products', (req, res) => {
   res.json(products);
@@ -64,11 +64,11 @@ app.get('/products', (req, res) => {
 
 // Route to serve the latest file and related data
 app.get('/Files/GetFiles', (req, res) => {
-  const dirPath = path.join(__dirname, 'your_directory'); // Replace 'your_directory' with the actual directory path
+  const dirPath = path.join(__dirname, 'your_directory'); 
 
   fs.readdir(dirPath, (err, files) => {
     if (err) {
-      console.error('Failed to read directory:', err.message); // Log error
+      console.error('Failed to read directory:', err.message); 
       return res.status(500).json({ error: 'Failed to read directory' });
     }
 
@@ -95,15 +95,22 @@ app.get('/Files/GetFiles', (req, res) => {
 });
 
 app.get('/branchusers', (req, res) => {
-  // Assuming you want to return all users or just the ones with specific roles
+  // return all users or just the ones with specific roles
   const filteredUsers = users.filter(user => user.role === 'Cashier' || user.role === 'Manager' || user.role === 'SalesPerson');
 
   res.json(filteredUsers);
 });
 
+// Endpoint to fetch customers
+app.get('/customers', (req, res) => {
+  res.json(customers);
+});
+
+
 // Serve static files if necessary
-app.use('/files', express.static(path.join(__dirname, 'your_directory'))); // Replace 'your_directory' with the actual directory path
+app.use('/files', express.static(path.join(__dirname, 'your_directory'))); 
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
