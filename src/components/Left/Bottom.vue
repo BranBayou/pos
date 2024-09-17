@@ -30,7 +30,7 @@ function handleCheckoutPopup() {
 </script>
 
 <template>
-  <div class="border shadow-lg w-full rounded-2xl flex items-center content-between gap-5 my-5 px-5">
+  <div class="bg-white w-full rounded-2xl flex items-center content-between gap-5 my-5 px-5">
     <Checkout />
     <div class="flex gap-5">
       <p class="font-semibold">Items: {{ totalItems }}</p>

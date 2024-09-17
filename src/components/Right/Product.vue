@@ -121,7 +121,7 @@ nextTick(() => {
   <AddSales />
   <CommentPopup v-if="showCommentPopup" :item="selectedItemForComment" @commentSubmitted="handleCommentSubmitted" @close="showCommentPopup = false" />
   <div class="w-[95%] relative mx-auto flex flex-col gap-2">
-    <div v-for="(item, index) in items" :key="index" class="collapse bg-base-200 rounded-2xl shadow-xl">
+    <div v-for="(item, index) in items" :key="index" class="collapse rounded-2xl bg-[#f4f5f7]">
       <input type="checkbox" :checked="isOpen[index]" @change="toggleAccordion(index)" />
       <div class="collapse-title text-xl font-medium flex justify-between items-center">
         <span

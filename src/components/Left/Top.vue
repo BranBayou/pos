@@ -157,7 +157,7 @@ onUnmounted(() => {
     <AddCustomer />
     
     <!-- Cashier Section -->
-    <div class="relative flex items-center border shadow-lg w-full p-5 rounded-2xl gap-5 my-3">  
+    <div class="relative flex items-center bg-white w-full p-5 rounded-2xl gap-5 my-3">  
       <div>
         <button class="flex flex-col items-center">
           <img style="width: 30px;" src="/cashier.png" alt="">
@@ -175,7 +175,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Manager Section -->
-    <div v-show="authStore.isManagerLoggedIn" class="relative flex items-center border shadow-lg w-full p-2 rounded-2xl gap-5 my-3">  
+    <div v-show="authStore.isManagerLoggedIn" class="relative flex items-center bg-white w-full p-2 rounded-2xl gap-5 my-3">  
       <div>
         <button class="flex flex-col items-center">
           <img style="width: 30px;" src="/manager.svg" alt="Manager Image">
@@ -206,7 +206,7 @@ onUnmounted(() => {
     <button
       :disabled="!authStore.isUserLoggedIn" 
       @click="authStore.toggleAddBehaviourPopup"
-      class="border shadow-lg w-full text-center p-5 rounded-2xl flex gap-5 my-3 cursor-pointer">
+      class="bg-white w-full text-center p-5 rounded-2xl flex gap-5 my-3 cursor-pointer">
       <span class="text-center mx-auto cursor-pointer">
         <i class="pi pi-plus text-purple-500 bg-purple-100 p-4 rounded-full" :class="{ 'opacity-50 cursor-not-allowed': !authStore.isUserLoggedIn }" style="font-size: 1.875rem;"></i>
       </span>

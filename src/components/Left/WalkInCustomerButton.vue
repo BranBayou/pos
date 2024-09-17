@@ -21,7 +21,7 @@ const handleWalkInCustomer = () => {
     <div>
         <button
          @click="handleWalkInCustomer" 
-         class="border shadow-lg text-center p-5 rounded-2xl flex gap-5 my-3 w-full">
+         class="bg-white text-center p-5 rounded-2xl flex gap-5 my-3 w-full">
             <span class="flex items-center gap-5 text-center cursor-pointer">
                 <div class="flex items-center">
                     <img class="w-14 h-14" src="/walking.png" alt="Walking Image">
