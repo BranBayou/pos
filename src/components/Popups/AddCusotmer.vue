@@ -89,7 +89,7 @@ const resetForm = () => {
                 <!-- Search Input -->
                 <div class="mb-4 mr-20">
                   <input type="text" v-model="searchQuery" placeholder="Search customers by name, phone or email..."
-                    class="p-3 border w-full rounded-2xl" />
+                    class="p-3 border w-full rounded-2xl bg-[#f4f5f7]" />
                 </div>
 
                 <!-- Display filtered customers (at most three) -->

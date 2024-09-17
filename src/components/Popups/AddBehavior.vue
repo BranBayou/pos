@@ -36,7 +36,7 @@ function moveButtonToParent(buttonName) {
           <div v-if="authStore.isAddBehaviourPopup" class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-50 w-10/12">
             <div class="bg-white rounded-2xl shadow-lg p-6 w-full">
               <h1 class="font-semibold text-[24px]">Add Behaviour</h1>
-              <div class="bg-[#f4f5f7]" v-if="buttons.length > 0">
+              <div class="bg-[#f4f5f7] rounded-2xl" v-if="buttons.length > 0">
                 <div v-for="button in buttons" :key="button.name" class="flex px-3">
                   <component :is="button.component" @click="moveButtonToParent(button.name)" />
                 </div>
