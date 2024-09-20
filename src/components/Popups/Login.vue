@@ -12,7 +12,6 @@ const authStore = useAuthStore(); // For login, fetching users, toggling, and st
 const selectedUser = ref(null);
 const username = ref('');
 const password = ref('');
-const storeId = ref(''); 
 
 const toast = useToast();
 const emit = defineEmits(["close-modal"]);
@@ -45,7 +44,7 @@ const login = async () => {
   }
 
   try {
-    await authStore.login(usernameValue, passwordValue, storeId.value);
+    await authStore.login(usernameValue, passwordValue, authStore.storeId);
     emit('close-modal');
     username.value = '';
     password.value = '';

@@ -77,7 +77,7 @@ export const useProductStore = defineStore('product', {
                         }
 
                         // Clear window.products after use to avoid conflicts with future scripts
-                        delete window.products;
+                        // delete window.products;
 
                         // Update loading percentage for each script
                         loadedScripts++;

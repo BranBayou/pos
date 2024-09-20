@@ -32,11 +32,16 @@ export const useAuthStore = defineStore('auth', () => {
   const isCheckoutPopupVisible = ref(false);
   const showCommentsModal = ref(false); 
 
-  // Fetch Cashiers Function
+  const storeId = '3XoymAusFEOcrifyfM1Tfw';
+
   async function fetchCashiers() {
     const toast = useToast();
     try {
-      const response = await axios.get('http://localhost:3131/branchusers');
+      const response = await axios.get('api/api/Users/BranchUsers', {
+        headers: {
+          'store-id': storeId // Pass the storeId as a header
+        }
+      });
       const cashiers = response.data.filter(user => user.role === 'Cashier');
       usersList.value = cashiers;
       console.log('Fetched Cashier Users:', usersList.value);
@@ -50,7 +55,11 @@ export const useAuthStore = defineStore('auth', () => {
   async function fetchManager() {
     const toast = useToast();
     try {
-      const response = await axios.get('http://localhost:3131/branchusers');
+      const response = await axios.get('/api/api/Users/BranchUsers', {
+        headers: {
+          'store-id': storeId // Pass the storeId as a header
+        }
+      });
       const managers = response.data.filter(user => user.role === 'Manager');
       managerUsersList.value = managers;
       console.log('Fetched Manager Users:', managerUsersList.value);
@@ -61,63 +70,64 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // Fetch Customers Function
-  async function fetchCustomers() {
-    const toast = useToast();
-    try {
-      const response = await axios.get('http://localhost:3131/customers');
-      customersList.value = response.data;
-      console.log('Fetched Customers:', customersList.value);
-    } catch (error) {
-      toast.error('Failed to load customers', error.message);
-      console.error('Failed to load customers:', error.message);
-    }
-  }
+  // async function fetchCustomers() {
+  //   const toast = useToast();
+  //   try {
+  //     const response = await axios.get('http://localhost:3131/customers');
+  //     customersList.value = response.data;
+  //     console.log('Fetched Customers:', customersList.value);
+  //   } catch (error) {
+  //     toast.error('Failed to load customers', error.message);
+  //     console.error('Failed to load customers:', error.message);
+  //   }
+  // }
 
   // Login API function for both cashier and manager
-  async function login(username, password, storeId) {
+  async function login(userId, pin, storeId) {
     const toast = useToast();
     try {
-      const response = await axios.post('http://localhost:3131/login', {
-        username,
-        password,
+      const response = await axios.post('api/api/Users/Login', {
+        userId, // Using `userId` instead of `username`
+        pin,    // Using `pin` instead of `password`
       }, {
         headers: {
           'store-id': storeId,
         }
       });
-
-      const { token: authToken, role } = response.data;
-
+  
+      const { jwt: authToken, role, fullName } = response.data; // Matching API's response
+  
       // If cashier logs in
       if (role === 'Cashier') {
         localStorage.setItem('token', authToken);
-        localStorage.setItem('currentUser', username);
+        localStorage.setItem('currentUser', fullName);
         localStorage.setItem('userRole', role);
         token.value = authToken;
-        currentUser.value = username;
+        currentUser.value = fullName;
         userRole.value = role;
         isUserLoggedIn.value = true;
       }
-
+  
       // If manager logs in
       if (role === 'Manager') {
         localStorage.setItem('managerToken', authToken);
-        localStorage.setItem('managerUser', username);
+        localStorage.setItem('managerUser', fullName);
         localStorage.setItem('managerRole', role);
         managerToken.value = authToken;
-        managerUser.value = username;
+        managerUser.value = fullName;
         managerRole.value = role;
         isManagerLoggedIn.value = true;
       }
-
-      toast.success(`Welcome back ${username}`);
-      console.log('Current User:', currentUser.value, 'Role:', userRole);
+  
+      toast.success(`Welcome back ${fullName}`);
+      console.log('Current User:', currentUser.value, 'Role:', userRole.value);
     } catch (error) {
       toast.error('Login failed!');
-      console.error('Login failed:', error.response?.data?.error || error.message);
+      console.error('Login failed:', error.response?.data?.errors || error.message);
       throw error;
     }
   }
+  
 
   // Logout Function
   function logout(role) {
@@ -215,7 +225,7 @@ export const useAuthStore = defineStore('auth', () => {
     customersList, 
     fetchCashiers,
     fetchManager,
-    fetchCustomers,
+    // fetchCustomers,
     login,
     logout,
     isCashierLoginInput,

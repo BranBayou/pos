@@ -22,7 +22,7 @@ const displayedCustomer = ref(null);
 
 // Fetch customers when component mounts
 onMounted(() => {
-  authStore.fetchCustomers();
+  // authStore.fetchCustomers();
 });
 
 // Computed property to filter customers based on the search query
