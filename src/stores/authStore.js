@@ -37,7 +37,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function fetchCashiers() {
     const toast = useToast();
     try {
-      const response = await axios.get('api/api/Users/BranchUsers', {
+      const response = await axios.get('/api/Users/BranchUsers', {
         headers: {
           'store-id': storeId // Pass the storeId as a header
         }
@@ -55,7 +55,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function fetchManager() {
     const toast = useToast();
     try {
-      const response = await axios.get('/api/api/Users/BranchUsers', {
+      const response = await axios.get('/api/Users/BranchUsers', {
         headers: {
           'store-id': storeId // Pass the storeId as a header
         }
@@ -86,7 +86,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(userId, pin, storeId) {
     const toast = useToast();
     try {
-      const response = await axios.post('api/api/Users/Login', {
+      const response = await axios.post('/api/Users/Login', {
         userId, // Using `userId` instead of `username`
         pin,    // Using `pin` instead of `password`
       }, {

@@ -15,7 +15,7 @@ export const useProductStore = defineStore('product', {
 
             try {
                 // Fetch the list of file URLs first
-                const response = await fetch('api/api/File/GetFiles', {
+                const response = await fetch('/api/File/GetFiles', {
                     headers: {
                         'store-id': storeId,
                     }
