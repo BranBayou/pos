@@ -25,6 +25,13 @@ const showCommentPopup = ref(false);  // Control to show AddComment popup
 const selectedItemForComment = ref(null);  // Track the selected item for which the comment is being added
 const backupDiscountPercentage = ref(null);  // Backup discount percentage
 
+// Validate input field 
+function handleInput(item) {
+  if (item.qty > item.MaxQty) {
+    item.qty = item.MaxQty;
+  }
+}
+
 function toggleAccordion(index) {
   isOpen.value[index] = !isOpen.value[index];
 }
