@@ -25,11 +25,19 @@ const showCommentPopup = ref(false);  // Control to show AddComment popup
 const selectedItemForComment = ref(null);  // Track the selected item for which the comment is being added
 const backupDiscountPercentage = ref(null);  // Backup discount percentage
 
-// Validate input field 
 function handleInput(item) {
   if (item.qty > item.MaxQty) {
     item.qty = item.MaxQty;
   }
+
+  if (item.qty === 0) {
+    orderStore.deleteOrderItem(item);  
+  }
+
+  // if (item.qty === null || item.qty === undefined || item.qty === '') {
+  //   orderStore.deleteOrderItem(item); 
+  //   return;
+  // }
 }
 
 function toggleAccordion(index) {
