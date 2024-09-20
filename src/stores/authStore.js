@@ -34,6 +34,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const storeId = '3XoymAusFEOcrifyfM1Tfw';
 
+  // Fetch Cashier
   async function fetchCashiers() {
     const toast = useToast();
     try {
@@ -51,7 +52,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Fetch Managers Function
+  // Fetch Managers 
   async function fetchManager() {
     const toast = useToast();
     try {
@@ -83,7 +84,7 @@ export const useAuthStore = defineStore('auth', () => {
   // }
 
   // Login API function for both cashier and manager
-  async function login(userId, pin, storeId) {
+  async function login(userId, pin) {
     const toast = useToast();
     try {
       const response = await axios.post('/api/Users/Login', {
