@@ -5,7 +5,8 @@ export const useOrderStore = defineStore('orders', () => {
   const state = reactive({
     orderItems: [],
     gst: 5, // GST default value
-    pst: 7  // PST default value
+    pst: 7, 
+    overallDiscount: ref(0),
   });
 
   const selectedSalesPerson = ref(null);
@@ -27,19 +28,29 @@ export const useOrderStore = defineStore('orders', () => {
     const existingItem = state.orderItems.find(orderItem =>
       orderItem.id === item.id && orderItem.Sku === item.Sku && orderItem.Price === item.Price
     );
-
+  
     if (existingItem) {
-      existingItem.qty++; 
+      existingItem.qty++;
     } else {
-      state.orderItems.push({
+      const newItem = {
         ...item,
         qty: 1,
         discountPercentage: item.discountPercentage || 0, // Ensure discount is tracked
         OriginalPrice: item.Price, // Track original price for discount calculations
         salesPerson: selectedSalesPerson.value // Assign the selected salesperson to the item
-      });
+      };
+  
+      // Apply the overall discount to the newly added item if it exists
+      if (state.overallDiscount && state.overallDiscount > 0) {
+        newItem.Price = (newItem.OriginalPrice * (1 - state.overallDiscount / 100)).toFixed(2);
+        newItem.discountPercentage = state.overallDiscount; // Apply the overall discount percentage
+      }
+  
+      state.orderItems.push(newItem);
     }
   }
+  
+  
 
   // Increment quantity of a specific order item
   function incrementOrderItem(item) {
@@ -123,6 +134,15 @@ export const useOrderStore = defineStore('orders', () => {
     return getOrderTotal.value * (state.pst / 100);
   });
 
+  function applyOverallDiscount(discountPercentage) {
+    state.overallDiscount = discountPercentage;
+    state.orderItems.forEach(item => {
+      item.discountPercentage = discountPercentage; // Set the discountPercentage for the item
+      item.Price = (item.OriginalPrice * (1 - discountPercentage / 100)).toFixed(2); // Recalculate the price
+    });
+  }
+  
+
   return {
     state,
     addOrderItem,
@@ -139,5 +159,6 @@ export const useOrderStore = defineStore('orders', () => {
     selectedSalesPerson,
     setSelectedSalesPerson,
     applySalesPersonToAllItems,
+    applyOverallDiscount,
   };
 });
