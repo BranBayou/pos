@@ -59,8 +59,8 @@ const handlePriceInput = (item) => {
   if (item.Price <= 0) {
     item.Price = item.OriginalPrice;
   }
-
-  orderStore.updateDiscountPercentage(item, ((item.OriginalPrice - item.Price) / item.OriginalPrice * 100).toFixed(2));
+  // Update item price in store
+  orderStore.updateItemPrice(item); // Call a function to handle price change
 };
 
 const handleDiscountInput = (item) => {
@@ -70,7 +70,7 @@ const handleDiscountInput = (item) => {
   if (item.discountPercentage > 100) {
     item.discountPercentage = 100;
   }
-
+  // Update item discount in store
   orderStore.updateDiscountPercentage(item, item.discountPercentage);
 };
 
@@ -86,6 +86,13 @@ const checkValueChanged = (key, item) => {
     checkManagerPermission(item);  // Trigger if value has changed
   }
 };
+
+// Watch overall discount changes to update the price in real-time
+watch(() => orderStore.state.overallDiscount, () => {
+  props.items.forEach(item => {
+    item.Price = (item.OriginalPrice * (1 - orderStore.state.overallDiscount / 100)).toFixed(2);
+  });
+});
 
 // Trigger comment popup when manager approval is needed
 const checkManagerPermission = function(item) {
@@ -150,6 +157,7 @@ nextTick(() => {
         </div>
         <div>
           <p class="font-semibold">${{ (item.Price * item.qty).toFixed(2) }}</p>
+          <!-- Show discount percentage dynamically based on overall discount -->
           <p v-if="item.discountPercentage" class="text-sm">{{ item.discountPercentage }}% discount applied</p>
         </div>
       </div>

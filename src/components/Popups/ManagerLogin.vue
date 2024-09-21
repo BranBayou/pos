@@ -38,13 +38,12 @@ const loginManager = async () => {
       return;
     }
 
-    // Call the login function from the authStore
-    await authStore.login(usernameValue, passwordValue);
+    // Call the login function from the authStore (using existing API logic)
+    await authStore.login(selectedUser.value.id, password.value);
 
-    toast.success(`Manager ${usernameValue} logged in successfully`);
-
+    // Reset and close the modal after successful login
     password.value = '';
-    authStore.toggleManagerLoginPopup(); // Close the modal after successful login
+    authStore.toggleManagerLoginPopup();
   } catch (error) {
     toast.error('Manager login failed');
     console.error('Manager login failed:', error);
@@ -83,6 +82,8 @@ const loginManager = async () => {
     </Transition>
   </Teleport>
 </template>
+
+
 
 <style>
 .modal-outer-enter-active,

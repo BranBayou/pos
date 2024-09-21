@@ -60,7 +60,7 @@ export const useProductStore = defineStore('product', {
                 // Load each file by dynamically injecting <script> tags
                 fileUrls.forEach((file, index) => {
                     const script = document.createElement('script');
-                    script.src = `api/GenJs/${file.fileUrl}`;  // Adjust the URL to point to the correct server
+                    script.src = `https://localhost:7293/GenJs/${file.fileUrl}`;  // Adjust the URL to point to the correct server
                     script.async = true;
 
                     // When the script is loaded

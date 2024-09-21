@@ -45,7 +45,7 @@ const login = async () => {
 
   try {
     // Use the login function from the store, which uses the API call
-    await authStore.login(userId, pin, authStore.storeId);
+    await authStore.login(userId, pin, 'authStore.storeId');
 
     // Close modal after successful login
     emit('close-modal');
@@ -61,10 +61,10 @@ const login = async () => {
 // Handle password input for numeric keypad
 const handlePasswordInput = (num) => {
   if (password.value.length < 6) {
-    password.value += num; // Add number to password field
+    password.value += num; 
   }
   if (password.value.length === 6) {
-    login(); // Trigger login when PIN is complete (6 digits)
+    login(); 
   }
 };
 
