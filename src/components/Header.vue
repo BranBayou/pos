@@ -27,7 +27,7 @@ const authStore = useAuthStore();
         <i 
          :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)"
          :class="{ 'opacity-50 cursor-not-allowed': !(authStore.isUserLoggedIn || authStore.isManagerLoggedIn) }"
-         class="pi pi-cog text-center text-purple-500 col-span-1"
+         class="pi pi-cog text-center text-purple-500 col-span-1 cursor-pointer"
          style="font-size: 1.875rem;"
         ></i>
     </div>

@@ -22,7 +22,7 @@ function saveOrderAsDraft() {
     <i 
      :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)"
      :class="{ 'opacity-50 cursor-not-allowed': !(authStore.isUserLoggedIn || authStore.isManagerLoggedIn) }"
-     class="pi pi-pause text-center text-purple-500"
+     class="pi pi-pause text-center text-purple-500 cursor-pointer"
      style="font-size: 1.875rem;"
      @click="saveOrderAsDraft"
     ></i>

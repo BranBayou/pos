@@ -20,14 +20,14 @@ const draftCount = computed(() => orderStore.fetchDraftOrders().length);
     <i
       :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)"
       :class="{ 'opacity-50 cursor-not-allowed': !(authStore.isUserLoggedIn || authStore.isManagerLoggedIn) }"
-      class="pi pi-bell text-center text-purple-500"
+      class="pi pi-bell text-center text-purple-500 cursor-pointer"
       style="font-size: 1.875rem;"
       @click="orderStore.toggleDraftList"
     ></i>
 
     <!-- Badge to show the number of drafts -->
     <span v-if="draftCount > 0"
-      class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full"
+      class="absolute top-0 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full"
       style="transform: translate(50%, -50%);"
     >
       {{ draftCount }}
