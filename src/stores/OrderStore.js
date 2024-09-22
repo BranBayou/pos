@@ -1,4 +1,4 @@
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { defineStore } from 'pinia';
 
 export const useOrderStore = defineStore('orders', () => {
@@ -22,6 +22,18 @@ export const useOrderStore = defineStore('orders', () => {
     });
   }
 
+  // Helper function to save the current orderItems to localStorage
+  function saveOrderItemsToLocalStorage() {
+    localStorage.setItem('orderItems', JSON.stringify(state.orderItems));
+  }
+
+  // Helper function to load orderItems from localStorage
+  function loadOrderItemsFromLocalStorage() {
+    const savedItems = JSON.parse(localStorage.getItem('orderItems'));
+    if (savedItems) {
+      state.orderItems = savedItems;
+    }
+  }
 
   // Add an order item to the list or increment the quantity if it exists
   function addOrderItem(item) {
@@ -48,9 +60,10 @@ export const useOrderStore = defineStore('orders', () => {
   
       state.orderItems.push(newItem);
     }
+
+    // Save the updated orderItems to localStorage
+    saveOrderItemsToLocalStorage();
   }
-  
-  
 
   // Increment quantity of a specific order item
   function incrementOrderItem(item) {
@@ -59,6 +72,7 @@ export const useOrderStore = defineStore('orders', () => {
     );
     if (existingItem && existingItem.qty < existingItem.MaxQty) {
       existingItem.qty++;
+      saveOrderItemsToLocalStorage(); // Save after incrementing
     }
   }
 
@@ -69,6 +83,7 @@ export const useOrderStore = defineStore('orders', () => {
     );
     if (existingItem && existingItem.qty > 1) {
       existingItem.qty--;
+      saveOrderItemsToLocalStorage(); // Save after decrementing
     } else if (existingItem && existingItem.qty === 1) {
       deleteOrderItem(existingItem);
     }
@@ -81,6 +96,7 @@ export const useOrderStore = defineStore('orders', () => {
     );
     if (index !== -1) {
       state.orderItems.splice(index, 1);
+      saveOrderItemsToLocalStorage(); // Save after deleting
     }
   }
 
@@ -141,6 +157,10 @@ export const useOrderStore = defineStore('orders', () => {
       item.Price = (item.OriginalPrice * (1 - discountPercentage / 100)).toFixed(2); // Recalculate the price
     });
   }
+
+  onMounted(() => {
+    loadOrderItemsFromLocalStorage();
+  });
 
   const draftOrders = ref([]); // Store the fetched draft orders reactively
   //
