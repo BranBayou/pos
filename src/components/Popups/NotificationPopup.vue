@@ -1,5 +1,4 @@
 <script setup>
-import { ref } from 'vue';
 import { useOrderStore } from '@/stores/OrderStore';
 
 // Receive props
@@ -12,37 +11,40 @@ const orderStore = useOrderStore();
 
 // Function to load a draft order
 function loadDraftOrder(draft) {
-  orderStore.loadDraftOrder(draft); // This calls the function to load the draft in the store
+  orderStore.loadDraftOrder(draft); // Load the draft order as active in the store
+  orderStore.toggleDraftList(); // Close the draft list after loading
 }
 </script>
 
+
 <template>
-    <Teleport to="body">
-      <Transition name="modal-outer">
-        <!-- Use orderStore.showDraftList to control visibility -->
-        <div v-show="orderStore.showDraftList" @click="orderStore.toggleDraftList"
-          class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
-          
-          <Transition name="modal-inner">
-            <!-- Prevent popup from closing when clicking inside -->
-            <div v-if="draftOrders && draftOrders.length" @click.stop
-              class="flex p-4 my-10 w-10/12 bg-white self-start rounded-2xl">
-              
-              <ul>
-                <li v-for="(draft, index) in draftOrders" :key="index">
-                  <span @click="loadDraftOrder(draft)">
-                    Draft Order #{{ index + 1 }} - {{ new Date(draft.timestamp).toLocaleString() }}
-                  </span>
-                </li>
-              </ul>
-            </div>
-  
-            <p v-else>No drafts available</p>
-          </Transition>
-        </div>
-      </Transition>
-    </Teleport>
-  </template>
+  <Teleport to="body">
+    <Transition name="modal-outer">
+      <!-- Use orderStore.showDraftList to control visibility -->
+      <div v-show="orderStore.showDraftList" @click="orderStore.toggleDraftList"
+        class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
+        
+        <Transition name="modal-inner">
+          <!-- Prevent popup from closing when clicking inside -->
+          <div v-if="draftOrders && draftOrders.length" @click.stop
+            class="flex p-4 my-10 w-10/12 bg-white self-start rounded-2xl">
+            
+            <ul>
+              <li v-for="(draft, index) in draftOrders" :key="index">
+                <span @click="loadDraftOrder(draft)">
+                  Draft Order #{{ index + 1 }} - {{ new Date(draft.timestamp).toLocaleString() }}
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          <p v-else>No drafts available</p>
+        </Transition>
+      </div>
+    </Transition>
+  </Teleport>
+</template>
+
   
 
 <style scoped>
