@@ -141,8 +141,39 @@ export const useOrderStore = defineStore('orders', () => {
       item.Price = (item.OriginalPrice * (1 - discountPercentage / 100)).toFixed(2); // Recalculate the price
     });
   }
-  
 
+  const draftOrders = ref([]); // Store the fetched draft orders reactively
+  //
+  function saveOrderAsDraft() {
+    const draft = { ...state.orderItems, timestamp: Date.now() };
+    draftOrders.value.push(draft); // Update the reactive draftOrders array
+
+    // Save the updated draft orders to localStorage for persistence
+    localStorage.setItem('draftOrders', JSON.stringify(draftOrders.value));
+
+    // Clear the current active order
+    state.orderItems = [];
+  }
+
+  // Fetch the draft orders from localStorage and update the reactive array
+  function fetchDraftOrders() {
+    const savedDrafts = JSON.parse(localStorage.getItem('draftOrders')) || [];
+    draftOrders.value = savedDrafts; // Update the reactive draftOrders array
+    return draftOrders.value;
+  }
+  
+  function loadDraftOrder(draftOrder) {
+    state.orderItems = draftOrder; // Load the draft order as active
+  }
+
+  const showDraftList = ref(false); // Toggle state
+
+  // Toggle the draft list visibility
+  function toggleDraftList() {
+    showDraftList.value = !showDraftList.value;
+    console.log('order notification toggeled');
+  }
+  
   return {
     state,
     addOrderItem,
@@ -160,5 +191,11 @@ export const useOrderStore = defineStore('orders', () => {
     setSelectedSalesPerson,
     applySalesPersonToAllItems,
     applyOverallDiscount,
+    saveOrderAsDraft,
+    fetchDraftOrders,
+    loadDraftOrder,
+    showDraftList,
+    toggleDraftList,
+    draftOrders,
   };
 });
