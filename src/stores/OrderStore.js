@@ -30,10 +30,9 @@ export const useOrderStore = defineStore('orders', () => {
   // Helper function to load orderItems from localStorage
   function loadOrderItemsFromLocalStorage() {
     const savedItems = JSON.parse(localStorage.getItem('orderItems'));
-    if (savedItems) {
-      state.orderItems = savedItems;
-    }
+    state.orderItems = Array.isArray(savedItems) ? savedItems : []; // Fallback to an empty array
   }
+  
 
   // Add an order item to the list or increment the quantity if it exists
   function addOrderItem(item) {
@@ -131,14 +130,17 @@ export const useOrderStore = defineStore('orders', () => {
   });
 
   // Get all order items
-  const getOrderItems = computed(() => state.orderItems);
+  const getOrderItems = computed(() => state.orderItems); 
 
   // Get the total price of the order
   const getOrderTotal = computed(() => {
-    return state.orderItems.reduce((total, item) => {
-      return total + (item.Price * item.qty);
-    }, 0);
+    return Array.isArray(state.orderItems)
+      ? state.orderItems.reduce((total, item) => {
+          return total + (parseFloat(item.Price) * item.qty);
+        }, 0)
+      : 0; // Fallback to 0 if orderItems is not an array
   });
+  
 
   // Get the total GST amount
   const getGstAmount = computed(() => {
@@ -158,33 +160,50 @@ export const useOrderStore = defineStore('orders', () => {
     });
   }
 
-  onMounted(() => {
-    loadOrderItemsFromLocalStorage();
-  });
-
   const draftOrders = ref([]); // Store the fetched draft orders reactively
   //
   function saveOrderAsDraft() {
-    const draft = { ...state.orderItems, timestamp: Date.now() };
-    draftOrders.value.push(draft); // Update the reactive draftOrders array
-
-    // Save the updated draft orders to localStorage for persistence
+    const draft = {
+      orderItems: [...state.orderItems], // Clone the current orderItems to draft
+      timestamp: Date.now(), // Add a unique timestamp to each draft
+    };
+    
+    draftOrders.value.push(draft); // Add the draft to the draftOrders array
+    
+    // Save the updated draft orders to localStorage
     localStorage.setItem('draftOrders', JSON.stringify(draftOrders.value));
-
-    // Clear the current active order
-    state.orderItems = [];
+    
+    // Clear the current active orderItems and remove from localStorage
+    state.orderItems = []; // Clear the orderItems state
+    localStorage.removeItem('orderItems'); // Remove active orderItems from localStorage
   }
+  
+  
 
   // Fetch the draft orders from localStorage and update the reactive array
   function fetchDraftOrders() {
     const savedDrafts = JSON.parse(localStorage.getItem('draftOrders')) || [];
     draftOrders.value = savedDrafts; // Update the reactive draftOrders array
+    console.log('draft=', draftOrders.value)
     return draftOrders.value;
   }
   
   function loadDraftOrder(draftOrder) {
-    state.orderItems = draftOrder; // Load the draft order as active
+    // Set the selected draft orderItems as the new active order
+    state.orderItems = draftOrder.orderItems;
+  
+    // Remove the loaded draft from draftOrders
+    const draftIndex = draftOrders.value.findIndex(draft => draft.timestamp === draftOrder.timestamp);
+    if (draftIndex !== -1) {
+      draftOrders.value.splice(draftIndex, 1); // Remove the selected draft from draftOrders
+    }
+  
+    // Update localStorage: save the new active order and updated draftOrders
+    saveOrderItemsToLocalStorage(); // Save the new active order to localStorage
+    localStorage.setItem('draftOrders', JSON.stringify(draftOrders.value)); // Update the draft orders in localStorage
   }
+  
+  
 
   const showDraftList = ref(false); // Toggle state
 
@@ -193,6 +212,10 @@ export const useOrderStore = defineStore('orders', () => {
     showDraftList.value = !showDraftList.value;
     console.log('order notification toggeled');
   }
+
+  onMounted(() => {
+    loadOrderItemsFromLocalStorage();
+  });
   
   return {
     state,

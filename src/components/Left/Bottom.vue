@@ -9,15 +9,21 @@ const toast = useToast();
 const orderStore = useOrderStore();
 const authStore = useAuthStore();
 
-// Computed properties to calculate total items and unique SKUs
 const totalItems = computed(() => {
-  return orderStore.getOrderItems.reduce((total, item) => total + item.qty, 0);
+  // Ensure that orderItems is always treated as an array
+  return Array.isArray(orderStore.getOrderItems) 
+    ? orderStore.getOrderItems.reduce((total, item) => total + item.qty, 0) 
+    : 0;
 });
 
 const totalSkus = computed(() => {
-  const skus = orderStore.getOrderItems.map(item => item.Sku);
-  return new Set(skus).size; // Using Set to get unique SKUs
+  if (Array.isArray(orderStore.getOrderItems)) {
+    const skus = orderStore.getOrderItems.map(item => item.Sku);
+    return new Set(skus).size; // Using Set to get unique SKUs
+  }
+  return 0;
 });
+
 
 // Function to handle checkout popup visibility
 function handleCheckoutPopup() {
