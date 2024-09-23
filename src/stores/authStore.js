@@ -70,19 +70,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Fetch Customers Function
-  // async function fetchCustomers() {
-  //   const toast = useToast();
-  //   try {
-  //     const response = await axios.get('http://localhost:3131/customers');
-  //     customersList.value = response.data;
-  //     console.log('Fetched Customers:', customersList.value);
-  //   } catch (error) {
-  //     toast.error('Failed to load customers', error.message);
-  //     console.error('Failed to load customers:', error.message);
-  //   }
-  // }
-
   // Login API function for both cashier and manager
   async function login(userId, pin) {
     const toast = useToast();

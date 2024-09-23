@@ -7,13 +7,20 @@ import { useAuthStore } from '@/stores/authStore';
 
 const authStore = useAuthStore();
 const toast = useToast();
-const selectedUser = ref(null);
-const password = ref('');
+const selectedUserId = ref(null); // Now track by id, not the whole object
+const password = ref(''); // Password input
 
-// Fetch manager users on modal open using the store
+// Fetch managers when the modal opens
 onMounted(async () => {
   try {
     await authStore.fetchManager(); // Fetch managers using the store function
+    
+    // Check if the managerUsersList is populated
+    console.log('MGR' ,authStore.managerUsersList);
+    
+    if (authStore.managerUsersList && authStore.managerUsersList.length === 0) {
+      toast.error('No managers available');
+    }
   } catch (error) {
     toast.error('Failed to load manager users');
     console.error('Error loading manager users:', error);
@@ -23,27 +30,22 @@ onMounted(async () => {
 // Function to handle manager login
 const loginManager = async () => {
   try {
-    // Check if the manager is already logged in
-    if (authStore.isManagerLoggedIn) {
-      toast.error('Manager is already logged in');
-      authStore.isManagerLoginPopupVisible = false;
-      return;
-    }
-
-    const usernameValue = selectedUser.value?.username;
+    const selectedUser = authStore.managerUsersList.find(user => user.id === selectedUserId.value);
+    const userIdValue = selectedUser?.id;
     const passwordValue = password.value;
 
-    if (!usernameValue || !passwordValue) {
+    if (!userIdValue || !passwordValue) {
       toast.error('Username or password is missing');
       return;
     }
 
-    // Call the login function from the authStore (using existing API logic)
-    await authStore.login(selectedUser.value.id, password.value);
+    // Call the login function from the authStore
+    await authStore.login(userIdValue, password.value);
 
     // Reset and close the modal after successful login
     password.value = '';
-    authStore.toggleManagerLoginPopup();
+    authStore.toggleManagerLoginPopup(); // Close popup after login
+    toast.success('Manager logged in successfully!');
   } catch (error) {
     toast.error('Manager login failed');
     console.error('Manager login failed:', error);
@@ -62,7 +64,14 @@ const loginManager = async () => {
               <div class="flex gap-x-1 my-1">
                 <div class="card flex justify-center border-2 rounded-2xl w-full px-3">
                   <!-- Bind the manager list from the authStore -->
-                  <Select v-model="selectedUser" :options="authStore.managerUsersList" optionLabel="username" placeholder="Manager Login" class="w-full py-3" />
+                  <Select 
+                    v-model="selectedUserId" 
+                    :options="authStore.managerUsersList" 
+                    optionLabel="fullName"  
+                    optionValue="id"    
+                    placeholder="Manager Login" 
+                    class="w-full py-3"
+                  />
                 </div>
               </div>
               <div class="flex justify-center items-center gap-2 border-2 rounded-2xl py-3 px-3">
