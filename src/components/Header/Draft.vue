@@ -14,7 +14,6 @@ const orderStore = useOrderStore();
 
 function saveOrderAsDraft() {
   orderStore.saveOrderAsDraft();
-  toast.success('Order saved as draft!');
 }
 
 onMounted(async () => {

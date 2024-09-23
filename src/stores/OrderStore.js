@@ -1,5 +1,8 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import { defineStore } from 'pinia';
+import { useToast } from 'vue-toastification';
+
+const toast = useToast();
 
 export const useOrderStore = defineStore('orders', () => {
   const state = reactive({
@@ -163,6 +166,13 @@ export const useOrderStore = defineStore('orders', () => {
   const draftOrders = ref([]); // Store the fetched draft orders reactively
   //
   function saveOrderAsDraft() {
+    // Check if there are any items in the active order
+    if (state.orderItems.length === 0) {
+      console.log('No active order items to save as draft');
+      toast.error('Cannot save an empty order as draft!');
+      return; // Do not save the draft if there are no order items
+    }
+  
     const draft = {
       orderItems: [...state.orderItems], // Clone the current orderItems to draft
       timestamp: Date.now(), // Add a unique timestamp to each draft
@@ -176,7 +186,9 @@ export const useOrderStore = defineStore('orders', () => {
     // Clear the current active orderItems and remove from localStorage
     state.orderItems = []; // Clear the orderItems state
     localStorage.removeItem('orderItems'); // Remove active orderItems from localStorage
+    toast.success('Order saved as draft!');
   }
+  
   
   
 
@@ -189,8 +201,21 @@ export const useOrderStore = defineStore('orders', () => {
   }
   
   function loadDraftOrder(draftOrder) {
-    // Set the selected draft orderItems as the new active order
-    state.orderItems = draftOrder.orderItems;
+    // Merge the draft items into the current active orderItems
+    draftOrder.orderItems.forEach(draftItem => {
+      // Check if the draft item already exists in the current order
+      const existingItem = state.orderItems.find(
+        orderItem => orderItem.id === draftItem.id && orderItem.Sku === draftItem.Sku
+      );
+  
+      if (existingItem) {
+        // If the item exists, increment the quantity
+        existingItem.qty += draftItem.qty;
+      } else {
+        // If the item doesn't exist, add it to the active order
+        state.orderItems.push({ ...draftItem });
+      }
+    });
   
     // Remove the loaded draft from draftOrders
     const draftIndex = draftOrders.value.findIndex(draft => draft.timestamp === draftOrder.timestamp);
@@ -198,10 +223,11 @@ export const useOrderStore = defineStore('orders', () => {
       draftOrders.value.splice(draftIndex, 1); // Remove the selected draft from draftOrders
     }
   
-    // Update localStorage: save the new active order and updated draftOrders
-    saveOrderItemsToLocalStorage(); // Save the new active order to localStorage
+    // Update localStorage: save the updated active order and draft orders
+    saveOrderItemsToLocalStorage(); // Save the merged active order to localStorage
     localStorage.setItem('draftOrders', JSON.stringify(draftOrders.value)); // Update the draft orders in localStorage
   }
+  
   
   
 
