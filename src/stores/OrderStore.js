@@ -18,8 +18,8 @@ export const useOrderStore = defineStore('orders', () => {
     selectedSalesPerson.value = salesPerson; 
   }
 
+  // Apply the selected salesperson to all items in the order
   function applySalesPersonToAllItems(salesPerson) {
-    // Apply the selected salesperson to all items in the order
     state.orderItems.forEach((item) => {
       item.salesPerson = salesPerson;
     });
