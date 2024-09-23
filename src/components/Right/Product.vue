@@ -145,18 +145,18 @@ nextTick(() => {
   <div class="w-[95%] relative mx-auto flex flex-col gap-2">
     <div v-for="(item, index) in items" :key="index" class="collapse rounded-2xl bg-[#f4f5f7]">
       <input type="checkbox" :checked="isOpen[index]" @change="toggleAccordion(index)" />
-      <div class="collapse-title text-xl font-medium flex justify-between items-center">
+      <div class="collapse-title text-md font-medium flex justify-between items-center p-0 px-3">
         <span
-          class="absolute top-0 left-0 border-2 bg-purple-100 rounded-full flex items-center justify-center font-semibold w-5 h-5 text-center m-1 p-1">
+          class="absolute top-0 left-0 border-2 bg-purple-100 rounded-full flex items-center justify-center w-5 h-5 text-center m-1 p-1">
           {{ item.qty }}
         </span>
         <div class="flex items-center gap-4">
           <img :src="`https://replicagunsca.b-cdn.net/images/products/small/${item.ImageUrl}`" class="w-14 rounded-lg"
             alt="product-img" />
-          <p class="text-base font-semibold">{{ item.Name }}</p>
+          <p class="text-base font-medium">{{ item.Name }}</p>
         </div>
         <div>
-          <p class="font-semibold">${{ (item.Price * item.qty).toFixed(2) }}</p>
+          <p class="font-medium">${{ (item.Price * item.qty).toFixed(2) }}</p>
           <!-- Show discount percentage dynamically based on overall discount -->
           <p v-if="item.discountPercentage" class="text-sm">{{ item.discountPercentage }}% discount applied</p>
         </div>
@@ -165,11 +165,11 @@ nextTick(() => {
       <div class="collapse-content flex bg-white">
         <div class="collapse-left w-6/12 flex flex-col justify-between">
           <div class="flex items-center space-x-2 w-full justify-center gap-5 pt-6">
-            <Button class="pi pi-minus p-button-rounded p-2 font-extrabold" @click="orderStore.decrementOrderItem(item)"
+            <Button class="pi pi-minus p-button-rounded p-2 font-extrabold hover:bg-purple-100 hover:rounded-lg" @click="orderStore.decrementOrderItem(item)"
               style="font-size: 20px;" />
             <input type="number" class="text-center no-arrows border-2 rounded-lg py-1" v-model.number="item.qty"
               :min="1" :max="item.MaxQty" @input="handleInput(item)" />
-            <Button class="pi pi-plus p-button-rounded font-extrabold p-2" @click="orderStore.incrementOrderItem(item)"
+            <Button class="pi pi-plus p-button-rounded font-extrabold p-2 hover:bg-purple-100 hover:rounded-lg" @click="orderStore.incrementOrderItem(item)"
               style="font-size: 20px;" />
           </div>
           <p class="flex items-center space-x-2 w-full justify-center py-5">SKU: {{ item.Sku }}</p>

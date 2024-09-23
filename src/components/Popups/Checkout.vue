@@ -21,7 +21,7 @@ const totalAmount = computed(() => orderStore.getOrderTotal);
           <div
             v-if="authStore.isCheckoutPopupVisible"
             @click.stop
-            class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-50 w-10/12"
+            class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-30 w-10/12"
           >
             <div class="bg-white rounded-2xl shadow-lg p-6 w-full">
               <h1 class="font-semibold text-[24px]">Checkout</h1>

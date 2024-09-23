@@ -76,7 +76,7 @@ function handleClick(draft) {
               </ul>
             </div>
   
-            <p v-else>No drafts available</p>
+            <p v-else class="bg-white my-10 h-20 px-20 flex justify-center items-center rounded-2xl font-semibold">No drafts available</p>
           </Transition>
         </div>
       </Transition>
