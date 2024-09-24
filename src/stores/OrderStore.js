@@ -110,8 +110,12 @@ export const useOrderStore = defineStore('orders', () => {
     if (existingItem) {
       existingItem.discountPercentage = discountPercentage;
       existingItem.Price = (existingItem.OriginalPrice * (1 - discountPercentage / 100)).toFixed(2);
+  
+      // **Save the updated orderItems to localStorage**
+      saveOrderItemsToLocalStorage();
     }
   }
+  
 
   // Reset the discount percentage for a specific order item
   function resetDiscount(item) {
@@ -121,8 +125,12 @@ export const useOrderStore = defineStore('orders', () => {
     if (existingItem) {
       existingItem.discountPercentage = 0; // Reset discount to 0
       existingItem.Price = existingItem.OriginalPrice; // Restore original price
+  
+      // **Save the updated orderItems to localStorage**
+      saveOrderItemsToLocalStorage();
     }
   }
+  
 
   // Get the total discount percentage of all items
   const getTotalDiscountPercentage = computed(() => {

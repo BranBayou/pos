@@ -18,9 +18,10 @@ const props = defineProps({
 
 // Check if props.item is defined and has discountPercentage; provide a fallback of 0 if not.
 const discountPercentage = ref(props.item?.discountPercentage ?? 0); // Use optional chaining to avoid error
-
+const originalPrice = ref(props.item?.OriginalPrice ?? props.item.Price);
 const comment = ref('');
 const isSubmitting = ref(false);
+const isCommentProvided = ref(false);  // Track if the manager has provided a comment
 
 // Emit event when the comment is submitted
 const emit = defineEmits(['close', 'commentSubmitted']);
@@ -37,6 +38,9 @@ const saveCommentToLocalStorage = (commentData) => {
 const submitComment = async () => {
   isSubmitting.value = true;
 
+  // Check if the comment was provided
+  isCommentProvided.value = comment.value.trim() !== '';
+
   const commentData = {
     item: {
       name: props.item?.Name ?? 'Unknown Item', // Fallback if Name is undefined
@@ -50,19 +54,32 @@ const submitComment = async () => {
     manager: authStore.managerUser,
   };
 
-  // Simulate saving (can be replaced with actual API call)
   await new Promise(resolve => setTimeout(resolve, 1000));
 
-  // Save the comment data to local storage
   saveCommentToLocalStorage(commentData);
 
-  // Emit the comment data and close the modal
+  if (isCommentProvided.value) {
+    props.item.discountPercentage = discountPercentage.value;
+    props.item.Price = (originalPrice.value * (1 - discountPercentage.value / 100)).toFixed(2);
+
+    // **Save the updated item in the store and persist to localStorage**
+    orderStore.updateDiscountPercentage(props.item, discountPercentage.value);
+  } else {
+    props.item.discountPercentage = 0;
+    props.item.Price = originalPrice.value;
+
+    // **Reset the discount and save to the store**
+    orderStore.resetDiscount(props.item);
+  }
+
   emit('commentSubmitted', commentData);
   emit('close');
 
   isSubmitting.value = false;
   toast.success('Comment submitted successfully!');
 };
+
+
 
 // Handle cancel and reset the discount
 const cancelComment = () => {
@@ -126,10 +143,6 @@ const imageBackgroundColor = computed(() => {
     </Transition>
   </Teleport>
 </template>
-
-
-
-
 
 
 <style scoped>
