@@ -200,7 +200,9 @@ nextTick(() => {
               :min="0"
               @focus="storeOriginalValue('Price', item)"  
               @input="handlePriceInput(item)" 
-              @blur="checkValueChanged('Price', item)"   
+              @blur="checkValueChanged('Price', item)"  
+              :disabled="orderStore.isOverallDiscountActive" 
+              :style="{ backgroundColor: orderStore.isOverallDiscountActive ? 'darkgray' : 'white' }" 
             />
           </span>
           

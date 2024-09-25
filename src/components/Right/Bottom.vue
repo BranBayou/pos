@@ -43,7 +43,7 @@ const handleOverallDiscountInput = (discount) => {
 
   // Prevent negative discounts
   if (discountValue < 0 || isNaN(discountValue)) {
-    orderStore.state.overallDiscount = 0; // Reset to 0 if negative or invalid
+    orderStore.applyOverallDiscount(0); // Reset to 0 if negative or invalid
     saveOverallDiscountToLocalStorage(0); // Save reset value to local storage
     overallDiscountInput.value = 0; // Clear the input field (reset to 0)
     return; // Do nothing if invalid value
@@ -77,7 +77,9 @@ const handleCommentSubmitted = (comment) => {
     orderStore.applyOverallDiscount(selectedItemForComment.value.discountPercentage);
     previousDiscount.value = selectedItemForComment.value.discountPercentage;
     saveOverallDiscountToLocalStorage(selectedItemForComment.value.discountPercentage); // Save to local storage
-    overallDiscountInput.value = 0; // Reset input field to 0 after applying discount
+
+    // Reset overall discount input to 0 after applying the discount
+    overallDiscountInput.value = 0; 
   } else {
     // If no comment, reset the discount to the backup value
     orderStore.applyOverallDiscount(backupOverallDiscount.value);
@@ -92,6 +94,7 @@ watch(() => authStore.isAddManagerApprovalRequest, (newVal) => {
   if (!newVal) {
     orderStore.applyOverallDiscount(backupOverallDiscount.value); // Restore backup if approval denied
     saveOverallDiscountToLocalStorage(backupOverallDiscount.value); // Save to local storage
+    overallDiscountInput.value = 0; // Ensure input is reset to 0
   }
 });
 
@@ -100,6 +103,7 @@ onMounted(() => {
   loadOverallDiscountFromLocalStorage(); // Load overall discount from local storage
 });
 </script>
+
 
 <template>
   <div v-if="(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" class="flex flex-col justify-end" style="min-height: 50%;">
