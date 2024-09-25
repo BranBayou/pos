@@ -114,12 +114,12 @@ watch(() => authStore.isManagerLoggedIn, (newVal) => {
   }
 });
 
-// Handle the comment submission and approval
-const handleCommentSubmitted = (data) => {
-  console.log('Comment Submitted:', data);
-  // Add logic here to handle discount approval after the comment is submitted
-  showCommentPopup.value = false;
-};
+// // Handle the comment submission and approval
+// const handleCommentSubmitted = (data) => {
+//   console.log('Comment Submitted:', data);
+//   // Add logic here to handle discount approval after the comment is submitted
+//   showCommentPopup.value = false;
+// };
 
 // Reset discount percentage if approval is not granted
 watch(() => authStore.isAddManagerApprovalRequest, (newVal) => {

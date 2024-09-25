@@ -26,59 +26,26 @@ const isCommentProvided = ref(false);  // Track if the manager has provided a co
 // Emit event when the comment is submitted
 const emit = defineEmits(['close', 'commentSubmitted']);
 
-// Function to save comment to local storage
-const saveCommentToLocalStorage = (commentData) => {
-  const existingComments = JSON.parse(localStorage.getItem('comments')) || [];
-  existingComments.push(commentData);
-  localStorage.setItem('comments', JSON.stringify(existingComments));
-  console.log('Comment saved to Local Storage:', commentData);
-};
+
 
 // Submit comment
 const submitComment = async () => {
   isSubmitting.value = true;
 
-  // Check if the comment was provided
-  isCommentProvided.value = comment.value.trim() !== '';
+  // Use the store's submit function
+  orderStore.submitCommentToStore(
+    props.item,
+    comment.value,
+    discountPercentage.value,
+    authStore.managerUser
+  );
 
-  const commentData = {
-    item: {
-      name: props.item?.Name ?? 'Unknown Item', // Fallback if Name is undefined
-      price: props.item?.Price ?? 0, // Fallback if Price is undefined
-      imageUrl: props.item?.ImageUrl ?? '', // Fallback if ImageUrl is undefined
-      sku: props.item?.Sku ?? 'Unknown SKU', // Fallback if Sku is undefined
-      discountPercentage: discountPercentage.value, // Include discount percentage
-    },
-    comment: comment.value,
-    timestamp: new Date().toISOString(),
-    manager: authStore.managerUser,
-  };
-
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  saveCommentToLocalStorage(commentData);
-
-  if (isCommentProvided.value) {
-    props.item.discountPercentage = discountPercentage.value;
-    props.item.Price = (originalPrice.value * (1 - discountPercentage.value / 100)).toFixed(2);
-
-    // **Save the updated item in the store and persist to localStorage**
-    orderStore.updateDiscountPercentage(props.item, discountPercentage.value);
-  } else {
-    props.item.discountPercentage = 0;
-    props.item.Price = originalPrice.value;
-
-    // **Reset the discount and save to the store**
-    orderStore.resetDiscount(props.item);
-  }
-
-  emit('commentSubmitted', commentData);
+  emit('commentSubmitted', comment.value);
   emit('close');
 
   isSubmitting.value = false;
   toast.success('Comment submitted successfully!');
 };
-
 
 
 // Handle cancel and reset the discount

@@ -104,17 +104,16 @@ export const useOrderStore = defineStore('orders', () => {
 
   // Update the discount percentage for a specific order item
   function updateDiscountPercentage(item, discountPercentage) {
-    const existingItem = state.orderItems.find(orderItem =>
-      orderItem.id === item.id && orderItem.Sku === item.Sku
-    );
+    const existingItem = state.orderItems.find(orderItem => orderItem.id === item.id && orderItem.Sku === item.Sku);
     if (existingItem) {
       existingItem.discountPercentage = discountPercentage;
       existingItem.Price = (existingItem.OriginalPrice * (1 - discountPercentage / 100)).toFixed(2);
   
-      // **Save the updated orderItems to localStorage**
+      // Persist the updated orderItems to localStorage
       saveOrderItemsToLocalStorage();
     }
   }
+  
   
 
   // Reset the discount percentage for a specific order item
@@ -237,7 +236,34 @@ export const useOrderStore = defineStore('orders', () => {
   }
   
   
+  function submitCommentToStore(item, commentText, discountPercentage, managerUser) {
+    const isCommentProvided = commentText.trim() !== '';
+    
+    const commentData = {
+      item: {
+        name: item?.Name ?? 'Unknown Item',
+        price: item?.Price ?? 0,  // This reflects the item price at the time of comment
+        imageUrl: item?.ImageUrl ?? '',
+        sku: item?.Sku ?? 'Unknown SKU',
+        discountPercentage: discountPercentage,
+      },
+      comment: commentText,
+      timestamp: new Date().toISOString(),
+      manager: managerUser,
+    };
   
+    // Save the comment to localStorage
+    const existingComments = JSON.parse(localStorage.getItem('comments')) || [];
+    existingComments.push(commentData);
+    localStorage.setItem('comments', JSON.stringify(existingComments));
+  
+    // Update the actual order item in the store
+    if (isCommentProvided) {
+      updateDiscountPercentage(item, discountPercentage)
+    } else {
+      resetDiscount(item);  // Reset discount if no comment is provided
+    }
+  }
 
   const showDraftList = ref(false); // Toggle state
 
@@ -274,5 +300,6 @@ export const useOrderStore = defineStore('orders', () => {
     showDraftList,
     toggleDraftList,
     draftOrders,
+    submitCommentToStore,
   };
 });

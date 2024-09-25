@@ -1,14 +1,28 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import msgIcon from '/message.svg';
+import { useAuthStore } from '@/stores/authStore';
+import { useOrderStore } from '@/stores/OrderStore';
+
+const authStore = useAuthStore();
+const orderStore = useOrderStore();
+
+const props = defineProps({
+  item: {
+    type: Object,
+    required: true,
+  },
+});
 
 const comments = ref([]);
 const isEditing = ref({}); // Track which comment is being edited
-const newComment = ref(''); // Track the new comment input
+const newComments = ref([]); // Track new comment inputs per comment
 
 // Function to load comments from local storage
 const loadCommentsFromLocalStorage = () => {
   comments.value = JSON.parse(localStorage.getItem('comments')) || [];
+  // Initialize newComments for each comment
+  comments.value.forEach(() => newComments.value.push(''));
 };
 
 // Function to save updated comments to local storage
@@ -19,18 +33,53 @@ const saveCommentsToLocalStorage = () => {
 // Function to handle comment editing
 const handleEdit = (index) => {
   isEditing.value[index] = true;
-  newComment.value = comments.value[index].comment || ''; // Initialize new comment value
+  newComments.value[index] = comments.value[index].comment || ''; // Initialize new comment value
 };
 
-// Function to save the new comment
+// Function to save the new comment and update order items
 const saveNewComment = (index) => {
-  if (!newComment.value.trim()) {
-    return; // Prevent saving empty comment
+  const currentComment = newComments.value[index];
+
+  if (!currentComment.trim()) {
+    return; // Prevent saving an empty comment
   }
-  comments.value[index].comment = newComment.value;
-  saveCommentsToLocalStorage(); // Update local storage
-  isEditing.value[index] = false; // Stop editing
+
+  const commentItem = comments.value[index].item; // Fetch the item linked to the comment
+
+  if (!commentItem) {
+    console.error('Item is missing.');
+    return;
+  }
+
+  // Ensure OriginalPrice is set before calculating the new price
+  if (!commentItem.OriginalPrice) {
+    commentItem.OriginalPrice = commentItem.price; // Set OriginalPrice if missing
+  }
+
+  // Apply the discount to the order item in the store
+  const orderItem = orderStore.state.orderItems.find(
+    (item) => item.Sku === commentItem.sku // Match orderItem with comment item based on SKU
+  );
+
+  if (orderItem) {
+    // Update the discount and price in the orderItem
+    orderStore.updateDiscountPercentage(orderItem, commentItem.discountPercentage);
+  } else {
+    console.error('Order item not found in the store.');
+    return;
+  }
+
+  // Update the comment in the comments array
+  comments.value[index].comment = currentComment;
+  comments.value[index].item.discountPercentage = commentItem.discountPercentage;
+
+  // Save the updated comments to local storage
+  saveCommentsToLocalStorage();
+
+  // Exit edit mode for the current comment
+  isEditing.value[index] = false;
 };
+
 
 // Function to cancel editing
 const cancelEdit = (index) => {
@@ -42,9 +91,10 @@ onMounted(() => {
   loadCommentsFromLocalStorage();
 });
 
-// Emit event to close the modal
 const emit = defineEmits(['close']);
 </script>
+
+
 
 <template>
   <Teleport to="body">
@@ -59,7 +109,6 @@ const emit = defineEmits(['close']);
                 No comments available.
               </div>
               
-              <!-- Iterate through the comments and display them -->
               <div v-for="(comment, index) in comments" :key="index" class="mb-4 pb-4 bg-[#f4f5f7] p-3 rounded-md">
                 <div class="flex items-center justify-between mb-2">
                   <div class="flex">
@@ -76,7 +125,6 @@ const emit = defineEmits(['close']);
                       <p class="text-sm text-gray-500">Approved by: <span class="font-semibold">{{ comment.manager }}</span></p>
                       <p class="text-sm text-gray-500">{{ new Date(comment.timestamp).toLocaleString() }}</p>
                     </div>
-                    <!-- Dynamically apply background color based on comment existence -->
                     <img :src="msgIcon" :class="comment.comment ? 'bg-green-400' : 'bg-red-400'" class="rounded-md p-1" alt="Comment Icon">
                   </div>
                 </div>
@@ -84,7 +132,7 @@ const emit = defineEmits(['close']);
                 <!-- Display editable textarea if the comment is empty or being edited -->
                 <div v-if="isEditing[index] || !comment.comment" class="mt-2">
                   <textarea
-                    v-model="newComment"
+                    v-model="newComments[index]"
                     rows="2"
                     class="w-full border rounded-lg p-2"
                     placeholder="Enter your comment"
@@ -96,16 +144,9 @@ const emit = defineEmits(['close']);
                 </div>
 
                 <!-- Display comment if it exists and is not being edited -->
-                
                 <div v-else class="text-sm">
                   <p>Reason: {{ comment.comment }}</p>
                 </div>
-                
-                <!-- Edit button to allow editing if the comment is empty
-                  <div v-if="!comment.comment && !isEditing[index]" class="mt-2 flex justify-end">
-                    <button @click="handleEdit(index)" class="px-4 py-2 bg-blue-500 text-white rounded-lg">Add Comment</button>
-                  </div>
-                -->
               </div>
 
               <!-- Close Button -->
@@ -119,6 +160,7 @@ const emit = defineEmits(['close']);
     </Transition>
   </Teleport>
 </template>
+
 
 <style scoped>
 .modal-outer-enter-active,
