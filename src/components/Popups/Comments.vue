@@ -7,13 +7,6 @@ import { useOrderStore } from '@/stores/OrderStore';
 const authStore = useAuthStore();
 const orderStore = useOrderStore();
 
-const props = defineProps({
-  item: {
-    type: Object,
-    required: true,
-  },
-});
-
 const comments = ref([]);
 const isEditing = ref({}); // Track which comment is being edited
 const newComments = ref([]); // Track new comment inputs per comment

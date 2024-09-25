@@ -155,7 +155,7 @@ nextTick(() => {
             alt="product-img" />
           <p class="text-base font-medium">{{ item.Name }}</p>
         </div>
-        <div>
+        <div class="flex flex-col items-end">
           <p class="font-medium">${{ (item.Price * item.qty).toFixed(2) }}</p>
           <!-- Show discount percentage dynamically based on overall discount -->
           <p v-if="item.discountPercentage" class="text-sm">{{ item.discountPercentage }}% discount applied</p>
