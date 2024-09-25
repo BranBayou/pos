@@ -44,10 +44,10 @@ const saveNewComment = (index) => {
     return;
   }
 
-  // Ensure OriginalPrice is set before calculating the new price
-  if (!commentItem.OriginalPrice) {
-    commentItem.OriginalPrice = commentItem.price; // Set OriginalPrice if missing
-  }
+  // // Ensure OriginalPrice is set before calculating the new price
+  // if (!commentItem.OriginalPrice) {
+  //   commentItem.OriginalPrice = commentItem.price; // Set OriginalPrice if missing
+  // }
 
   // Apply the discount to the order item in the store
   const orderItem = orderStore.state.orderItems.find(
