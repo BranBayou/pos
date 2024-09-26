@@ -9,9 +9,9 @@ const authStore = useAuthStore();
 const orderStore = useOrderStore();
 
 const showCommentPopup = ref(false);  // Control to show AddComment popup
-
-const previousDiscount = ref(orderStore.state.overallDiscount);
+const selectedItemForComment = ref(null);  // Track the selected overall discount for the comment
 const backupOverallDiscount = ref(orderStore.state.overallDiscount);
+const pendingApprovalDiscount = ref(null);  // Track if there is a pending approval for the overall discount
 
 // Computed values for order total, GST, PST, and Discount
 const gstAmount = computed(() => orderStore.getGstAmount);
@@ -29,34 +29,60 @@ const handleOverallDiscountInput = (discount) => {
   }
 
   // Check if the discount has changed
-  if (discountValue === previousDiscount.value) {
+  if (discountValue === backupOverallDiscount.value) {
     return; // Do nothing if no changes
   }
 
   // If the user is not a manager, ask for manager approval
   if (!authStore.isManagerLoggedIn) {
-    backupOverallDiscount.value = previousDiscount.value; // Backup the current discount
+    backupOverallDiscount.value = discountValue; // Backup the current discount
+    pendingApprovalDiscount.value = discountValue;  // Store as pending approval
     authStore.toggleAddManagerApprovalRequest(); // Trigger manager approval request
+    selectedItemForComment.value = { Name: 'Overall Discount', discountPercentage: discountValue }; // Store for comment
     return;
   }
 
   // Apply the overall discount and update the previous value
   orderStore.applyOverallDiscount(discountValue);
-  previousDiscount.value = discountValue;
+  backupOverallDiscount.value = discountValue;
 };
 
-//
+// Watch for manager login status and show comment popup
+watch(() => authStore.isManagerLoggedIn, (newVal) => {
+  if (newVal && selectedItemForComment.value) {
+    showCommentPopup.value = true;  // Automatically show the comment popup after login for overall discount
+  }
+});
+
+// Handle the comment submission and approval for the overall discount
+const handleCommentSubmitted = (comment) => {
+  if (comment.trim()) {
+    // Apply the overall discount
+    orderStore.applyOverallDiscount(selectedItemForComment.value.discountPercentage);
+    backupOverallDiscount.value = selectedItemForComment.value.discountPercentage;  // Update backup
+  } else {
+    // If no comment, reset the discount to the backup value
+    pendingApprovalDiscount.value = selectedItemForComment.value.discountPercentage;  // Mark as pending
+    orderStore.applyOverallDiscount(backupOverallDiscount.value); // Revert to the previous value
+  }
+
+  showCommentPopup.value = false; // Close the popup
+};
+
+// Disable overall discount if any item has a discount
 const isOverallDiscountDisabled = computed(() => {
   return orderStore.state.orderItems.some(item => item.discountPercentage > 0);
 });
 
 // Reset overall discount if manager approval is denied
 watch(() => authStore.isAddManagerApprovalRequest, (newVal) => {
-  if (!newVal) {
+  if (!newVal && pendingApprovalDiscount.value !== null) {
     orderStore.applyOverallDiscount(backupOverallDiscount.value); // Restore backup if approval denied
+    pendingApprovalDiscount.value = null;  // Reset pending approval
   }
 });
 </script>
+
 
 <template>
   <div v-if="(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" class="flex flex-col justify-end" style="min-height: 50%;">

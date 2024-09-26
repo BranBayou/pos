@@ -61,21 +61,18 @@ export const useOrderStore = defineStore('orders', () => {
       const newItem = {
         ...item,
         qty: 1,
-        discountPercentage: item.discountPercentage || 0, // Ensure discount is tracked
-        OriginalPrice: item.Price, // Track original price for discount calculations
-        salesPerson: selectedSalesPerson.value // Assign the selected salesperson to the item
+        discountPercentage: item.discountPercentage || 0, 
+        OriginalPrice: item.Price, 
+        salesPerson: selectedSalesPerson.value 
       };
   
       // Apply the overall discount to the newly added item if it exists
       if (state.overallDiscount && state.overallDiscount > 0) {
         newItem.Price = (newItem.OriginalPrice * (1 - state.overallDiscount / 100)).toFixed(2);
-        // newItem.discountPercentage = state.overallDiscount; // Apply the overall discount percentage
       }
   
       state.orderItems.push(newItem);
     }
-
-    // Save the updated orderItems to localStorage
     saveOrderItemsToLocalStorage();
   }
 
@@ -86,7 +83,7 @@ export const useOrderStore = defineStore('orders', () => {
     );
     if (existingItem && existingItem.qty < existingItem.MaxQty) {
       existingItem.qty++;
-      saveOrderItemsToLocalStorage(); // Save after incrementing
+      saveOrderItemsToLocalStorage(); 
     }
   }
 
@@ -97,7 +94,7 @@ export const useOrderStore = defineStore('orders', () => {
     );
     if (existingItem && existingItem.qty > 1) {
       existingItem.qty--;
-      saveOrderItemsToLocalStorage(); // Save after decrementing
+      saveOrderItemsToLocalStorage(); 
     } else if (existingItem && existingItem.qty === 1) {
       deleteOrderItem(existingItem);
     }
@@ -110,7 +107,7 @@ export const useOrderStore = defineStore('orders', () => {
     );
     if (index !== -1) {
       state.orderItems.splice(index, 1);
-      saveOrderItemsToLocalStorage(); // Save after deleting
+      saveOrderItemsToLocalStorage(); 
     }
   }
 
@@ -120,8 +117,7 @@ export const useOrderStore = defineStore('orders', () => {
     if (existingItem) {
       existingItem.discountPercentage = discountPercentage;
       existingItem.Price = (existingItem.OriginalPrice * (1 - discountPercentage / 100)).toFixed(2);
-  
-      // Persist the updated orderItems to localStorage
+
       saveOrderItemsToLocalStorage();
     }
   }
@@ -134,10 +130,8 @@ export const useOrderStore = defineStore('orders', () => {
       orderItem.id === item.id && orderItem.Sku === item.Sku
     );
     if (existingItem) {
-      existingItem.discountPercentage = 0; // Reset discount to 0
-      existingItem.Price = existingItem.OriginalPrice; // Restore original price
-  
-      // **Save the updated orderItems to localStorage**
+      existingItem.discountPercentage = 0; 
+      existingItem.Price = existingItem.OriginalPrice; 
       saveOrderItemsToLocalStorage();
     }
   }
@@ -178,13 +172,11 @@ export const useOrderStore = defineStore('orders', () => {
   function applyOverallDiscount(overallDiscountPercentage) {
     state.overallDiscount = overallDiscountPercentage;
 
-    // Recalculate the price for each item based on the overall discount
     state.orderItems.forEach(item => {
-      const originalPrice = item.OriginalPrice || item.Price; // Use OriginalPrice if available, otherwise Price
+      const originalPrice = item.OriginalPrice || item.Price; 
       item.Price = (originalPrice * (1 - overallDiscountPercentage / 100)).toFixed(2);
     });
 
-    // Save the overallDiscount to localStorage
     localStorage.setItem('overallDiscount', overallDiscountPercentage.toString());
     saveOrderItemsToLocalStorage();
   }
@@ -206,7 +198,6 @@ const getOrderTotalBeforeDiscount = computed(() => {
 // Apply the overall discount and save it to local storage
 function applyOverallDiscount(overallDiscountPercentage) {
   state.overallDiscount = overallDiscountPercentage;
-  // Save the overallDiscount to localStorage
   localStorage.setItem('overallDiscount', overallDiscountPercentage.toString());
 }
 
@@ -215,47 +206,45 @@ onMounted(() => {
   const savedItems = JSON.parse(localStorage.getItem('orderItems'));
   state.orderItems = Array.isArray(savedItems) ? savedItems : [];
 
-  // Load the overallDiscount from localStorage if it exists
   const savedOverallDiscount = localStorage.getItem('overallDiscount');
   if (savedOverallDiscount !== null) {
     state.overallDiscount = parseFloat(savedOverallDiscount);
-    // Reapply the overall discount to the items after loading
     applyOverallDiscount(state.overallDiscount);
   }
 });
 
 
-  const draftOrders = ref([]); // Store the fetched draft orders reactively
+  const draftOrders = ref([]); 
   //
   function saveOrderAsDraft() {
-    // Check if there are any items in the active order
     if (state.orderItems.length === 0) {
       console.log('No active order items to save as draft');
       toast.error('Cannot save an empty order as draft!');
-      return; // Do not save the draft if there are no order items
+      return; 
     }
-  
+    // Clone the current orderItems to draft
     const draft = {
-      orderItems: [...state.orderItems], // Clone the current orderItems to draft
-      overallDiscount: state.overallDiscount, // Include overallDiscount in the draft
-      timestamp: Date.now(), // Add a unique timestamp to each draft
+      orderItems: [...state.orderItems], 
+      overallDiscount: state.overallDiscount, 
+      timestamp: Date.now(), 
     };
     
-    draftOrders.value.push(draft); // Add the draft to the draftOrders array
+    draftOrders.value.push(draft); 
     
     // Save the updated draft orders to localStorage
     localStorage.setItem('draftOrders', JSON.stringify(draftOrders.value));
     
     // Clear the current active orderItems and remove from localStorage
-    state.orderItems = []; // Clear the orderItems state
-    localStorage.removeItem('orderItems'); // Remove active orderItems from localStorage
+    state.orderItems = []; 
+    state.overallDiscount = 0;
+    localStorage.removeItem('orderItems'); 
     toast.success('Order saved as draft!');
   }
 
   // Fetch the draft orders from localStorage and update the reactive array
   function fetchDraftOrders() {
     const savedDrafts = JSON.parse(localStorage.getItem('draftOrders')) || [];
-    draftOrders.value = savedDrafts; // Update the reactive draftOrders array
+    draftOrders.value = savedDrafts; 
     console.log('draft=', draftOrders.value)
     return draftOrders.value;
   }
@@ -263,16 +252,13 @@ onMounted(() => {
   function loadDraftOrder(draftOrder) {
     // Merge the draft items into the current active orderItems
     draftOrder.orderItems.forEach(draftItem => {
-      // Check if the draft item already exists in the current order
       const existingItem = state.orderItems.find(
         orderItem => orderItem.id === draftItem.id && orderItem.Sku === draftItem.Sku
       );
   
       if (existingItem) {
-        // If the item exists, increment the quantity
         existingItem.qty += draftItem.qty;
       } else {
-        // If the item doesn't exist, add it to the active order
         state.orderItems.push({ ...draftItem });
       }
     });
@@ -280,18 +266,18 @@ onMounted(() => {
     // Restore the overall discount from the draft and reapply it
     if (draftOrder.overallDiscount) {
       state.overallDiscount = draftOrder.overallDiscount;
-      applyOverallDiscount(state.overallDiscount); // Reapply the overall discount to the items
+      applyOverallDiscount(state.overallDiscount); 
     }
   
     // Remove the loaded draft from draftOrders
     const draftIndex = draftOrders.value.findIndex(draft => draft.timestamp === draftOrder.timestamp);
     if (draftIndex !== -1) {
-      draftOrders.value.splice(draftIndex, 1); // Remove the selected draft from draftOrders
+      draftOrders.value.splice(draftIndex, 1); s
     }
   
     // Update localStorage: save the updated active order and draft orders
-    saveOrderItemsToLocalStorage(); // Save the merged active order to localStorage
-    localStorage.setItem('draftOrders', JSON.stringify(draftOrders.value)); // Update the draft orders in localStorage
+    saveOrderItemsToLocalStorage(); 
+    localStorage.setItem('draftOrders', JSON.stringify(draftOrders.value)); 
   }
   
   
@@ -325,7 +311,7 @@ onMounted(() => {
     }
   }
 
-  const showDraftList = ref(false); // Toggle state
+  const showDraftList = ref(false); 
 
   // Toggle the draft list visibility
   function toggleDraftList() {

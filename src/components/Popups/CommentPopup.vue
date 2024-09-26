@@ -86,7 +86,7 @@ const imageBackgroundColor = computed(() => {
                   </div>
                   <div class="flex">
                     <p class="text-sm text-gray-500 mt-2">Approved by: <span class="font-semibold">{{ authStore.managerUser }}</span></p>
-                    <img :src="msgIcon" :class="imageBackgroundColor" class="rounded-md p-1" alt="Comment Icon">
+                    <img src="/message.svg" :class="imageBackgroundColor" class="rounded-md p-1" alt="Comment Icon">
                   </div>
                 </div>
               </div>

@@ -75,8 +75,8 @@ export const useAuthStore = defineStore('auth', () => {
     const toast = useToast();
     try {
       const response = await axios.post('/api/Users/Login', {
-        userId, // Using `userId` instead of `username`
-        pin,    // Using `pin` instead of `password`
+        userId, 
+        pin,    
       }, {
         headers: {
           'store-id': storeId,
