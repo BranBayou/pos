@@ -203,8 +203,6 @@ const getOrderTotalBeforeDiscount = computed(() => {
 //   return totalBeforeDiscount - discountAmount;
 // });
 
-
-
 // Apply the overall discount and save it to local storage
 function applyOverallDiscount(overallDiscountPercentage) {
   state.overallDiscount = overallDiscountPercentage;
