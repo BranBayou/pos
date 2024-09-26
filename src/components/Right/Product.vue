@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick, onMounted, watch } from 'vue';
+import { ref, nextTick, onMounted, watch, computed } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useOrderStore } from '@/stores/OrderStore';
 import tippy from 'tippy.js';
@@ -40,6 +40,9 @@ function handleInput(item) {
   // }
 }
 
+// Computed property to check if overall discount is applied
+const isOverallDiscountApplied = computed(() => orderStore.state.overallDiscount > 0);
+
 function toggleAccordion(index) {
   isOpen.value[index] = !isOpen.value[index];
 }
@@ -54,14 +57,19 @@ onMounted(() => {
 
 const originalValues = ref({});
 
-// Handle Price Input and update in the store
 const handlePriceInput = (item) => {
   if (item.Price <= 0) {
     item.Price = item.OriginalPrice;
+  } else {
+    // Calculate the new discountPercentage based on the original price
+    const discount = (1 - item.Price / item.OriginalPrice) * 100;
+    item.discountPercentage = discount > 0 ? discount.toFixed(2) : 0;
   }
-  // Update item price in store
-  orderStore.updateItemPrice(item); // Call a function to handle price change
+  
+  // Update item price and discount in store
+  orderStore.updateDiscountPercentage(item, item.discountPercentage);
 };
+
 
 const handleDiscountInput = (item) => {
   if (item.discountPercentage < 0) {
@@ -158,7 +166,12 @@ nextTick(() => {
         <div class="flex flex-col items-end">
           <p class="font-medium">${{ (item.Price * item.qty).toFixed(2) }}</p>
           <!-- Show discount percentage dynamically based on overall discount -->
-          <p v-if="item.discountPercentage" class="text-sm">{{ item.discountPercentage }}% discount applied</p>
+          <p v-if="item.discountPercentage" class="text-sm">
+            {{ `${item.discountPercentage} % discount applied` }}
+          </p>
+          <p v-if="orderStore.state.overallDiscount" class="text-sm">
+            {{ `${orderStore.state.overallDiscount} % overall discount applied` }}
+          </p>
         </div>
       </div>
 
@@ -201,8 +214,11 @@ nextTick(() => {
               @focus="storeOriginalValue('Price', item)"  
               @input="handlePriceInput(item)" 
               @blur="checkValueChanged('Price', item)"  
-              :disabled="orderStore.isOverallDiscountActive" 
-              :style="{ backgroundColor: orderStore.isOverallDiscountActive ? 'darkgray' : 'white' }" 
+              :disabled="isOverallDiscountApplied"
+              :class="{
+                'bg-purple-500 opacity-30 cursor-not-allowed': isOverallDiscountApplied,
+                'bg-white': !isOverallDiscountApplied
+              }"
             />
           </span>
           
@@ -216,7 +232,12 @@ nextTick(() => {
               :max="100" 
               @focus="storeOriginalValue('discountPercentage', item)"  
               @input="handleDiscountInput(item)"
-              @blur="checkValueChanged('discountPercentage', item)"  
+              @blur="checkValueChanged('discountPercentage', item)" 
+              :disabled="isOverallDiscountApplied"
+              :class="{
+                'bg-purple-500 opacity-30 cursor-not-allowed': isOverallDiscountApplied,
+                'bg-white': !isOverallDiscountApplied
+              }" 
             />
           </span>
 

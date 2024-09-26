@@ -33,8 +33,20 @@ export const useOrderStore = defineStore('orders', () => {
   // Helper function to load orderItems from localStorage
   function loadOrderItemsFromLocalStorage() {
     const savedItems = JSON.parse(localStorage.getItem('orderItems'));
+    const savedDiscount = localStorage.getItem('overallDiscount'); // Load the overall discount
+  
     state.orderItems = Array.isArray(savedItems) ? savedItems : []; // Fallback to an empty array
+    
+    if (savedDiscount) {
+      state.overallDiscount = parseFloat(savedDiscount);
+      
+      // Reapply the overall discount to each item
+      state.orderItems.forEach(item => {
+        item.Price = (item.OriginalPrice * (1 - state.overallDiscount / 100)).toFixed(2);
+      });
+    }
   }
+  
   
 
   // Add an order item to the list or increment the quantity if it exists
@@ -57,7 +69,7 @@ export const useOrderStore = defineStore('orders', () => {
       // Apply the overall discount to the newly added item if it exists
       if (state.overallDiscount && state.overallDiscount > 0) {
         newItem.Price = (newItem.OriginalPrice * (1 - state.overallDiscount / 100)).toFixed(2);
-        newItem.discountPercentage = state.overallDiscount; // Apply the overall discount percentage
+        // newItem.discountPercentage = state.overallDiscount; // Apply the overall discount percentage
       }
   
       state.orderItems.push(newItem);
@@ -162,13 +174,58 @@ export const useOrderStore = defineStore('orders', () => {
     return getOrderTotal.value * (state.pst / 100);
   });
 
-  function applyOverallDiscount(discountPercentage) {
-    state.overallDiscount = discountPercentage;
+  // Apply the overall discount to each item in the order
+  function applyOverallDiscount(overallDiscountPercentage) {
+    state.overallDiscount = overallDiscountPercentage;
+
+    // Recalculate the price for each item based on the overall discount
     state.orderItems.forEach(item => {
-      item.discountPercentage = discountPercentage; // Set the discountPercentage for the item
-      item.Price = (item.OriginalPrice * (1 - discountPercentage / 100)).toFixed(2); // Recalculate the price
+      const originalPrice = item.OriginalPrice || item.Price; // Use OriginalPrice if available, otherwise Price
+      item.Price = (originalPrice * (1 - overallDiscountPercentage / 100)).toFixed(2);
     });
+
+    // Save the overallDiscount to localStorage
+    localStorage.setItem('overallDiscount', overallDiscountPercentage.toString());
+    saveOrderItemsToLocalStorage();
   }
+
+// Calculate the total price before applying the overall discount
+const getOrderTotalBeforeDiscount = computed(() => {
+  return state.orderItems.reduce((total, item) => {
+    return total + parseFloat(item.Price) * item.qty;
+  }, 0);
+});
+
+// // Apply the overall discount to the total price
+// const getOrderTotal = computed(() => {
+//   const totalBeforeDiscount = getOrderTotalBeforeDiscount.value;
+//   const discountAmount = totalBeforeDiscount * (state.overallDiscount / 100);
+//   return totalBeforeDiscount - discountAmount;
+// });
+
+
+
+// Apply the overall discount and save it to local storage
+function applyOverallDiscount(overallDiscountPercentage) {
+  state.overallDiscount = overallDiscountPercentage;
+  // Save the overallDiscount to localStorage
+  localStorage.setItem('overallDiscount', overallDiscountPercentage.toString());
+}
+
+// Load the order items and overall discount from localStorage on mounted
+onMounted(() => {
+  const savedItems = JSON.parse(localStorage.getItem('orderItems'));
+  state.orderItems = Array.isArray(savedItems) ? savedItems : [];
+
+  // Load the overallDiscount from localStorage if it exists
+  const savedOverallDiscount = localStorage.getItem('overallDiscount');
+  if (savedOverallDiscount !== null) {
+    state.overallDiscount = parseFloat(savedOverallDiscount);
+    // Reapply the overall discount to the items after loading
+    applyOverallDiscount(state.overallDiscount);
+  }
+});
+
 
   const draftOrders = ref([]); // Store the fetched draft orders reactively
   //
@@ -182,6 +239,7 @@ export const useOrderStore = defineStore('orders', () => {
   
     const draft = {
       orderItems: [...state.orderItems], // Clone the current orderItems to draft
+      overallDiscount: state.overallDiscount, // Include overallDiscount in the draft
       timestamp: Date.now(), // Add a unique timestamp to each draft
     };
     
@@ -195,9 +253,6 @@ export const useOrderStore = defineStore('orders', () => {
     localStorage.removeItem('orderItems'); // Remove active orderItems from localStorage
     toast.success('Order saved as draft!');
   }
-  
-  
-  
 
   // Fetch the draft orders from localStorage and update the reactive array
   function fetchDraftOrders() {
@@ -224,6 +279,12 @@ export const useOrderStore = defineStore('orders', () => {
       }
     });
   
+    // Restore the overall discount from the draft and reapply it
+    if (draftOrder.overallDiscount) {
+      state.overallDiscount = draftOrder.overallDiscount;
+      applyOverallDiscount(state.overallDiscount); // Reapply the overall discount to the items
+    }
+  
     // Remove the loaded draft from draftOrders
     const draftIndex = draftOrders.value.findIndex(draft => draft.timestamp === draftOrder.timestamp);
     if (draftIndex !== -1) {
@@ -234,6 +295,7 @@ export const useOrderStore = defineStore('orders', () => {
     saveOrderItemsToLocalStorage(); // Save the merged active order to localStorage
     localStorage.setItem('draftOrders', JSON.stringify(draftOrders.value)); // Update the draft orders in localStorage
   }
+  
   
   
   function submitCommentToStore(item, commentText, discountPercentage, managerUser) {
@@ -301,5 +363,7 @@ export const useOrderStore = defineStore('orders', () => {
     toggleDraftList,
     draftOrders,
     submitCommentToStore,
+    getOrderTotalBeforeDiscount,
+    loadOrderItemsFromLocalStorage,
   };
 });
