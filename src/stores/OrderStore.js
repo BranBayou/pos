@@ -237,6 +237,7 @@ onMounted(() => {
     // Clear the current active orderItems and remove from localStorage
     state.orderItems = []; 
     state.overallDiscount = 0;
+    localStorage.setItem('overallDiscount', 0);
     localStorage.removeItem('orderItems'); 
     toast.success('Order saved as draft!');
   }
@@ -272,13 +273,14 @@ onMounted(() => {
     // Remove the loaded draft from draftOrders
     const draftIndex = draftOrders.value.findIndex(draft => draft.timestamp === draftOrder.timestamp);
     if (draftIndex !== -1) {
-      draftOrders.value.splice(draftIndex, 1); s
+      draftOrders.value.splice(draftIndex, 1); // Removed the extra 's' here
     }
   
     // Update localStorage: save the updated active order and draft orders
     saveOrderItemsToLocalStorage(); 
     localStorage.setItem('draftOrders', JSON.stringify(draftOrders.value)); 
-  }
+}
+
   
   
   

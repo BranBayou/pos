@@ -216,7 +216,7 @@ nextTick(() => {
               @blur="checkValueChanged('Price', item)"  
               :disabled="isOverallDiscountApplied"
               :class="{
-                'bg-purple-500 opacity-30 cursor-not-allowed': isOverallDiscountApplied,
+                'bg-purple-500 opacity-30 text-white cursor-not-allowed': isOverallDiscountApplied,
                 'bg-white': !isOverallDiscountApplied
               }"
             />
@@ -235,7 +235,7 @@ nextTick(() => {
               @blur="checkValueChanged('discountPercentage', item)" 
               :disabled="isOverallDiscountApplied"
               :class="{
-                'bg-purple-500 opacity-30 cursor-not-allowed': isOverallDiscountApplied,
+                'bg-purple-500 opacity-30 text-white cursor-not-allowed': isOverallDiscountApplied,
                 'bg-white': !isOverallDiscountApplied
               }" 
             />
