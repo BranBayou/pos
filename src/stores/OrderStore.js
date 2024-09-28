@@ -109,6 +109,10 @@ export const useOrderStore = defineStore('orders', () => {
       state.orderItems.splice(index, 1);
       saveOrderItemsToLocalStorage(); 
     }
+    if(state.orderItems.length === 0) {
+      state.overallDiscount = 0;
+      localStorage.setItem('overallDiscount', 0);
+    }
   }
 
   // Update the discount percentage for a specific order item
@@ -196,10 +200,10 @@ const getOrderTotalBeforeDiscount = computed(() => {
 // });
 
 // Apply the overall discount and save it to local storage
-function applyOverallDiscount(overallDiscountPercentage) {
-  state.overallDiscount = overallDiscountPercentage;
-  localStorage.setItem('overallDiscount', overallDiscountPercentage.toString());
-}
+// function applyOverallDiscount(overallDiscountPercentage) {
+//   state.overallDiscount = overallDiscountPercentage;
+//   localStorage.setItem('overallDiscount', overallDiscountPercentage.toString());
+// }
 
 // Load the order items and overall discount from localStorage on mounted
 onMounted(() => {

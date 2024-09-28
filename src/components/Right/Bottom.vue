@@ -97,7 +97,7 @@ watch(() => authStore.isAddManagerApprovalRequest, (newVal) => {
         v-model.number="orderStore.state.overallDiscount" 
         @blur="handleOverallDiscountInput($event.target.value)" 
         placeholder="Overall Discount (%)"
-        min="0" 
+        :min="0"
         class="text-center w-20 rounded-lg transition-colors duration-300"
         :class="{
           'bg-purple-500 opacity-30 cursor-not-allowed': isOverallDiscountDisabled, 

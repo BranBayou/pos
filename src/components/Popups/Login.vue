@@ -29,12 +29,29 @@ onMounted(() => {
   } else {
     // Fetch Cashiers if the user is not logged in yet
     authStore.fetchCashiers();
+    authStore.fetchManager();
   }
 });
 
 const login = async () => {
-  const userId = authStore.isCashierLoginInput ? selectedUser.value?.id : username.value;
+  let userId;
+  
+  // If cashier login mode, use the selectedUser's id
+  if (authStore.isCashierLoginInput) {
+    userId = selectedUser.value?.id;
+  } 
+  // If manager login mode, find the manager by fullName in managerUsersList
+  else {
+    const manager = authStore.managerUsersList.find(user => user.fullName === username.value);
+    if (manager) {
+      userId = manager.id;  // Get the manager's ID from the matched manager object
+    }
+  }
+
   const pin = password.value;
+
+  // Debugging: Log the values being sent to the API
+  console.log('Attempting login with:', { userId, pin });
 
   // Validation: Ensure both userId and pin are provided
   if (!userId || !pin) {
@@ -45,7 +62,7 @@ const login = async () => {
 
   try {
     // Use the login function from the store, which uses the API call
-    await authStore.login(userId, pin, 'authStore.storeId');
+    await authStore.login(userId, pin, authStore.storeId);
 
     // Close modal after successful login
     emit('close-modal');
@@ -53,10 +70,18 @@ const login = async () => {
     // Reset inputs
     username.value = '';
     password.value = '';
+    selectedUser.value = null;
   } catch (error) {
     console.error('Login failed:', error);
+    if (error.response?.data?.errors) {
+      toast.error(error.response.data.errors.join(', ')); // Show errors if they exist
+    } else {
+      toast.error('Login failed');
+    }
   }
 };
+
+
 
 // Handle password input for numeric keypad
 const handlePasswordInput = (num) => {
