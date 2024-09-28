@@ -33,18 +33,19 @@ const handleOverallDiscountInput = (discount) => {
     return; // Do nothing if no changes
   }
 
+  // Show comment popup regardless of manager login status
+  backupOverallDiscount.value = discountValue; // Backup the current discount
+  pendingApprovalDiscount.value = discountValue;  // Store as pending approval
+  selectedItemForComment.value = { Name: 'Overall Discount', discountPercentage: discountValue }; // Store for comment
+
   // If the user is not a manager, ask for manager approval
   if (!authStore.isManagerLoggedIn) {
-    backupOverallDiscount.value = discountValue; // Backup the current discount
-    pendingApprovalDiscount.value = discountValue;  // Store as pending approval
     authStore.toggleAddManagerApprovalRequest(); // Trigger manager approval request
-    selectedItemForComment.value = { Name: 'Overall Discount', discountPercentage: discountValue }; // Store for comment
     return;
   }
 
-  // Apply the overall discount and update the previous value
-  orderStore.applyOverallDiscount(discountValue);
-  backupOverallDiscount.value = discountValue;
+  // Show the comment popup immediately for managers
+  showCommentPopup.value = true;
 };
 
 // Watch for manager login status and show comment popup
@@ -62,10 +63,10 @@ const handleCommentSubmitted = (comment) => {
     backupOverallDiscount.value = selectedItemForComment.value.discountPercentage;  // Update backup
   } else {
     // If no comment, reset the discount to the backup value
-    pendingApprovalDiscount.value = selectedItemForComment.value.discountPercentage;  // Mark as pending
     orderStore.applyOverallDiscount(backupOverallDiscount.value); // Revert to the previous value
   }
 
+  pendingApprovalDiscount.value = null; // Clear pending approval
   showCommentPopup.value = false; // Close the popup
 };
 
@@ -82,7 +83,6 @@ watch(() => authStore.isAddManagerApprovalRequest, (newVal) => {
   }
 });
 </script>
-
 
 <template>
   <div v-if="(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" class="flex flex-col justify-end" style="min-height: 50%;">
@@ -125,6 +125,7 @@ watch(() => authStore.isAddManagerApprovalRequest, (newVal) => {
 
   </div>
 </template>
+
 
 <style scoped>
 input[type="number"]::-webkit-outer-spin-button,
