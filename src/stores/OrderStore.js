@@ -31,21 +31,31 @@ export const useOrderStore = defineStore('orders', () => {
   }
 
   // Helper function to load orderItems from localStorage
-  function loadOrderItemsFromLocalStorage() {
-    const savedItems = JSON.parse(localStorage.getItem('orderItems'));
-    const savedDiscount = localStorage.getItem('overallDiscount'); // Load the overall discount
+function loadOrderItemsFromLocalStorage() {
+  const savedItems = JSON.parse(localStorage.getItem('orderItems'));
+  const savedDiscount = localStorage.getItem('overallDiscount'); // Load the overall discount
   
-    state.orderItems = Array.isArray(savedItems) ? savedItems : []; // Fallback to an empty array
-    
-    if (savedDiscount) {
-      state.overallDiscount = parseFloat(savedDiscount);
-      
-      // Reapply the overall discount to each item
-      state.orderItems.forEach(item => {
-        item.Price = (item.OriginalPrice * (1 - state.overallDiscount / 100)).toFixed(2);
-      });
+  state.orderItems = Array.isArray(savedItems) ? savedItems : []; // Fallback to an empty array
+  
+  // Reapply the discountPercentage to each item
+  state.orderItems.forEach(item => {
+    if (item.discountPercentage && item.OriginalPrice) {
+      item.Price = (item.OriginalPrice * (1 - item.discountPercentage / 100)).toFixed(2);
     }
+  });
+
+  if (savedDiscount) {
+    state.overallDiscount = parseFloat(savedDiscount);
+    
+    // Reapply the overall discount to each item
+    state.orderItems.forEach(item => {
+      if (state.overallDiscount > 0) {
+        item.Price = (item.OriginalPrice * (1 - state.overallDiscount / 100)).toFixed(2);
+      }
+    });
   }
+}
+
   
   
 
