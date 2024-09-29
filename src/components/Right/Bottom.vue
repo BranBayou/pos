@@ -54,10 +54,12 @@ const handleOverallDiscountInput = (discount) => {
 
 // Watch for manager login status and show comment popup
 watch(() => authStore.isManagerLoggedIn, (newVal) => {
+  console.log("before mgr popup close",pendingApprovalDiscount.value);
   if (newVal && selectedItemForComment.value) {
     showCommentPopup.value = true;  // Automatically show the comment popup after login for overall discount
     isPopupCanceled.value = false;  // Reset popup cancel status
     isCommentSubmitted.value = false;  // Reset comment submitted status
+    console.log("after mgr popup close",pendingApprovalDiscount.value);
   }
 });
 
@@ -158,8 +160,6 @@ watch(() => authStore.isAddManagerApprovalRequest, (newVal) => {
 
   </div>
 </template>
-
-
 
 
 <style scoped>
