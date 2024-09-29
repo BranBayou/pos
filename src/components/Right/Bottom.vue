@@ -12,6 +12,8 @@ const showCommentPopup = ref(false);  // Control to show AddComment popup
 const selectedItemForComment = ref(null);  // Track the selected overall discount for the comment
 const backupOverallDiscount = ref(orderStore.state.overallDiscount);
 const pendingApprovalDiscount = ref(null);  // Track if there is a pending approval for the overall discount
+const isPopupCanceled = ref(false); // Track if the popup was canceled
+const isCommentSubmitted = ref(false); // Track if the comment was successfully submitted
 
 // Computed values for order total, GST, PST, and Discount
 const gstAmount = computed(() => orderStore.getGstAmount);
@@ -46,29 +48,55 @@ const handleOverallDiscountInput = (discount) => {
 
   // Show the comment popup immediately for managers
   showCommentPopup.value = true;
+  isPopupCanceled.value = false;  // Reset popup cancel status
+  isCommentSubmitted.value = false;  // Reset comment submitted status
 };
 
 // Watch for manager login status and show comment popup
 watch(() => authStore.isManagerLoggedIn, (newVal) => {
   if (newVal && selectedItemForComment.value) {
     showCommentPopup.value = true;  // Automatically show the comment popup after login for overall discount
+    isPopupCanceled.value = false;  // Reset popup cancel status
+    isCommentSubmitted.value = false;  // Reset comment submitted status
   }
 });
 
 // Handle the comment submission and approval for the overall discount
 const handleCommentSubmitted = (comment) => {
   if (comment.trim()) {
-    // Apply the overall discount
-    orderStore.applyOverallDiscount(selectedItemForComment.value.discountPercentage);
-    backupOverallDiscount.value = selectedItemForComment.value.discountPercentage;  // Update backup
+    // Apply the pending overall discount if a valid comment is provided
+    if (pendingApprovalDiscount.value !== null) {
+      orderStore.applyOverallDiscount(pendingApprovalDiscount.value);  // Apply the pending discount
+      backupOverallDiscount.value = pendingApprovalDiscount.value;  // Update backup
+      pendingApprovalDiscount.value = null;  // Clear pending approval
+      isCommentSubmitted.value = true;  // Mark the comment as successfully submitted
+    }
   } else {
-    // If no comment, reset the discount to the backup value
-    orderStore.applyOverallDiscount(backupOverallDiscount.value); // Revert to the previous value
+    // If no comment is provided, reset the discount to 0
+    orderStore.applyOverallDiscount(0); // Reset to 0 as no valid comment is provided
+    backupOverallDiscount.value = 0; // Set backup to 0
+    isCommentSubmitted.value = false;  // No comment was submitted
   }
 
-  pendingApprovalDiscount.value = null; // Clear pending approval
   showCommentPopup.value = false; // Close the popup
 };
+
+// Handle the popup closure (triggered by cancel button)
+const handleCommentPopupCancel = () => {
+  isPopupCanceled.value = true; // Mark as canceled
+  orderStore.applyOverallDiscount(backupOverallDiscount.value || 0); // Reset discount to backup
+  showCommentPopup.value = false; // Close the popup
+};
+
+// Watch if the popup was canceled or closed, reset discount if necessary
+watch(() => showCommentPopup.value, (newVal) => {
+  if (!newVal && isPopupCanceled.value && !isCommentSubmitted.value) {
+    // Reset to 0 only if the popup was canceled without submitting a comment
+    orderStore.applyOverallDiscount(0);
+    backupOverallDiscount.value = 0;
+    pendingApprovalDiscount.value = null;  // Clear pending approval
+  }
+});
 
 // Disable overall discount if any item has a discount
 const isOverallDiscountDisabled = computed(() => {
@@ -77,18 +105,23 @@ const isOverallDiscountDisabled = computed(() => {
 
 // Reset overall discount if manager approval is denied
 watch(() => authStore.isAddManagerApprovalRequest, (newVal) => {
-  if (!newVal && pendingApprovalDiscount.value !== null) {
-    orderStore.applyOverallDiscount(backupOverallDiscount.value); // Restore backup if approval denied
+  if (!newVal && pendingApprovalDiscount.value !== null && !isCommentSubmitted.value) {
+    // Restore backup if approval denied or no comment was submitted
+    orderStore.applyOverallDiscount(0);
     pendingApprovalDiscount.value = null;  // Reset pending approval
   }
 });
 </script>
 
 <template>
-  <div v-if="(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" class="flex flex-col justify-end" style="min-height: 50%;">
-
+  <div v-if="(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" class="flex flex-col justify-end" style="min-height: 50%;"> 
     <AddManagerApprovalRequest />
-    <CommentPopup v-if="showCommentPopup" :item="selectedItemForComment" @commentSubmitted="handleCommentSubmitted" @close="showCommentPopup = false" />
+    <CommentPopup 
+      v-if="showCommentPopup" 
+      :item="selectedItemForComment" 
+      @commentSubmitted="handleCommentSubmitted" 
+      @close="handleCommentPopupCancel" 
+    />
 
     <div class="flex items-center justify-between rounded-2xl bg-[#f4f5f7] mx-3 my-2 py-4 px-3">
       <p>Overall Discount</p>
@@ -125,6 +158,8 @@ watch(() => authStore.isAddManagerApprovalRequest, (newVal) => {
 
   </div>
 </template>
+
+
 
 
 <style scoped>
