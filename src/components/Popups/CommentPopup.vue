@@ -50,6 +50,7 @@ const submitComment = async () => {
 
 // Handle cancel and reset the discount
 const cancelComment = () => {
+  orderStore.state.overallDiscount = 0;
   if (props.item) {
     orderStore.resetDiscount(props.item);
   }
