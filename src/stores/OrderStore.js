@@ -202,19 +202,6 @@ const getOrderTotalBeforeDiscount = computed(() => {
   }, 0);
 });
 
-// // Apply the overall discount to the total price
-// const getOrderTotal = computed(() => {
-//   const totalBeforeDiscount = getOrderTotalBeforeDiscount.value;
-//   const discountAmount = totalBeforeDiscount * (state.overallDiscount / 100);
-//   return totalBeforeDiscount - discountAmount;
-// });
-
-// Apply the overall discount and save it to local storage
-// function applyOverallDiscount(overallDiscountPercentage) {
-//   state.overallDiscount = overallDiscountPercentage;
-//   localStorage.setItem('overallDiscount', overallDiscountPercentage.toString());
-// }
-
 // Load the order items and overall discount from localStorage on mounted
 onMounted(() => {
   const savedItems = JSON.parse(localStorage.getItem('orderItems'));

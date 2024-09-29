@@ -67,49 +67,31 @@ const handleCommentSubmitted = (comment) => {
   if (comment.trim()) {
     // Apply the pending overall discount if a valid comment is provided
     if (pendingApprovalDiscount.value !== null) {
-      orderStore.applyOverallDiscount(pendingApprovalDiscount.value);  // Apply the pending discount
-      backupOverallDiscount.value = pendingApprovalDiscount.value;  // Update backup to the new approved discount
-      pendingApprovalDiscount.value = null;  // Clear pending approval
-      isCommentSubmitted.value = true;  // Mark the comment as successfully submitted
+      orderStore.applyOverallDiscount(pendingApprovalDiscount.value);  
+      backupOverallDiscount.value = pendingApprovalDiscount.value; 
+      pendingApprovalDiscount.value = null;  
+      isCommentSubmitted.value = true;  
     }
   } else {
     // If no comment is provided, reset the discount to 0
-    orderStore.applyOverallDiscount(backupOverallDiscount.value); // Reset to backup discount
-    isCommentSubmitted.value = false;  // No comment was submitted
+    orderStore.state.overallDiscount = 0;
+    isCommentSubmitted.value = false; 
   }
 
-  showCommentPopup.value = false; // Close the popup
+  showCommentPopup.value = false; 
 };
 
 // Handle the popup closure (triggered by cancel button)
 const handleCommentPopupCancel = () => {
-  isPopupCanceled.value = true; // Mark as canceled
-  // orderStore.applyOverallDiscount(backupOverallDiscount.value || 0); // Reset discount to backup
-  showCommentPopup.value = false; // Close the popup
+  isPopupCanceled.value = true; 
+  showCommentPopup.value = false; 
 };
 
-// // Watch if the popup was canceled or closed, reset discount if necessary
-// watch(() => showCommentPopup.value, (newVal) => {
-//   if (!newVal && isPopupCanceled.value && !isCommentSubmitted.value) {
-//     // Reset to backup only if the popup was canceled without submitting a comment
-//     orderStore.applyOverallDiscount(backupOverallDiscount.value);
-//     pendingApprovalDiscount.value = null;  // Clear pending approval
-//   }
-// });
 
 // Disable overall discount if any item has a discount
 const isOverallDiscountDisabled = computed(() => {
   return orderStore.state.orderItems.some(item => item.discountPercentage > 0);
 });
-
-// Reset overall discount if manager approval is denied or canceled
-// watch(() => authStore.isAddManagerApprovalRequest, (newVal) => {
-//   if (!newVal && pendingApprovalDiscount.value !== null && !isCommentSubmitted.value) {
-//     // If approval was denied, reset to the backup discount
-//     orderStore.applyOverallDiscount(backupOverallDiscount.value);
-//     pendingApprovalDiscount.value = null;  // Clear pending approval
-//   }
-// });
 </script>
 
 <template>
