@@ -175,7 +175,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Manager Section -->
-    <div v-show="authStore.isManagerLoggedIn" class="relative flex items-center bg-white w-full p-2 rounded-2xl gap-5 my-3">  
+    <div v-show="authStore.isManagerLoggedIn" class="relative flex items-center justify-center bg-white w-full py-2 px-2 gap-3 rounded-2xl my-3">  
       <div>
         <button class="flex flex-col items-center">
           <img style="width: 30px;" src="/manager.svg" alt="Manager Image">
