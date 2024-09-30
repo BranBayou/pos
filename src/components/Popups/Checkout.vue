@@ -32,25 +32,32 @@ const remainingAmount = computed(() => {
 
 // Function to add a payment method
 function addPaymentMethod(paymentMethod) {
-  // Check if the method is already selected
   const existingMethod = selectedPaymentMethods.value.find(method => method.id === paymentMethod.id);
   
   if (!existingMethod) {
     selectedPaymentMethods.value.push({
       id: paymentMethod.id,
       name: paymentMethod.name,
-      amount: remainingAmount.value > 0 ? remainingAmount.value : 0 // Default to the remaining amount
+      amount: remainingAmount.value > 0 ? remainingAmount.value : 0
     });
   } else {
     toast.error(`${paymentMethod.name} is already selected.`);
   }
 }
 
-// Generate predictive cash amounts (for example, $20, $50, $100)
+// Function to clear the amount for a payment method
+function clearPaymentAmount(method) {
+  const methodToUpdate = selectedPaymentMethods.value.find(m => m.id === method.id);
+  if (methodToUpdate) {
+    methodToUpdate.amount = '0.00';
+  }
+}
+
+// Generate predictive cash amounts
 const predictiveCashAmounts = computed(() => {
   const total = parseFloat(totalAmount.value);
   if (!isNaN(total)) {
-    return [20, 50, 100, 200, 500]; // Common cash amounts
+    return [20, 50, 100, 200, 500];
   }
   return [];
 });
@@ -73,21 +80,18 @@ function preventNegativeInput(event) {
 // Function to update the amount for a specific payment method
 function updatePaymentAmount(method, amount) {
   const methodToUpdate = selectedPaymentMethods.value.find(m => m.id === method.id);
-  
   if (methodToUpdate) {
-    // Ensure that the amount is not negative and round it to 2 decimal places
-    const newAmount = Math.max(0, parseFloat(amount)).toFixed(2); // Ensuring non-negative and rounding to 2 decimals
+    const newAmount = Math.max(0, parseFloat(amount)).toFixed(2);
     const currentRemaining = totalAmount.value - selectedPaymentMethods.value.reduce((acc, m) => acc + (m.id === method.id ? 0 : parseFloat(m.amount || 0)), 0);
 
     if (newAmount > currentRemaining) {
       toast.error('Amount exceeds remaining balance.');
-      methodToUpdate.amount = currentRemaining.toFixed(2); // Rounding to 2 decimals
+      methodToUpdate.amount = currentRemaining.toFixed(2);
     } else {
       methodToUpdate.amount = newAmount;
     }
   }
 }
-
 
 // Watcher to automatically adjust remaining amount for the last payment method
 watch(selectedPaymentMethods, (newVal) => {
@@ -103,13 +107,11 @@ async function handleCheckout() {
     return;
   }
 
-  // Sum the total allocated amount from payment methods
   const totalAllocated = selectedPaymentMethods.value.reduce(
     (acc, method) => acc + parseFloat(method.amount || 0),
     0
   );
 
-  // Compare the total allocated amount with the total order amount, rounding to 2 decimal places
   if (Math.abs(totalAllocated.toFixed(2) - totalAmount.value.toFixed(2)) > 0.01) {
     toast.error('Payment allocation does not match the total amount.');
     return;
@@ -126,7 +128,7 @@ async function handleCheckout() {
     ApprovalList: [], 
     OverallDiscount: orderStore.state.overallDiscount || 0,
     Customer: {
-      id: '', // Add customer details
+      id: '',
       Name: 'Customer Name',
       Phone: '123-456-7890',
       Email: 'customer@example.com',
@@ -134,7 +136,7 @@ async function handleCheckout() {
     },
     Comments: [
       {
-        UserId: authStore.user.id, 
+        UserId: authStore.managerUser.id, 
         Text: 'Order comments here'
       }
     ],
@@ -160,6 +162,7 @@ async function handleCheckout() {
 }
 </script>
 
+
 <template>
   <Teleport to="body">
     <Transition name="modal-outer">
@@ -177,12 +180,12 @@ async function handleCheckout() {
             <div class="bg-white rounded-2xl shadow-lg p-6 w-full">
               <h1 class="font-semibold text-[24px] pb-4">Checkout</h1>
               
-              <div class="w-6/12 flex justify-between gap-3 mb-5">
+              <div class="w-6/12 flex justify-between gap-3 mb-5 bg-gray-100 rounded-xl p-3">
                 <!-- Payment methods -->
                 <button
                   v-for="method in paymentMethods"
                   :key="method.id"
-                  class="w-24 border-2 px-5 py-3 rounded-xl hover:bg-gray-200"
+                  class="w-24 border-2 px-5 py-3 rounded-xl bg-white hover:bg-gray-200"
                   @click="addPaymentMethod(method)"
                 >
                   <img :src="method.icon" :alt="method.name" class="mx-auto w-12 h-12">
@@ -192,21 +195,31 @@ async function handleCheckout() {
               <div class="mb-5 w-6/12">
                 <h2 class="font-semibold text-lg mb-2">Selected Payments</h2>
                 <ul class="space-y-3">
-                  <li v-for="method in selectedPaymentMethods" :key="method.id" class="flex flex-col bg-gray-100 p-3 rounded-lg shadow-sm">
-                    <div class="flex items-center justify-between">
-                      <span class="text-gray-700 font-medium">{{ method.name }}</span>
-                      <input 
-                        type="number" 
-                        v-model.number="method.amount" 
-                        @input="updatePaymentAmount(method, method.amount)"
-                        @keydown="preventNegativeInput"
-                        :max="remainingAmount"
-                        class="border-2 border-gray-300 rounded-md py-1 px-3 w-32 text-right focus:ring focus:ring-purple-200 focus:outline-none focus:border-purple-500"
-                      >
+                  <li v-for="method in selectedPaymentMethods" :key="method.id" class="flex flex-col items-center justify-between bg-gray-100 p-3 rounded-lg shadow-sm">
+                    <div class="flex w-full justify-between">
+                      <img :src="paymentMethods.find(pm => pm.id === method.id).icon" alt="" class="w-10 h-10">
+                      <div class="relative flex items-center gap-4">
+                        <input 
+                          type="number" 
+                          v-model.number="method.amount" 
+                          @input="updatePaymentAmount(method, method.amount)"
+                          @keydown="preventNegativeInput"
+                          :max="remainingAmount"
+                          class="border-2 border-gray-300 rounded-md py-1 px-3 w-32 text-right focus:ring focus:ring-purple-200 focus:outline-none focus:border-purple-500 pr-10"
+                        >
+                        <!-- Clear Button inside Input -->
+                        <button 
+                          v-if="method.amount > 0" 
+                          @click="clearPaymentAmount(method)"
+                          class="absolute right-2 top-2 text-gray-500 hover:text-gray-700 text-lg"
+                        >
+                          <i class="pi pi-times"></i>
+                        </button>
+                      </div>
                     </div>
-
+                    
                     <!-- Predictive Cash Amounts if Cash is selected -->
-                    <div v-if="method.name === 'Cash'" class="mt-2 flex gap-2">
+                    <div v-if="method.name === 'Cash'" class="mt-2 w-full flex gap-2 justify-end">
                       <button 
                         v-for="amount in predictiveCashAmounts" 
                         :key="amount" 
@@ -245,6 +258,9 @@ async function handleCheckout() {
     </Transition>
   </Teleport>
 </template>
+
+
+
 
 
 
