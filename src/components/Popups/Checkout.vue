@@ -45,7 +45,7 @@ function addPaymentMethod(paymentMethod) {
   }
 }
 
-// Function to clear the amount for a payment method
+// handle clear the amount for a payment method
 function clearPaymentAmount(method) {
   const methodToUpdate = selectedPaymentMethods.value.find(m => m.id === method.id);
   if (methodToUpdate) {
@@ -53,7 +53,7 @@ function clearPaymentAmount(method) {
   }
 }
 
-// Generate predictive cash amounts
+// handle predictive cash amounts
 const predictiveCashAmounts = computed(() => {
   const total = parseFloat(totalAmount.value);
   if (!isNaN(total)) {
@@ -62,7 +62,7 @@ const predictiveCashAmounts = computed(() => {
   return [];
 });
 
-// Function to update cash amount based on button click
+// handle update cash amount based on button click
 function setCashAmount(amount) {
   const cashMethod = selectedPaymentMethods.value.find(method => method.name === 'Cash');
   if (cashMethod) {
@@ -77,7 +77,7 @@ function preventNegativeInput(event) {
   }
 }
 
-// Function to update the amount for a specific payment method
+// update the amount for a specific payment method
 function updatePaymentAmount(method, amount) {
   const methodToUpdate = selectedPaymentMethods.value.find(m => m.id === method.id);
   if (methodToUpdate) {
@@ -100,7 +100,7 @@ watch(selectedPaymentMethods, (newVal) => {
   }
 });
 
-// Function to handle checkout and API submission
+// handle checkout and API submission
 async function handleCheckout() {
   if (selectedPaymentMethods.value.length === 0) {
     toast.error('Please select a payment method.');
