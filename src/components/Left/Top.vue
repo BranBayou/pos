@@ -144,6 +144,20 @@ onUnmounted(() => {
   window.removeEventListener('mousemove', resetCountdown);
   window.removeEventListener('keydown', resetCountdown);
 });
+
+const hasEmptyComment = ref(false); // Reactive tracking for empty comments
+  const getAllComments = ref([]); // Reactive array for all comments
+  // Function to update the comments and check for empty commentText
+  const updateComments = () => {
+    getAllComments.value = JSON.parse(localStorage.getItem('comments')) || [];
+    hasEmptyComment.value = getAllComments.value.some(comment => !comment.comment.trim());
+  };
+  // Call updateComments on mounted
+  onMounted(() => {
+    updateComments();
+  });
+  window.addEventListener('comment-saved', updateComments);
+
 </script>
 
 <template>
@@ -185,7 +199,7 @@ onUnmounted(() => {
       <i @click="handleAuthAction('Manager')" ref="myButton" class="pi pi-user text-purple-500 bg-purple-100 p-4 rounded-full cursor-pointer" style="font-size: 1.875rem;"></i>
       <span class="font-medium">{{ authStore.isManagerLoggedIn ? authStore.managerUser : 'Logged out' }}</span>
 
-      <img :src="msgIcon" class="rounded-md cursor-pointer" alt="" @click="authStore.toggleShowCommentsModal">
+      <img :src="msgIcon" :class="hasEmptyComment ? 'bg-red-500' : 'bg-green-200'" class="rounded-md cursor-pointer p-2" alt="" @click="authStore.toggleShowCommentsModal">
     </div>
 
     <ItemsSearch v-if="authStore.isUserLoggedIn" />
