@@ -35,7 +35,7 @@ const handleWalkInCustomer = () => {
                     <span>{{ selectedCustomer.name }}</span>  
                     <span>{{ selectedCustomer.phone }}</span>
                 </p>
-                <span v-else>Select Customer</span>
+                <span v-else class="font-semibold">Select Customer</span>
             </span>
         </button>
     </div>

@@ -37,27 +37,40 @@ const filteredProducts = computed(() => {
     return result.slice(0, 5);
 });
 
+// Function to clear the input field
+function clearSearch() {
+    searchQuery.value = '';
+}
 
 function handleClick(product) {
   orderStore.addOrderItem(product);
   toast.success('Item added');
   searchQuery.value = '';
 }
-
 </script>
 
-
 <template>
-    <input 
-        v-model="searchQuery"
-        :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" 
-        type="text" 
-        name="barcode-search" 
-        id="barcode-search" 
-        class="bg-gray-100 border-0 outline-none p-2 rounded-lg w-full"
-        :class="{ 'opacity-50 cursor-not-allowed': !(authStore.isUserLoggedIn || authStore.isManagerLoggedIn) }"
-        placeholder="Scan or Enter Barcode"
-    >
+    <div class="relative w-full">
+        <input 
+            v-model="searchQuery"
+            :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" 
+            type="text" 
+            name="barcode-search" 
+            id="barcode-search" 
+            class="bg-gray-100 border-0 outline-none p-2 rounded-lg w-full pr-10" 
+            :class="{ 'opacity-50 cursor-not-allowed': !(authStore.isUserLoggedIn || authStore.isManagerLoggedIn) }"
+            placeholder="Scan or Enter Barcode"
+        >
+
+        <!-- Clear Button (X) -->
+        <button 
+            v-if="searchQuery" 
+            @click="clearSearch"
+            class="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
+        >
+            <i class="pi pi-times"></i>
+        </button>
+    </div>
 
     <div v-if="searchQuery.value && filteredProducts.length === 0">
         <p>No products found.</p>
@@ -84,11 +97,6 @@ function handleClick(product) {
         </table>
     </div>
 </template>
-
-
-
-
-
 
 
 <style scoped>

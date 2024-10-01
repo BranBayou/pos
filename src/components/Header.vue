@@ -1,6 +1,9 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
 import BarcodeInput from '@/components/Header/BarcodeInput.vue';
+import Notification from './Header/Notification.vue';
+import Draft from './Header/Draft.vue';
+import Settings from './Header/Settings.vue';
 const authStore = useAuthStore();
 
 </script>
@@ -16,24 +19,15 @@ const authStore = useAuthStore();
             ></i>
             <BarcodeInput />
         </div>
-        <i 
-         :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)"
-         :class="{ 'opacity-50 cursor-not-allowed': !(authStore.isUserLoggedIn || authStore.isManagerLoggedIn) }"
-         class="pi pi-pause text-center text-purple-500 col-span-1"
-         style="font-size: 1.875rem;"
-         ></i>
-        <i
-        :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)"
-        :class="{ 'opacity-50 cursor-not-allowed': !(authStore.isUserLoggedIn || authStore.isManagerLoggedIn) }"
-         class="pi pi-bell text-center text-purple-500 col-span-1"
-         style="font-size: 1.875rem;"
-        ></i>
-        <i 
-         :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)"
-         :class="{ 'opacity-50 cursor-not-allowed': !(authStore.isUserLoggedIn || authStore.isManagerLoggedIn) }"
-         class="pi pi-cog text-center text-purple-500 col-span-1"
-         style="font-size: 1.875rem;"
-        ></i>
+        <div class="col-span-1 text-center">
+            <Draft />
+        </div>
+        <div class="col-span-1 text-center">
+            <Notification />
+        </div>
+        <div class="col-span-1 text-center">
+            <Settings />
+        </div>
     </div>
 
 </template>

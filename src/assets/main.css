@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+    font-family: "Poppins", sans-serif;
+}
+
 .p-select-list-container {
     background-color: white;
     /* border-left: 2px solid #E0E0E0;

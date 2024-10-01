@@ -9,13 +9,11 @@ import casherImg from '/cashier.png';
 import qrCode from '/qr-code.svg';
 
 const authStore = useAuthStore(); // For login, fetching users, toggling, and state management
-const selectedUser = ref(null);
-const username = ref('');
-const password = ref('');
-const storeId = ref(''); 
-
+const selectedUser = ref(null); // Holds the selected user for Cashier login
+const username = ref(''); // For manager login (manual entry)
+const password = ref(''); // Holds the password (PIN)
 const toast = useToast();
-const emit = defineEmits(["close-modal"]);
+const emit = defineEmits(['close-modal']); // To close the modal after login
 
 defineProps({
   modalActive: {
@@ -25,42 +23,73 @@ defineProps({
 });
 
 onMounted(() => {
-  // If the user is already logged in, no need to call the login API
+  // If the user is already logged in, no need to fetch users
   if (authStore.token && authStore.currentUser) {
     console.log('User session restored:', authStore.currentUser);
   } else {
-    // Fetch users if not logged in
+    // Fetch Cashiers if the user is not logged in yet
     authStore.fetchCashiers();
+    authStore.fetchManager();
   }
 });
 
 const login = async () => {
-  const usernameValue = authStore.isCashierLoginInput ? selectedUser.value?.username : username.value;
-  const passwordValue = password.value;
+  let userId;
+  
+  // If cashier login mode, use the selectedUser's id
+  if (authStore.isCashierLoginInput) {
+    userId = selectedUser.value?.id;
+  } 
+  // If manager login mode, find the manager by fullName in managerUsersList
+  else {
+    const manager = authStore.managerUsersList.find(user => user.fullName === username.value);
+    if (manager) {
+      userId = manager.id;  // Get the manager's ID from the matched manager object
+    }
+  }
 
-  if (!usernameValue || !passwordValue) {
-    toast.error('Wrong username or password');
-    console.error('Username or password is missing');
+  const pin = password.value;
+
+  // Debugging: Log the values being sent to the API
+  console.log('Attempting login with:', { userId, pin });
+
+  // Validation: Ensure both userId and pin are provided
+  if (!userId || !pin) {
+    toast.error('Username or PIN is missing');
+    console.error('Username or PIN is missing');
     return;
   }
 
   try {
-    await authStore.login(usernameValue, passwordValue, storeId.value);
+    // Use the login function from the store, which uses the API call
+    await authStore.login(userId, pin, authStore.storeId);
+
+    // Close modal after successful login
     emit('close-modal');
+    
+    // Reset inputs
     username.value = '';
     password.value = '';
+    selectedUser.value = null;
   } catch (error) {
     console.error('Login failed:', error);
+    if (error.response?.data?.errors) {
+      toast.error(error.response.data.errors.join(', ')); // Show errors if they exist
+    } else {
+      toast.error('Login failed');
+    }
   }
 };
 
-// Handle password input to prevent more than 6 characters and auto-login
+
+
+// Handle password input for numeric keypad
 const handlePasswordInput = (num) => {
   if (password.value.length < 6) {
-    password.value += num;
+    password.value += num; 
   }
   if (password.value.length === 6) {
-    login();
+    login(); 
   }
 };
 
@@ -74,61 +103,73 @@ const handlePasswordInput = (num) => {
           <div v-if="modalActive" class="p-4 bg-white self-start mt-24" style="width: 29%; border-radius: 40px;">
             <div class="grid grid-cols-3 gap-6 place-items-center">
               <div class="w-full col-span-3 space-y-3">
+                <!-- Cashier Login -->
                 <div v-if="authStore.isCashierLoginInput" class="cashier-login flex gap-x-1 my-1">
                   <div class="card flex justify-center border-2 rounded-2xl w-full px-3">
-                    <Select v-model="selectedUser" :options="authStore.usersList" optionLabel="username" placeholder="Cashier Login" checkmark :highlightOnSelect="false" class="w-full py-3" />
+                    <Select v-model="selectedUser" :options="authStore.usersList" optionLabel="fullName" placeholder="Cashier Login" checkmark :highlightOnSelect="false" class="w-full py-3" />
                   </div>
                   <img
                     title="Switch to barcode login"
                     :src="qrCode"
-                    alt=""
+                    alt="Switch to manager login"
                     class="cursor-pointer bg-purple-100 p-2 rounded-2xl"
                     @click="authStore.toggleLoginInput"
                   />
                 </div>
+
+                <!-- Manager Login -->
                 <div v-else class="manager-login flex gap-x-1 my-1">
                   <div class="card flex justify-center w-full">
                     <FloatLabel class="border-2 py-3 px-3 w-full rounded-2xl">
                       <i class="pi pi-barcode text-purple-500 pr-2"></i>
-                      <InputText id="username" v-model="username" />
+                      <InputText id="username" v-model="username" placeholder="Enter Manager Username" />
                     </FloatLabel>
                   </div>
                   <img
                     title="Switch to cashier login"
                     :src="casherImg"
-                    alt=""
+                    alt="Switch to cashier login"
                     class="cursor-pointer bg-purple-100 p-2 rounded-2xl"
                     style="width: 44px;"
                     @click="authStore.toggleLoginInput"
                   />
                 </div>
-                <div class="">
-                  <div class="flex justify-center items-center gap-2 border-2 rounded-2xl py-3 px-3">
-                    <i class="pi pi-lock"></i>
-                    <Password v-model="password" :feedback="false" placeholder="******" class=" w-full mx-auto" />
-                  </div>
+
+                <!-- Password Input -->
+                <div class="flex justify-center items-center gap-2 border-2 rounded-2xl py-3 px-3">
+                  <i class="pi pi-lock"></i>
+                  <Password v-model="password" :feedback="false" placeholder="Enter PIN" class="w-full mx-auto" />
                 </div>
               </div>
-              <!-- Number buttons for entering password -->
+
+              <!-- Number Buttons for PIN Entry -->
               <button @click="handlePasswordInput(i)" v-for="i in 9" :key="i"
-                      class="capitalize hover:bg-purple-500 border-2 border-solid border-1 bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
+                      class="hover:bg-purple-500 w-12 h-12 border-2 bg-transparent hover:text-white text-16px font-semibold rounded-full transition duration-300 ease-in-out">
                 {{ i }}
               </button>
-              <button @click="password = password.slice(0, -1)"
-                      class="capitalize hover:bg-purple-500 border-solid border-2 bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
+
+              <!-- Clear Button -->
+              <button @click="password.value = password.value.slice(0, -1)"
+                      class="hover:bg-purple-500 w-12 h-12 border-2 bg-transparent hover:text-white text-16px font-semibold rounded-full transition duration-300 ease-in-out">
                 <i class="pi pi-delete-left"></i>
               </button>
+
+              <!-- Zero Button -->
               <button @click="handlePasswordInput(0)"
-                      class="capitalize hover:bg-purple-500 border-solid border-2 bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
+                      class="hover:bg-purple-500 w-12 h-12 border-2 bg-transparent hover:text-white text-16px font-semibold rounded-full transition duration-300 ease-in-out">
                 0
               </button>
+
+              <!-- Submit Button -->
               <button @click="login" type="submit"
-                      class="capitalize hover:bg-purple-500 border-solid border-2 bg-transparent hover:text-white text-[16px] font-semibold leading-[22px] inline-flex items-center justify-center rounded-full w-[50px] h-[50px] [&>span]:inline-flex gap-[6px] transition duration-300 ease-in-out">
+                      class="hover:bg-purple-500 w-12 h-12 border-2 bg-transparent hover:text-white text-16px font-semibold rounded-full transition duration-300 ease-in-out">
                 <i class="pi pi-check"></i>
               </button>
             </div>
+
+            <!-- Close Modal Button -->
             <button @click="$emit('close-modal')"
-                    class="mt-8 bg-weather-primary rounded-2xl text-white bg-purple-500 hover:bg-purple-400 hover:text-white py-2 px-6">
+                    class="mt-8 bg-purple-500 hover:bg-purple-400 text-white py-2 px-6 rounded-2xl">
               Close
             </button>
           </div>
@@ -137,6 +178,7 @@ const handlePasswordInput = (num) => {
     </Transition>
   </Teleport>
 </template>
+
 
 
 

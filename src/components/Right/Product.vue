@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick, onMounted, watch } from 'vue';
+import { ref, nextTick, onMounted, watch, computed } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useOrderStore } from '@/stores/OrderStore';
 import tippy from 'tippy.js';
@@ -25,6 +25,24 @@ const showCommentPopup = ref(false);  // Control to show AddComment popup
 const selectedItemForComment = ref(null);  // Track the selected item for which the comment is being added
 const backupDiscountPercentage = ref(null);  // Backup discount percentage
 
+function handleInput(item) {
+  if (item.qty > item.MaxQty) {
+    item.qty = item.MaxQty;
+  }
+
+  if (item.qty === 0) {
+    orderStore.deleteOrderItem(item);  
+  }
+
+  // if (item.qty === null || item.qty === undefined || item.qty === '') {
+  //   orderStore.deleteOrderItem(item); 
+  //   return;
+  // }
+}
+
+// Computed property to check if overall discount is applied
+const isOverallDiscountApplied = computed(() => orderStore.state.overallDiscount > 0);
+
 function toggleAccordion(index) {
   isOpen.value[index] = !isOpen.value[index];
 }
@@ -39,14 +57,19 @@ onMounted(() => {
 
 const originalValues = ref({});
 
-// Handle Price Input and update in the store
 const handlePriceInput = (item) => {
   if (item.Price <= 0) {
     item.Price = item.OriginalPrice;
+  } else {
+    // Calculate the new discountPercentage based on the original price
+    const discount = (1 - item.Price / item.OriginalPrice) * 100;
+    item.discountPercentage = discount > 0 ? discount.toFixed(2) : 0;
   }
-
-  orderStore.updateDiscountPercentage(item, ((item.OriginalPrice - item.Price) / item.OriginalPrice * 100).toFixed(2));
+  
+  // Update item price and discount in store
+  orderStore.updateDiscountPercentage(item, item.discountPercentage);
 };
+
 
 const handleDiscountInput = (item) => {
   if (item.discountPercentage < 0) {
@@ -55,7 +78,7 @@ const handleDiscountInput = (item) => {
   if (item.discountPercentage > 100) {
     item.discountPercentage = 100;
   }
-
+  // Update item discount in store
   orderStore.updateDiscountPercentage(item, item.discountPercentage);
 };
 
@@ -71,6 +94,13 @@ const checkValueChanged = (key, item) => {
     checkManagerPermission(item);  // Trigger if value has changed
   }
 };
+
+// Watch overall discount changes to update the price in real-time
+watch(() => orderStore.state.overallDiscount, () => {
+  props.items.forEach(item => {
+    item.Price = (item.OriginalPrice * (1 - orderStore.state.overallDiscount / 100)).toFixed(2);
+  });
+});
 
 // Trigger comment popup when manager approval is needed
 const checkManagerPermission = function(item) {
@@ -92,12 +122,12 @@ watch(() => authStore.isManagerLoggedIn, (newVal) => {
   }
 });
 
-// Handle the comment submission and approval
-const handleCommentSubmitted = (data) => {
-  console.log('Comment Submitted:', data);
-  // Add logic here to handle discount approval after the comment is submitted
-  showCommentPopup.value = false;
-};
+// // Handle the comment submission and approval
+// const handleCommentSubmitted = (data) => {
+//   console.log('Comment Submitted:', data);
+//   // Add logic here to handle discount approval after the comment is submitted
+//   showCommentPopup.value = false;
+// };
 
 // Reset discount percentage if approval is not granted
 watch(() => authStore.isAddManagerApprovalRequest, (newVal) => {
@@ -123,30 +153,36 @@ nextTick(() => {
   <div class="w-[95%] relative mx-auto flex flex-col gap-2">
     <div v-for="(item, index) in items" :key="index" class="collapse rounded-2xl bg-[#f4f5f7]">
       <input type="checkbox" :checked="isOpen[index]" @change="toggleAccordion(index)" />
-      <div class="collapse-title text-xl font-medium flex justify-between items-center">
+      <div class="collapse-title text-md font-medium flex justify-between items-center p-0 px-3">
         <span
-          class="absolute top-0 left-0 border-2 bg-purple-100 rounded-full flex items-center justify-center font-semibold w-5 h-5 text-center m-1 p-1">
+          class="absolute top-0 left-0 border-2 bg-purple-500 rounded-full flex items-center justify-center w-5 h-5 text-center text-white m-1 p-1">
           {{ item.qty }}
         </span>
         <div class="flex items-center gap-4">
           <img :src="`https://replicagunsca.b-cdn.net/images/products/small/${item.ImageUrl}`" class="w-14 rounded-lg"
             alt="product-img" />
-          <p class="text-base font-semibold">{{ item.Name }}</p>
+          <p class="text-base font-medium">{{ item.Name }}</p>
         </div>
-        <div>
-          <p class="font-semibold">${{ (item.Price * item.qty).toFixed(2) }}</p>
-          <p v-if="item.discountPercentage" class="text-sm">{{ item.discountPercentage }}% discount applied</p>
+        <div class="flex flex-col items-end">
+          <p class="font-medium">${{ (item.Price * item.qty).toFixed(2) }}</p>
+          <!-- Show discount percentage dynamically based on overall discount -->
+          <p v-if="item.discountPercentage" class="text-sm">
+            {{ `${item.discountPercentage} % discount applied` }}
+          </p>
+          <p v-if="orderStore.state.overallDiscount" class="text-sm">
+            {{ `${orderStore.state.overallDiscount} % overall discount applied` }}
+          </p>
         </div>
       </div>
 
       <div class="collapse-content flex bg-white">
         <div class="collapse-left w-6/12 flex flex-col justify-between">
           <div class="flex items-center space-x-2 w-full justify-center gap-5 pt-6">
-            <Button class="pi pi-minus p-button-rounded p-2 font-extrabold" @click="orderStore.decrementOrderItem(item)"
+            <Button class="pi pi-minus p-button-rounded p-2 font-extrabold hover:bg-purple-100 hover:rounded-lg" @click="orderStore.decrementOrderItem(item)"
               style="font-size: 20px;" />
             <input type="number" class="text-center no-arrows border-2 rounded-lg py-1" v-model.number="item.qty"
               :min="1" :max="item.MaxQty" @input="handleInput(item)" />
-            <Button class="pi pi-plus p-button-rounded font-extrabold p-2" @click="orderStore.incrementOrderItem(item)"
+            <Button class="pi pi-plus p-button-rounded font-extrabold p-2 hover:bg-purple-100 hover:rounded-lg" @click="orderStore.incrementOrderItem(item)"
               style="font-size: 20px;" />
           </div>
           <p class="flex items-center space-x-2 w-full justify-center py-5">SKU: {{ item.Sku }}</p>
@@ -177,7 +213,12 @@ nextTick(() => {
               :min="0"
               @focus="storeOriginalValue('Price', item)"  
               @input="handlePriceInput(item)" 
-              @blur="checkValueChanged('Price', item)"   
+              @blur="checkValueChanged('Price', item)"  
+              :disabled="isOverallDiscountApplied"
+              :class="{
+                'bg-purple-500 opacity-30 text-white cursor-not-allowed': isOverallDiscountApplied,
+                'bg-white': !isOverallDiscountApplied
+              }"
             />
           </span>
           
@@ -191,7 +232,12 @@ nextTick(() => {
               :max="100" 
               @focus="storeOriginalValue('discountPercentage', item)"  
               @input="handleDiscountInput(item)"
-              @blur="checkValueChanged('discountPercentage', item)"  
+              @blur="checkValueChanged('discountPercentage', item)" 
+              :disabled="isOverallDiscountApplied"
+              :class="{
+                'bg-purple-500 opacity-30 text-white cursor-not-allowed': isOverallDiscountApplied,
+                'bg-white': !isOverallDiscountApplied
+              }" 
             />
           </span>
 
