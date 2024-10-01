@@ -40,7 +40,7 @@ const draftCount = computed(() => draftOrders.value.length);
     ></i>
 
     <!-- Badge to show the number of drafts -->
-    <span v-if="draftCount > 0"
+    <span v-if="draftCount > 0 && authStore.isUserLoggedIn"
       class="absolute top-0 right-3 bg-purple-500 text-white text-xs font-bold px-2 py-1 rounded-full"
       style="transform: translate(50%, -50%);"
     >
