@@ -8,8 +8,10 @@ const authStore = useAuthStore();
 const orderStore = useOrderStore();
 
 const comments = ref([]);
-const isEditing = ref({}); // Track which comment is being edited
-const newComments = ref([]); // Track new comment inputs per comment
+// Track which comment is being edited
+const isEditing = ref({}); 
+// Track new comment inputs per comment
+const newComments = ref([]); 
 
 // Function to load comments from local storage
 const loadCommentsFromLocalStorage = () => {
@@ -44,11 +46,6 @@ const saveNewComment = (index) => {
     return;
   }
 
-  // // Ensure OriginalPrice is set before calculating the new price
-  // if (!commentItem.OriginalPrice) {
-  //   commentItem.OriginalPrice = commentItem.price; // Set OriginalPrice if missing
-  // }
-
   // Apply the discount to the order item in the store
   const orderItem = orderStore.state.orderItems.find(
     (item) => item.Sku === commentItem.sku // Match orderItem with comment item based on SKU
@@ -73,10 +70,15 @@ const saveNewComment = (index) => {
   isEditing.value[index] = false;
 };
 
-
-// Function to cancel editing
+// Handle to cancel editing
 const cancelEdit = (index) => {
   isEditing.value[index] = false;
+};
+
+// Handle to delete a comment
+const deleteComment = (index) => {
+  comments.value.splice(index, 1); 
+  saveCommentsToLocalStorage(); 
 };
 
 // Fetch the comments when the component is mounted
@@ -87,14 +89,12 @@ onMounted(() => {
 const emit = defineEmits(['close']);
 </script>
 
-
-
 <template>
   <Teleport to="body">
     <Transition name="modal-outer">
       <div class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
         <Transition name="modal-inner" class="rounded-2xl">
-          <div class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-50 w-10/12">
+          <div class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-50 w-10/12 max-h-full overflow-y-auto">
             <div class="bg-white rounded-2xl p-6 w-full shadow-lg">
               <h3 class="text-lg font-semibold mb-4">Saved Comments</h3>
               
@@ -137,8 +137,11 @@ const emit = defineEmits(['close']);
                 </div>
 
                 <!-- Display comment if it exists and is not being edited -->
-                <div v-else class="text-sm">
+                <div v-else class="text-sm flex justify-between">
                   <p>Reason: {{ comment.comment }}</p>
+                  <button @click="deleteComment(index)" class="px-4 py-2 bg-gray-500 text-white rounded-lg">
+                    <i class="pi pi-trash"></i>
+                  </button>
                 </div>
               </div>
 
