@@ -144,25 +144,25 @@ const handlePasswordInput = (num) => {
 
               <!-- Number Buttons for PIN Entry -->
               <button @click="handlePasswordInput(i)" v-for="i in 9" :key="i"
-                      class="hover:bg-purple-500 border-2 bg-transparent hover:text-white text-16px font-semibold rounded-full w-50px h-50px transition duration-300 ease-in-out">
+                      class="hover:bg-purple-500 w-16 h-16 border-2 bg-transparent hover:text-white text-16px font-semibold rounded-full w-50px h-50px transition duration-300 ease-in-out">
                 {{ i }}
               </button>
 
               <!-- Clear Button -->
               <button @click="password.value = password.value.slice(0, -1)"
-                      class="hover:bg-purple-500 border-2 bg-transparent hover:text-white text-16px font-semibold rounded-full w-50px h-50px transition duration-300 ease-in-out">
+                      class="hover:bg-purple-500 w-16 h-16 border-2 bg-transparent hover:text-white text-16px font-semibold rounded-full w-50px h-50px transition duration-300 ease-in-out">
                 <i class="pi pi-delete-left"></i>
               </button>
 
               <!-- Zero Button -->
               <button @click="handlePasswordInput(0)"
-                      class="hover:bg-purple-500 border-2 bg-transparent hover:text-white text-16px font-semibold rounded-full w-50px h-50px transition duration-300 ease-in-out">
+                      class="hover:bg-purple-500 w-16 h-16 border-2 bg-transparent hover:text-white text-16px font-semibold rounded-full w-50px h-50px transition duration-300 ease-in-out">
                 0
               </button>
 
               <!-- Submit Button -->
               <button @click="login" type="submit"
-                      class="hover:bg-purple-500 border-2 bg-transparent hover:text-white text-16px font-semibold rounded-full w-50px h-50px transition duration-300 ease-in-out">
+                      class="hover:bg-purple-500 w-16 h-16 border-2 bg-transparent hover:text-white text-16px font-semibold rounded-full w-50px h-50px transition duration-300 ease-in-out">
                 <i class="pi pi-check"></i>
               </button>
             </div>

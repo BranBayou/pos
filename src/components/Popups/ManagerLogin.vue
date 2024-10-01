@@ -79,7 +79,7 @@ const loginManager = async () => {
                 <Password v-model="password" :feedback="false" placeholder="******" class=" w-full mx-auto" />
               </div>
             </div>
-            <button @click="loginManager" class="mt-8 bg-purple-500 text-white py-2 px-6 rounded-2xl hover:bg-purple-700">
+            <button @click="loginManager" class="mt-8 mr-2 bg-purple-500 text-white py-2 px-6 rounded-2xl hover:bg-purple-700">
               Login
             </button>
             <button @click="authStore.toggleManagerLoginPopup" class="mt-8 bg-weather-primary rounded-2xl text-white bg-purple-500 hover:bg-purple-400 hover:text-white py-2 px-6">
