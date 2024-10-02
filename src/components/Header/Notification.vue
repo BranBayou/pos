@@ -17,7 +17,7 @@ const draftOrders = ref([]);
 
 // Fetch draft orders once on component mount
 onMounted(() => {
-  draftOrders.value = orderStore.fetchDraftOrders();
+  // draftOrders.value = orderStore.fetchDraftOrders();
 
   tippy('#notiTooltip', {
     content: 'Notifications',

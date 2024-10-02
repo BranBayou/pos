@@ -96,7 +96,7 @@ const startCountdown = () => {
       authStore.logout(authStore.userRole ); 
       authStore.logout(authStore.managerRole); 
     }
-  }, 1000);
+  }, 10000000);
 };
 
 const resetCountdown = () => {
@@ -180,7 +180,7 @@ const hasEmptyComment = ref(false); // Reactive tracking for empty comments
       </div>
       <i @click="handleAuthAction('Cashier')" ref="myButton" class="pi pi-user text-purple-500 bg-purple-100 p-4 rounded-full cursor-pointer" style="font-size: 1.875rem;"></i>
       <span class="font-medium">{{ authStore.isUserLoggedIn ? authStore.currentUser : 'Logged out' }}</span>
-      
+
       <!-- Countdown Timer -->
       <span v-if="authStore.isUserLoggedIn && countdown <= 10" class="absolute bottom-2 right-2 flex items-center gap-2">
         <p>{{ countdown }}</p>
