@@ -1,4 +1,4 @@
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { defineStore } from 'pinia';
 import { useToast } from 'vue-toastification';
 
@@ -45,6 +45,7 @@ export const useOrderStore = defineStore('orders', () => {
         Discount: item.Discount || 0,
         TaxesWaived: false,
         OriginalPrice: item.Price,
+        Price: null,
         SalesPersonId: selectedSalesPerson.value?.SalesPersonId || null,
       };
   
@@ -211,7 +212,7 @@ export const useOrderStore = defineStore('orders', () => {
     }
   }
 
-  // Function to update PST rate and recalculate taxes
+  // hnadle update PST rate and recalculate taxes
   function updatePstRate(rate) {
     const pstTax = state.taxes.find(tax => tax.type === 'PST');
     if (pstTax) {
@@ -219,6 +220,14 @@ export const useOrderStore = defineStore('orders', () => {
       calculateTaxes();  // Recalculate taxes based on new rate
     }
   }
+
+  // handle update state total
+  function updateOrderTotal(newTotal) {
+    const roundedTotal = parseFloat(newTotal.toFixed(2));
+    state.total = roundedTotal;
+    saveOrderItemsToLocalStorage();
+}
+
 
 const getTotalGstAmount = computed(() => {
   return state.taxes.find(tax => tax.type === 'GST').amount;
@@ -240,7 +249,6 @@ const getTotalPstAmount = computed(() => {
       : 0;
   });
 
-  
   // Update the discount for a specific order item and recalculate the price
 function updateDiscountPercentage(item, discount) {
   const existingItem = state.orderItems.find(orderItem =>
@@ -338,6 +346,7 @@ function updateOriginalPrice(item, originalPrice) {
     // updateOriginalPrice,
     updateGstRate,
     updatePstRate,
+    updateOrderTotal,
   };
 });
 

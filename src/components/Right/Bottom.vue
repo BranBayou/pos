@@ -20,6 +20,10 @@ const gstAmount = computed(() => orderStore.getTotalGstAmount);
 const pstAmount = computed(() => orderStore.getTotalPstAmount);
 const orderTotal = computed(() => orderStore.getOrderTotal);
 
+watch(orderTotal, (newValue) => {
+  orderStore.updateOrderTotal(newValue);  // Update the store's total
+});
+
 // Handle overall discount input with necessary checks
 const handleOverallDiscountInput = (discount) => {
   const discountValue = parseFloat(discount);
