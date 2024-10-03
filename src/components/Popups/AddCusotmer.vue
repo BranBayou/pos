@@ -1,9 +1,11 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
+import { useCustomerStore } from '@/stores/customerStore';
 import { ref, computed, onMounted } from 'vue';
 import InputMask from 'primevue/inputmask';
 
 const authStore = useAuthStore();
+const customerStore = useCustomerStore();
 
 const value = ref(''); // Phone mask value
 
@@ -22,15 +24,15 @@ const displayedCustomer = ref(null);
 
 // Fetch customers when component mounts
 onMounted(() => {
-  // authStore.fetchCustomers();
+  customerStore.fetchCustomers(); // Fetch the customers from customerStore
 });
 
 // Computed property to filter customers based on the search query
 const filteredCustomers = computed(() => {
   if (!searchQuery.value) {
-    return authStore.customersList.slice(0, 3); // Show first 3 customers by default
+    return customerStore.customersList.slice(0, 3); // Show first 3 customers by default
   }
-  return authStore.customersList.filter(customer => 
+  return customerStore.customersList.filter(customer => 
     customer.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
     customer.phone.includes(searchQuery.value) || 
     customer.email.toLowerCase().includes(searchQuery.value.toLowerCase())
@@ -39,18 +41,23 @@ const filteredCustomers = computed(() => {
 
 // Function to handle customer selection from the list
 const selectCustomer = (customer) => {
-  authStore.setSelectedCustomer(customer); // Store the selected customer in the store
+  // Store the selected customer in both authStore and customerStore
+  authStore.setSelectedCustomer(customer); 
+  customerStore.selectedCustomer = customer;
+
   authStore.toggleAddCustomerPopup(); // Close the popup
 };
 
-// Function to handle form submission (adding new customer for display only)
+// Function to handle form submission (adding new customer for display)
 const submitNewCustomer = () => {
   if (newCustomer.value.name && newCustomer.value.phone && newCustomer.value.email) {
-    // Store the new customer locally (for display)
-    displayedCustomer.value = { ...newCustomer.value };
+    // Store the new customer in customerStore
+    const newCustomerEntry = { ...newCustomer.value };
+    customerStore.customersList.push(newCustomerEntry);
 
-    // Set it as the selected customer (for consistency with the listed customer selection)
-    authStore.setSelectedCustomer(displayedCustomer.value);
+    // Set the new customer as selected in both authStore and customerStore
+    authStore.setSelectedCustomer(newCustomerEntry);
+    customerStore.selectedCustomer = newCustomerEntry;
 
     // Close the popup
     authStore.toggleAddCustomerPopup();
@@ -72,6 +79,7 @@ const resetForm = () => {
   };
 };
 </script>
+
 
 <template>
   <Teleport to="body">
