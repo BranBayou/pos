@@ -29,7 +29,7 @@ const handleWalkInCustomer = () => {
                 </div>
                 <!-- Check if a customer is selected and show name and phone or fallback to 'Select Customer' -->
                 <p 
-                 v-if="selectedCustomer"
+                 v-if="selectedCustomer && selectedCustomer.name"
                  class="flex flex-col"
                 >
                     <span>{{ selectedCustomer.name }}</span>  
@@ -40,6 +40,7 @@ const handleWalkInCustomer = () => {
         </button>
     </div>
 </template>
+
 
 
 <style scoped>

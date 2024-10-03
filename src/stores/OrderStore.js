@@ -226,7 +226,7 @@ export const useOrderStore = defineStore('orders', () => {
     const roundedTotal = parseFloat(newTotal.toFixed(2));
     state.total = roundedTotal;
     saveOrderItemsToLocalStorage();
-}
+  }
 
 
 const getTotalGstAmount = computed(() => {
@@ -343,10 +343,11 @@ function updateOriginalPrice(item, originalPrice) {
     // submitCommentToStore,
     loadOrderItemsFromLocalStorage,
     // recalculateTotal,
-    // updateOriginalPrice,
+    updateOriginalPrice,
     updateGstRate,
     updatePstRate,
     updateOrderTotal,
+    saveOrderItemsToLocalStorage,
   };
 });
 

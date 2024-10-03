@@ -1,11 +1,13 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
 import { useCustomerStore } from '@/stores/customerStore';
+import { useOrderStore } from '@/stores/OrderStore'; // Import the order store
 import { ref, computed, onMounted } from 'vue';
 import InputMask from 'primevue/inputmask';
 
 const authStore = useAuthStore();
 const customerStore = useCustomerStore();
+const orderStore = useOrderStore(); // Initialize the order store
 
 const value = ref(''); // Phone mask value
 
@@ -45,6 +47,15 @@ const selectCustomer = (customer) => {
   authStore.setSelectedCustomer(customer); 
   customerStore.selectedCustomer = customer;
 
+  // Update the customer details in orderStore's state.customer
+  orderStore.state.customer = {
+    id: '', // Add logic to assign customer ID if needed
+    name: customer.name,
+    phone: customer.phone,
+    email: customer.email,
+    note: customer.note,
+  };
+  orderStore.saveOrderItemsToLocalStorage();
   authStore.toggleAddCustomerPopup(); // Close the popup
 };
 
@@ -59,9 +70,19 @@ const submitNewCustomer = () => {
     authStore.setSelectedCustomer(newCustomerEntry);
     customerStore.selectedCustomer = newCustomerEntry;
 
+    // Update the customer details in orderStore's state.customer
+    orderStore.state.customer = {
+      id: '', // Add logic to assign customer ID if needed
+      name: newCustomerEntry.name,
+      phone: newCustomerEntry.phone,
+      email: newCustomerEntry.email,
+      note: newCustomerEntry.note,
+    };
+    console.log(orderStore.state.customer)
+    
     // Close the popup
     authStore.toggleAddCustomerPopup();
-
+    orderStore.saveOrderItemsToLocalStorage();
     // Reset the form after submission
     resetForm();
   } else {
@@ -79,6 +100,7 @@ const resetForm = () => {
   };
 };
 </script>
+
 
 
 <template>
