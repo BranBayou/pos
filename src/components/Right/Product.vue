@@ -121,6 +121,23 @@ nextTick(() => {
     content: 'In Store Quantity',
   });
 });
+
+const gstRate = computed({
+  get() {
+    return orderStore.state.taxes.find(tax => tax.type === 'GST').rate;
+  },
+  set(value) {
+    orderStore.updateGstRate(value);  // Update GST rate in the store
+  }
+})
+const pstRate = computed({
+  get() {
+    return orderStore.state.taxes.find(tax => tax.type === 'PST').rate;
+  },
+  set(value) {
+    orderStore.updatePstRate(value);  // Update PST rate in the store
+  }
+});
 </script>
 
 <template>
@@ -230,29 +247,31 @@ nextTick(() => {
             />
           </span>
 
-          <!-- Editable GST input, default set to 0.5 -->
-          <span class="flex items-center justify-start gap-2">
-            <p class="font-semibold">GST</p>
-            <input 
-              type="number" 
-              class="border-2 rounded-lg w-28 text-center py-1" 
-              v-model.number="orderStore.state.gst" 
-              :min="0" 
-              :max="100" 
-            />
-          </span>
-
-          <!-- PST Input -->
-          <span class="flex items-center justify-start gap-2 pt-5">
-            <p class="font-semibold">PST</p>
-            <input 
-              type="number" 
-              class="border-2 rounded-lg w-28 text-center py-1" 
-              v-model.number="orderStore.state.pst" 
-              :min="0" 
-              :max="100" 
-            />
-          </span>
+          <!-- Editable GST input, default set to 5% -->
+         <span class="flex items-center justify-start gap-2">
+           <p class="font-semibold">GST</p>
+           <input 
+             type="number" 
+             class="border-2 rounded-lg w-28 text-center py-1" 
+             v-model.number="gstRate" 
+             @input="updateGstRate(gstRate)" 
+             :min="0" 
+             :max="100"
+           />
+         </span>
+     
+         <!-- PST Input, default set to 7% -->
+         <span class="flex items-center justify-start gap-2 pt-5">
+           <p class="font-semibold">PST</p>
+           <input 
+             type="number" 
+             class="border-2 rounded-lg w-28 text-center py-1" 
+             v-model.number="pstRate" 
+             @input="updatePstRate(pstRate)" 
+             :min="0" 
+             :max="100"
+           />
+         </span>
         </div>
       </div>
     </div>

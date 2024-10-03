@@ -171,42 +171,51 @@ export const useOrderStore = defineStore('orders', () => {
     }
   }
   
+  // Function to recalculate taxes based on the current rates
   function calculateTaxes() {
-    // Ensure the taxes array contains GST and PST objects
+    // Get current tax objects
     let gstTax = state.taxes.find(tax => tax.type === 'GST');
     let pstTax = state.taxes.find(tax => tax.type === 'PST');
-  
-    // If GST or PST is missing, add them to the array with default values
-    if (!gstTax) {
-      gstTax = { type: 'GST', rate: 5, amount: 0 };
-      state.taxes.push(gstTax);
-    }
-  
-    if (!pstTax) {
-      pstTax = { type: 'PST', rate: 7, amount: 0 };
-      state.taxes.push(pstTax);
-    }
-  
+
     // Reset the tax amounts before recalculating
     let gstTotal = 0;
     let pstTotal = 0;
-  
+
     // Calculate taxes for each item in the order
     state.orderItems.forEach(item => {
-      const price = Number(item.Price) || 0;  // Ensure Price is a valid number
-      const itemGst = (price * gstTax.rate) / 100;  // 5% GST
-      const itemPst = (price * pstTax.rate) / 100;  // 7% PST
-  
+      const price = Number(item.Price) || 0; // Ensure Price is a valid number
+      const itemGst = (price * gstTax.rate) / 100;  // GST based on the rate
+      const itemPst = (price * pstTax.rate) / 100;  // PST based on the rate
+
       gstTotal += itemGst * item.Qty;
       pstTotal += itemPst * item.Qty;
     });
-  
-    // Update the amounts for GST and PST
+
+    // Update the tax amounts in the state
     gstTax.amount = gstTotal.toFixed(2);
     pstTax.amount = pstTotal.toFixed(2);
-  
-    saveOrderItemsToLocalStorage();  // Save the updated taxes to localStorage
+
+    saveOrderItemsToLocalStorage();  // Save the updated state to localStorage
   }
+
+  // Function to update GST rate and recalculate taxes
+  function updateGstRate(rate) {
+    const gstTax = state.taxes.find(tax => tax.type === 'GST');
+    if (gstTax) {
+      gstTax.rate = Number(rate);  // Update the rate
+      calculateTaxes();  // Recalculate taxes based on new rate
+    }
+  }
+
+  // Function to update PST rate and recalculate taxes
+  function updatePstRate(rate) {
+    const pstTax = state.taxes.find(tax => tax.type === 'PST');
+    if (pstTax) {
+      pstTax.rate = Number(rate);  // Update the rate
+      calculateTaxes();  // Recalculate taxes based on new rate
+    }
+  }
+
   
 
 
@@ -330,6 +339,8 @@ function updateOriginalPrice(item, originalPrice) {
     loadOrderItemsFromLocalStorage,
     // recalculateTotal,
     // updateOriginalPrice,
+    updateGstRate,
+    updatePstRate,
   };
 });
 
