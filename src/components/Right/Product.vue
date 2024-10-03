@@ -62,13 +62,11 @@ const checkValueChanged = (key, item) => {
 // Handle price input and recalculate discount based on the original price
 const handlePriceInput = (item) => {
   if (item.Price <= 0) {
-    item.Price = item.OriginalPrice; // Revert to original price if input is invalid
+    item.Price = item.OriginalPrice; 
   } else {
-    // Calculate discount percentage based on price and original price
     const discount = ((1 - item.Price / item.OriginalPrice) * 100).toFixed(2);
     item.discountPercentage = discount > 0 ? discount : 0;
   }
-  // Update the discount in the store
   orderStore.updateDiscountPercentage(item, item.discountPercentage);
 };
 
@@ -76,11 +74,7 @@ const handlePriceInput = (item) => {
 const handleDiscountInput = (item) => {
   if (item.Discount < 0) item.Discount = 0;
   if (item.Discount > 100) item.Discount = 100;
-
-  // Calculate new price based on discount
   item.Price = (item.OriginalPrice * (1 - item.Discount / 100)).toFixed(2);
-  
-  // Update the store with the new discount
   orderStore.updateDiscountPercentage(item, item.Discount);
 };
 
@@ -127,7 +121,8 @@ const gstRate = computed({
     return orderStore.state.taxes.find(tax => tax.type === 'GST').rate;
   },
   set(value) {
-    orderStore.updateGstRate(value);  // Update GST rate in the store
+    // Update GST rate in the store
+    orderStore.updateGstRate(value);  
   }
 })
 const pstRate = computed({
@@ -135,7 +130,8 @@ const pstRate = computed({
     return orderStore.state.taxes.find(tax => tax.type === 'PST').rate;
   },
   set(value) {
-    orderStore.updatePstRate(value);  // Update PST rate in the store
+    // Update PST rate in the store
+    orderStore.updatePstRate(value);  
   }
 });
 </script>
@@ -191,7 +187,7 @@ const pstRate = computed({
               @click="orderStore.incrementOrderItem(item)" style="font-size: 20px;" 
             />
           </div>
-          <p class="flex items-center space-x-2 w-full justify-center py-5">SKU: {{ item.ItemId }}</p>
+          <p class="flex items-center space-x-2 w-full justify-center py-5">SKU: {{ item.Sku }}</p>
 
           <div class="flex items-center justify-center gap-5">
             <span id="storeQuantity" class="flex flex-col items-center">

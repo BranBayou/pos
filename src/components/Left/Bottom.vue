@@ -11,19 +11,18 @@ const authStore = useAuthStore();
 
 const totalItems = computed(() => {
   // Ensure that orderItems is always treated as an array
-  return Array.isArray(orderStore.getOrderItems) 
-    ? orderStore.getOrderItems.reduce((total, item) => total + item.qty, 0) 
+  return Array.isArray(orderStore.state.orderItems) 
+    ? orderStore.state.orderItems.reduce((total, item) => total + item.Qty, 0) 
     : 0;
 });
 
 const totalSkus = computed(() => {
-  if (Array.isArray(orderStore.getOrderItems)) {
-    const skus = orderStore.getOrderItems.map(item => item.Sku);
+  if (Array.isArray(orderStore.state.orderItems)) {
+    const skus = orderStore.state.orderItems.map(item => item.ItemId); // Assuming ItemId represents SKU
     return new Set(skus).size; // Using Set to get unique SKUs
   }
   return 0;
 });
-
 
 // Function to handle checkout popup visibility
 function handleCheckoutPopup() {
@@ -34,6 +33,7 @@ function handleCheckoutPopup() {
   }
 }
 </script>
+
 
 <template>
   <div class="bg-white w-full rounded-2xl flex items-center content-between gap-5 my-5 px-5">

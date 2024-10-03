@@ -37,6 +37,7 @@ export const useOrderStore = defineStore('orders', () => {
     } else {
       const newItem = {
         ItemId: item.BarCode,
+        Sku: item.Sku,
         ItemName: item.Name,
         ItemImage: item.ImageUrl,
         Qty: 1,
