@@ -97,6 +97,7 @@ export const useOrderStore = defineStore('orders', () => {
     );
     if (index !== -1) {
       state.orderItems.splice(index, 1);
+      calculateTaxes(); 
       saveOrderItemsToLocalStorage(); 
     }
     if(state.orderItems.length === 0) {
@@ -183,9 +184,9 @@ export const useOrderStore = defineStore('orders', () => {
 
     // Calculate taxes for each item in the order
     state.orderItems.forEach(item => {
-      const price = Number(item.Price) || 0; // Ensure Price is a valid number
-      const itemGst = (price * gstTax.rate) / 100;  // GST based on the rate
-      const itemPst = (price * pstTax.rate) / 100;  // PST based on the rate
+      const price = Number(item.Price) || 0;
+      const itemGst = (price * gstTax.rate) / 100; 
+      const itemPst = (price * pstTax.rate) / 100; 
 
       gstTotal += itemGst * item.Qty;
       pstTotal += itemPst * item.Qty;
@@ -215,11 +216,6 @@ export const useOrderStore = defineStore('orders', () => {
       calculateTaxes();  // Recalculate taxes based on new rate
     }
   }
-
-  
-
-
-
 
 const getTotalGstAmount = computed(() => {
   return state.taxes.find(tax => tax.type === 'GST').amount;
