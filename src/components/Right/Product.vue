@@ -74,14 +74,14 @@ const handlePriceInput = (item) => {
 
 // Handle discount input and recalculate the price based on the original price
 const handleDiscountInput = (item) => {
-  if (item.discountPercentage < 0) item.discountPercentage = 0;
-  if (item.discountPercentage > 100) item.discountPercentage = 100;
+  if (item.Discount < 0) item.Discount = 0;
+  if (item.Discount > 100) item.Discount = 100;
 
   // Calculate new price based on discount
-  item.Price = (item.OriginalPrice * (1 - item.discountPercentage / 100)).toFixed(2);
+  item.Price = (item.OriginalPrice * (1 - item.Discount / 100)).toFixed(2);
   
   // Update the store with the new discount
-  orderStore.updateDiscountPercentage(item, item.discountPercentage);
+  orderStore.updateDiscountPercentage(item, item.Discount);
 };
 
 // Watch for overall discount changes to update item prices in real time
