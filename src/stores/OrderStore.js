@@ -48,14 +48,13 @@ export const useOrderStore = defineStore('orders', () => {
       };
   
       // Apply the overall discount to newly added items
-      if (state.overallDiscount > 0) {
-        newItem.Price = Number(
-          (newItem.OriginalPrice * (1 - state.overallDiscount / 100)).toFixed(2)
-        );
-      } else {
-        // Ensure Price is set as a number
-        newItem.Price = Number(newItem.OriginalPrice);
-      }
+    if (state.overallDiscount > 0) {
+      newItem.Price = Number(
+        (newItem.OriginalPrice * (1 - state.overallDiscount / 100)).toFixed(2)
+      );
+    } else {
+      newItem.Price = Number(newItem.OriginalPrice);
+    }
   
       state.orderItems.push(newItem);
     }
@@ -71,6 +70,9 @@ export const useOrderStore = defineStore('orders', () => {
     );
     if (existingItem) {
       existingItem.Qty++;
+      if(existingItem.Qty > existingItem.MaxQty) {
+        existingItem.Qty = existingItem.MaxQty;
+      }
       saveOrderItemsToLocalStorage(); 
       calculateTaxes(); 
     }
@@ -291,11 +293,9 @@ function updateOriginalPrice(item, originalPrice) {
     state.overallDiscount = overallDiscountPercentage;
 
     state.orderItems.forEach(item => {
-      const originalPrice = item.OriginalPrice || item.Price;
+      const originalPrice = item.OriginalPrice;
       item.Price = (originalPrice * (1 - overallDiscountPercentage / 100)).toFixed(2);
     });
-
-    localStorage.setItem('overallDiscount', overallDiscountPercentage.toString());
     saveOrderItemsToLocalStorage();
   }
 

@@ -35,10 +35,10 @@ const isOverallDiscountApplied = computed(() => props.order.overallDiscount > 0)
 
 // Handle quantity changes and remove item if quantity is zero
 function handleInput(item) {
-  if (item.qty > item.MaxQty) {
-    item.qty = item.MaxQty;
+  if (item.Qty > item.MaxQty) {
+    item.Qty = item.MaxQty;
   }
-  if (item.qty === 0) {
+  if (item.Qty === 0) {
     orderStore.deleteOrderItem(item);
   }
 }
@@ -47,14 +47,14 @@ function handleInput(item) {
 const originalValues = ref({});
 
 const storeOriginalValue = (key, item) => {
-  if (!originalValues.value[item.Name]) {
-    originalValues.value[item.Name] = {};
+  if (!originalValues.value[item.ItemName]) {
+    originalValues.value[item.ItemName] = {};
   }
-  originalValues.value[item.Name][key] = item[key];
+  originalValues.value[item.ItemName][key] = item[key];
 };
 
 const checkValueChanged = (key, item) => {
-  if (item[key] !== originalValues.value[item.Name]?.[key]) {
+  if (item[key] !== originalValues.value[item.ItemName]?.[key]) {
     checkManagerPermission(item);
   }
 };
@@ -162,7 +162,7 @@ const pstRate = computed({
           <p class="text-base font-medium">{{ item.ItemName }}</p>
         </div>
         <div class="flex flex-col items-end">
-          <p class="font-medium">${{ (item.OriginalPrice * item.Qty).toFixed(2) }}</p>
+          <p class="font-medium">${{ (item.Price * item.Qty).toFixed(2) }}</p>
           <!-- Show discount percentage dynamically based on overall discount -->
           <p v-if="item.Discount" class="text-sm">
             {{ `${item.Discount} % discount applied` }}
@@ -215,7 +215,7 @@ const pstRate = computed({
             <input 
               type="number" 
               class="border-2 rounded-lg w-28 text-center py-1" 
-              v-model.number="item.OriginalPrice" 
+              v-model.number="item.Price" 
               :min="0"
               @focus="storeOriginalValue('Price', item)"  
               @input="handlePriceInput(item)" 
