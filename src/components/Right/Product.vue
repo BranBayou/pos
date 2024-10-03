@@ -186,7 +186,7 @@ nextTick(() => {
               class="flex flex-col items-center"
             >
               <i class="pi pi-user bg-purple-200 p-3 rounded-full" style="font-size: 20px;"></i>
-              <p>{{ orderStore.selectedSalesPerson ? orderStore.selectedSalesPerson.name : 'No Salesperson Selected' }}</p>
+              <p>{{ item.SalesPersonId ? item.SalesPersonId.name : 'No Salesperson Selected' }}</p>
             </button>
           </div>
         </div>

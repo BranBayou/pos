@@ -16,8 +16,8 @@ const isPopupCanceled = ref(false); // Track if the popup was canceled
 const isCommentSubmitted = ref(false); // Track if the comment was successfully submitted
 
 // Computed values for order total, GST, PST, and Discount
-const gstAmount = computed(() => orderStore.getGstAmount);
-const pstAmount = computed(() => orderStore.getPstAmount);
+const gstAmount = computed(() => orderStore.getTotalGstAmount);
+const pstAmount = computed(() => orderStore.getTotalPstAmount);
 const orderTotal = computed(() => orderStore.getOrderTotal);
 
 // Handle overall discount input with necessary checks
@@ -124,11 +124,11 @@ const isOverallDiscountDisabled = computed(() => {
     <div>
       <div class="flex items-center justify-between rounded-2xl bg-[#f4f5f7] mx-3 my-2 py-4 px-3">
         <p>GST %</p>
-        <p>${{ gstAmount.toFixed(2) }}</p>
+        <p>${{ gstAmount }}</p>
       </div>
       <div class="flex items-center justify-between rounded-2xl bg-[#f4f5f7] mx-3 my-2 py-4 px-3">
         <p>PST %</p>
-        <p>${{ pstAmount.toFixed(2) }}</p>
+        <p>${{ pstAmount }}</p>
       </div>
     </div>
 

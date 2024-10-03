@@ -12,15 +12,19 @@ export const useOrderStore = defineStore('orders', () => {
     customer: reactive({
       id: '', 
       name: '',
-      phone: '', 
+      phone: '',
       email: '',
       note: ''
     }),
     comments: [], 
     payments: [],
     total: ref(0), 
-    taxes: [],
+    taxes: reactive([
+      { type: 'GST', rate: 5, amount: 0 },  
+      { type: 'PST', rate: 7, amount: 0 }   
+    ]),
   });
+  
 
   // Add or increment an order item
   function addOrderItem(item) {
@@ -37,21 +41,28 @@ export const useOrderStore = defineStore('orders', () => {
         ItemImage: item.ImageUrl,
         Qty: 1,
         MaxQty: item.MaxQty,
-        Discount: item.Discount || 0, 
-        TaxesWaived: false, 
-        OriginalPrice: item.Price, 
-        SalesPersonId: selectedSalesPerson.value
+        Discount: item.Discount || 0,
+        TaxesWaived: false,
+        OriginalPrice: item.Price,
+        SalesPersonId: selectedSalesPerson.value?.SalesPersonId || null,
       };
   
       // Apply the overall discount to newly added items
       if (state.overallDiscount > 0) {
-        newItem.Price = (newItem.OriginalPrice * (1 - state.overallDiscount / 100)).toFixed(2);
+        newItem.Price = Number(
+          (newItem.OriginalPrice * (1 - state.overallDiscount / 100)).toFixed(2)
+        );
+      } else {
+        // Ensure Price is set as a number
+        newItem.Price = Number(newItem.OriginalPrice);
       }
   
       state.orderItems.push(newItem);
     }
+    calculateTaxes(); // Recalculate taxes after adding an item
     saveOrderItemsToLocalStorage();
   }
+  
 
   // Increment quantity of a specific order item
   function incrementOrderItem(item) {
@@ -61,6 +72,7 @@ export const useOrderStore = defineStore('orders', () => {
     if (existingItem) {
       existingItem.Qty++;
       saveOrderItemsToLocalStorage(); 
+      calculateTaxes(); 
     }
   }
 
@@ -71,6 +83,7 @@ export const useOrderStore = defineStore('orders', () => {
     );
     if (existingItem && existingItem.Qty > 1) {
       existingItem.Qty--;
+      calculateTaxes(); 
       saveOrderItemsToLocalStorage(); 
     } else if (existingItem && existingItem.Qty === 1) {
       deleteOrderItem(existingItem);
@@ -92,52 +105,134 @@ export const useOrderStore = defineStore('orders', () => {
     }
   }
 
-
   const selectedSalesPerson = ref(null);
 
   function setSelectedSalesPerson(salesPersonId) {
-    selectedSalesPerson.value = salesPersonId;
+    state.orderItems.forEach(item => {
+      item.SalesPersonId = salesPersonId; 
+    });
+    saveOrderItemsToLocalStorage(); 
   }
+  
 
   // Apply the selected salesperson to all items in the order
   function applySalesPersonToAllItems(salesPersonId) {
     state.orderItems.forEach(item => {
       item.SalesPersonId = salesPersonId;
     });
+    saveOrderItemsToLocalStorage();
   }
-
-  // Save orderItems to localStorage
-  function saveOrderItemsToLocalStorage() {
-    localStorage.setItem('newOrder', JSON.stringify(state));
-  }
-
-  // Load orderItems from localStorage
+   
+  // Load the entire state from localStorage
   function loadOrderItemsFromLocalStorage() {
-    const savedItems = JSON.parse(localStorage.getItem('newOrder'));
-    
-    state.orderItems = Array.isArray(savedItems) ? savedItems : [];
-    
-    // Reapply the discount to each item
-    state.orderItems.forEach(item => {
-      if (item.Discount && item.OriginalPrice) {
-        item.Price = (item.OriginalPrice * (1 - item.Discount / 100)).toFixed(2);
+    const savedState = JSON.parse(localStorage.getItem('newOrder'));
+  
+    if (savedState) {
+      Object.assign(state, savedState);
+  
+      // Ensure that taxes array is present and has the correct structure
+      if (!state.taxes || !Array.isArray(state.taxes)) {
+        state.taxes = [
+          { type: 'GST', rate: 5, amount: 0 },
+          { type: 'PST', rate: 7, amount: 0 }
+        ];
       }
-    });
-
-    if (savedDiscount) {
-      state.overallDiscount = parseFloat(savedDiscount);
-      // Apply the overall discount to all items
+  
       state.orderItems.forEach(item => {
-        if (state.overallDiscount > 0) {
-          item.Price = (item.OriginalPrice * (1 - state.overallDiscount / 100)).toFixed(2);
+        if (item.Discount && item.OriginalPrice) {
+          item.Price = (item.OriginalPrice * (1 - item.Discount / 100)).toFixed(2);
         }
       });
+  
+      if (state.overallDiscount > 0) {
+        state.orderItems.forEach(item => {
+          item.Price = (item.OriginalPrice * (1 - state.overallDiscount / 100)).toFixed(2);
+        });
+      }
+  
+      calculateTaxes(); // Recalculate taxes after loading items
+    } else {
+      state.orderItems = [];
+      state.overallDiscount = 0;
+      state.customer = {
+        id: '',
+        name: '',
+        phone: '',
+        email: '',
+        note: ''
+      };
+      state.comments = [];
+      state.payments = [];
+      state.taxes = [
+        { type: 'GST', rate: 5, amount: 0 },
+        { type: 'PST', rate: 7, amount: 0 }
+      ];
+      state.total = 0;
     }
   }
+  
+  function calculateTaxes() {
+    // Ensure the taxes array contains GST and PST objects
+    let gstTax = state.taxes.find(tax => tax.type === 'GST');
+    let pstTax = state.taxes.find(tax => tax.type === 'PST');
+  
+    // If GST or PST is missing, add them to the array with default values
+    if (!gstTax) {
+      gstTax = { type: 'GST', rate: 5, amount: 0 };
+      state.taxes.push(gstTax);
+    }
+  
+    if (!pstTax) {
+      pstTax = { type: 'PST', rate: 7, amount: 0 };
+      state.taxes.push(pstTax);
+    }
+  
+    // Reset the tax amounts before recalculating
+    let gstTotal = 0;
+    let pstTotal = 0;
+  
+    // Calculate taxes for each item in the order
+    state.orderItems.forEach(item => {
+      const price = Number(item.Price) || 0;  // Ensure Price is a valid number
+      const itemGst = (price * gstTax.rate) / 100;  // 5% GST
+      const itemPst = (price * pstTax.rate) / 100;  // 7% PST
+  
+      gstTotal += itemGst * item.Qty;
+      pstTotal += itemPst * item.Qty;
+    });
+  
+    // Update the amounts for GST and PST
+    gstTax.amount = gstTotal.toFixed(2);
+    pstTax.amount = pstTotal.toFixed(2);
+  
+    saveOrderItemsToLocalStorage();  // Save the updated taxes to localStorage
+  }
+  
+
+
+
+
+const getTotalGstAmount = computed(() => {
+  return state.taxes.find(tax => tax.type === 'GST').amount;
+});
+
+const getTotalPstAmount = computed(() => {
+  return state.taxes.find(tax => tax.type === 'PST').amount;
+});
+
+
+  // Get all order items
+  const getOrderItems = computed(() => state);
+
+  // Get the total price of the order
+  const getOrderTotal = computed(() => {
+    return Array.isArray(state.orderItems)
+      ? state.orderItems.reduce((total, item) => 
+          total + (parseFloat(item.Price) * item.Qty), 0)
+      : 0;
+  });
 
   
-  
-
   // Update the discount for a specific order item and recalculate the price
 function updateDiscountPercentage(item, discount) {
   const existingItem = state.orderItems.find(orderItem =>
@@ -186,27 +281,6 @@ function updateOriginalPrice(item, originalPrice) {
       totalDiscount + parseFloat(item.Discount || 0), 0) / state.orderItems.length;
   });
 
-  // Get all order items
-  const getOrderItems = computed(() => state);
-
-  // Get the total price of the order
-  const getOrderTotal = computed(() => {
-    return Array.isArray(state.orderItems)
-      ? state.orderItems.reduce((total, item) => 
-          total + (parseFloat(item.Price) * item.Qty), 0)
-      : 0;
-  });
-
-  // Get the total GST amount
-  const getGstAmount = computed(() => {
-    return getOrderTotal.value * (state.gst / 100);
-  });
-
-  // Get the total PST amount
-  const getPstAmount = computed(() => {
-    return getOrderTotal.value * (state.pst / 100);
-  });
-
   // Apply the overall discount to each item
   function applyOverallDiscount(overallDiscountPercentage) {
     state.overallDiscount = overallDiscountPercentage;
@@ -220,7 +294,15 @@ function updateOriginalPrice(item, originalPrice) {
     saveOrderItemsToLocalStorage();
   }
 
-  
+  // Save orderItems to localStorage
+  function saveOrderItemsToLocalStorage() {
+    localStorage.setItem('newOrder', JSON.stringify(state));
+  }
+
+  onMounted(() => {
+    loadOrderItemsFromLocalStorage();
+  });
+
   return {
     state,
     addOrderItem,
@@ -232,8 +314,8 @@ function updateOriginalPrice(item, originalPrice) {
     getTotalDiscountPercentage,
     getOrderItems,
     getOrderTotal,
-    getGstAmount,
-    getPstAmount,
+    getTotalGstAmount,
+    getTotalPstAmount,
     selectedSalesPerson,
     setSelectedSalesPerson,
     applySalesPersonToAllItems,
@@ -245,7 +327,7 @@ function updateOriginalPrice(item, originalPrice) {
     // toggleDraftList,
     // draftOrders,
     // submitCommentToStore,
-    // loadOrderItemsFromLocalStorage,
+    loadOrderItemsFromLocalStorage,
     // recalculateTotal,
     // updateOriginalPrice,
   };

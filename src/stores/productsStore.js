@@ -11,8 +11,7 @@ export const useProductStore = defineStore('product', {
         async fetchProducts() {
             const storeId = '3XoymAusFEOcrifyfM1Tfw';
             const startTime = Date.now();
-            const chunkSize = 10000; // Process in chunks of 1000 items
-
+            const chunkSize = 10000;
             try {
                 // Fetch the list of file URLs first
                 const response = await fetch('/api/File/GetFiles', {
@@ -47,27 +46,26 @@ export const useProductStore = defineStore('product', {
 
                         if (processed < totalProducts) {
                             // Process the next chunk asynchronously
-                            setTimeout(processChunk, 0); // Yield control back to the browser
+                            // Yield control back to the browser
+                            setTimeout(processChunk, 0); 
                         } else {
                             console.log('All products processed');
                         }
                     };
 
-                    // Start processing the first chunk
                     processChunk();
                 };
 
                 // Load each file by dynamically injecting <script> tags
                 fileUrls.forEach((file, index) => {
                     const script = document.createElement('script');
-                    script.src = `https://localhost:7293/GenJs/${file.fileUrl}`;  // Adjust the URL to point to the correct server
+                    script.src = `https://localhost:7293/GenJs/${file.fileUrl}`;  
                     script.async = true;
 
                     // When the script is loaded
                     script.onload = () => {
                         console.log(`Script ${index + 1} loaded from ${file.fileUrl}`);
 
-                        // Assuming the external script exposes a global variable like `window.products`
                         if (window.products && Array.isArray(window.products)) {
                             // Process the large products array in chunks
                             processProductsInChunks(window.products);
@@ -75,9 +73,6 @@ export const useProductStore = defineStore('product', {
                         } else {
                             console.warn(`No valid products array found in the script: ${file.fileUrl}`);
                         }
-
-                        // Clear window.products after use to avoid conflicts with future scripts
-                        // delete window.products;
 
                         // Update loading percentage for each script
                         loadedScripts++;
