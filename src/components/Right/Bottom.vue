@@ -94,7 +94,7 @@ const handleCommentPopupCancel = () => {
 
 // Disable overall discount if any item has a discount
 const isOverallDiscountDisabled = computed(() => {
-  return orderStore.state.orderItems.some(item => item.discountPercentage > 0);
+  return orderStore.state.orderItems.some(item => item.Discount > 0);
 });
 </script>
 
