@@ -35,7 +35,7 @@ onMounted(() => {
 
 const login = async () => {
   let userId;
-  
+
   // If cashier login mode, use the selectedUser's id
   if (authStore.isCashierLoginInput) {
     userId = selectedUser.value?.id;
@@ -50,13 +50,10 @@ const login = async () => {
 
   const pin = password.value;
 
-  // Debugging: Log the values being sent to the API
-  console.log('Attempting login with:', { userId, pin });
-
-  // Validation: Ensure both userId and pin are provided
-  if (!userId || !pin) {
-    toast.error('Username or PIN is missing');
-    console.error('Username or PIN is missing');
+  // Validation: Ensure both userId and pin are provided and PIN is exactly 6 digits
+  if (!userId || !pin || pin.length !== 6 || isNaN(pin)) {
+    toast.error('Please enter a valid 6-digit PIN');
+    console.error('Invalid PIN format or missing user ID');
     return;
   }
 
@@ -81,6 +78,9 @@ const login = async () => {
   }
 };
 
+const clearLastCharacter = () => {
+  password.value = password.value.slice(0, -1);
+};
 
 
 // Handle password input for numeric keypad
@@ -89,9 +89,16 @@ const handlePasswordInput = (num) => {
     password.value += num; 
   }
   if (password.value.length === 6) {
-    login(); 
+    // Check if the PIN is valid before triggering login
+    if (password.value.length === 6 && !isNaN(password.value)) {
+      login();
+    } else {
+      toast.error('Please enter a valid 6-digit PIN');
+      password.value = ''; // Clear invalid PIN for re-entry
+    }
   }
 };
+
 
 </script>
 
@@ -149,7 +156,7 @@ const handlePasswordInput = (num) => {
               </button>
 
               <!-- Clear Button -->
-              <button @click="password.value = password.value.slice(0, -1)"
+              <button @click="clearLastCharacter"
                       class="hover:bg-purple-500 w-12 h-12 border-2 bg-transparent hover:text-white text-16px font-semibold rounded-full transition duration-300 ease-in-out">
                 <i class="pi pi-delete-left"></i>
               </button>

@@ -71,50 +71,58 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // Login API function for both cashier and manager
-  async function login(userId, pin) {
-    const toast = useToast();
-    try {
-      const response = await axios.post('/api/Users/Login', {
-        userId, 
-        pin,    
-      }, {
-        headers: {
-          'store-id': storeId,
-        }
-      });
-  
-      const { jwt: authToken, role, fullName } = response.data; // Matching API's response
-  
-      // If cashier logs in
-      if (role === 'Cashier') {
-        localStorage.setItem('token', authToken);
-        localStorage.setItem('currentUser', fullName);
-        localStorage.setItem('userRole', role);
-        token.value = authToken;
-        currentUser.value = fullName;
-        userRole.value = role;
-        isUserLoggedIn.value = true;
+  // Login API function for both cashier and manager
+async function login(userId, pin) {
+  const toast = useToast();
+  try {
+    const response = await axios.post('/api/Users/Login', {
+      userId, 
+      pin,    
+    }, {
+      headers: {
+        'store-id': storeId,
       }
-  
-      // If manager logs in
-      if (role === 'Manager') {
-        localStorage.setItem('managerToken', authToken);
-        localStorage.setItem('managerUser', fullName);
-        localStorage.setItem('managerRole', role);
-        managerToken.value = authToken;
-        managerUser.value = fullName;
-        managerRole.value = role;
-        isManagerLoggedIn.value = true;
-      }
-  
-      toast.success(`Welcome back ${fullName}`);
-      console.log('Current User:', currentUser.value, 'Role:', userRole.value);
-    } catch (error) {
-      toast.error('Login failed!');
-      console.error('Login failed:', error.response?.data?.errors || error.message);
-      throw error;
+    });
+    
+    const { jwt: authToken, role, fullName } = response.data || {}; // Ensure response has valid data
+    
+    if (!authToken || !role || !fullName) {
+      throw new Error('Invalid response from server');
     }
+
+    // If cashier logs in
+    if (role === 'Cashier') {
+      localStorage.setItem('token', authToken);
+      localStorage.setItem('currentUser', fullName);
+      localStorage.setItem('userRole', role);
+      token.value = authToken;
+      currentUser.value = fullName;
+      userRole.value = role;
+      isUserLoggedIn.value = true;
+      toast.success(`Welcome back, ${fullName}`);
+    }
+  
+    // If manager logs in
+    if (role === 'Manager') {
+      localStorage.setItem('managerToken', authToken);
+      localStorage.setItem('managerUser', fullName);
+      localStorage.setItem('managerRole', role);
+      managerToken.value = authToken;
+      managerUser.value = fullName;
+      managerRole.value = role;
+      isManagerLoggedIn.value = true;
+      toast.success(`Welcome back, ${fullName}`);
+    }
+
+    console.log('Current User:', currentUser.value, 'Role:', userRole.value);
+  } catch (error) {
+    // This will handle any errors from the API call or invalid responses
+    toast.error('Login failed!');
+    console.error('Login failed:', error.response?.data?.errors || error.message);
+    throw error; // Re-throw the error so that it can be caught outside if needed
   }
+}
+
   
 
   // Logout Function
