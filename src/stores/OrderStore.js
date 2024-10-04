@@ -318,7 +318,7 @@ function updateOriginalPrice(item, originalPrice) {
   
     const commentData = {
       item: {
-        name: item?.Name ?? 'Unknown Item',  // Ensure 'item' is used correctly
+        name: item?.ItemName ?? 'Unknown Item',  // Ensure 'item' is used correctly
         price: item?.Price ?? 0,  // This reflects the item price at the time of comment
         imageUrl: item?.ImageUrl ?? '',
         sku: item?.Sku ?? 'Unknown SKU',
@@ -330,16 +330,15 @@ function updateOriginalPrice(item, originalPrice) {
     };
   
     // Check if the state already contains the comment and update the array
-    state.comments.push(commentData);  // Assuming state.comments is reactive and exists
+    state.comments.push(commentData); 
   
-    // Save the entire state to localStorage (this will include comments, order items, etc.)
-    saveOrderItemsToLocalStorage();  // Assuming saveOrderItemsToLocalStorage handles saving the full state
+    saveOrderItemsToLocalStorage(); 
   
     // Update the actual order item in the store
     if (isCommentProvided) {
-      updateDiscountPercentage(item, Discount);  // Assuming 'Discount' is passed in and handled elsewhere
+      updateDiscountPercentage(item, Discount);  
     } else {
-      resetDiscount(item);  // Reset discount if no comment is provided
+      resetDiscount(item); 
     }
   }
   

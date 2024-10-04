@@ -47,17 +47,21 @@ function handleInput(item) {
 const originalValues = ref({});
 
 const storeOriginalValue = (key, item) => {
-  if (!originalValues.value[item.ItemName]) {
-    originalValues.value[item.ItemName] = {};
+  if (!originalValues.value[item.ItemId]) {
+    originalValues.value[item.ItemId] = {};
   }
-  originalValues.value[item.ItemName][key] = item[key];
+  if (originalValues.value[item.ItemId][key] === undefined) {
+    originalValues.value[item.ItemId][key] = item[key];
+  }
 };
 
 const checkValueChanged = (key, item) => {
-  if (item[key] !== originalValues.value[item.ItemName]?.[key]) {
+  const originalValue = originalValues.value[item.ItemId]?.[key];
+  if (item[key] !== originalValue) {
     checkManagerPermission(item);
   }
 };
+
 
 // Handle price input and recalculate discount based on the original price
 const handlePriceInput = (item) => {
@@ -65,9 +69,9 @@ const handlePriceInput = (item) => {
     item.Price = item.OriginalPrice; 
   } else {
     const discount = ((1 - item.Price / item.OriginalPrice) * 100).toFixed(2);
-    item.discountPercentage = discount > 0 ? discount : 0;
+    item.Discount = discount > 0 ? discount : 0;
   }
-  orderStore.updateDiscountPercentage(item, item.discountPercentage);
+  orderStore.updateDiscountPercentage(item, item.Discount);
 };
 
 // Handle discount input and recalculate the price based on the original price
@@ -88,7 +92,7 @@ watch(() => props.order.overallDiscount, () => {
 // Check for manager permission to approve the discount
 const checkManagerPermission = (item) => {
   if (authStore.managerRole !== 'Manager') {
-    backupDiscountPercentage.value = item.discountPercentage;
+    backupDiscountPercentage.value = item.Discount;
     authStore.toggleAddManagerApprovalRequest();
     selectedItemForComment.value = item;
   } else {
@@ -100,7 +104,7 @@ const checkManagerPermission = (item) => {
 // Watch for manager login and show comment popup if necessary
 watch(() => authStore.isManagerLoggedIn, (newVal) => {
   if (newVal && selectedItemForComment.value) {
-    selectedItemForComment.value.discountPercentage = backupDiscountPercentage.value;
+    selectedItemForComment.value.Discount = backupDiscountPercentage.value;
     showCommentPopup.value = true;
   }
 });
@@ -232,9 +236,9 @@ const pstRate = computed({
               v-model.number="item.Discount" 
               :min="0" 
               :max="100" 
-              @focus="storeOriginalValue('discountPercentage', item)"  
+              @focus="storeOriginalValue('Discount', item)"  
               @input="handleDiscountInput(item)"
-              @blur="checkValueChanged('discountPercentage', item)" 
+              @blur="checkValueChanged('Discount', item)" 
               :disabled="isOverallDiscountApplied"
               :class="{
                 'bg-purple-500 opacity-30 text-white cursor-not-allowed': isOverallDiscountApplied,

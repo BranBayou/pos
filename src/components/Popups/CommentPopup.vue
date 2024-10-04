@@ -17,12 +17,11 @@ const props = defineProps({
 });
 
 // Check if props.item is defined and has discountPercentage; provide a fallback of 0 if not.
-const discountPercentage = ref(props.item?.discountPercentage ?? 0); // Use optional chaining to avoid error
+const discountPercentage = ref(props.item?.discountPercentage ?? 0); 
 const originalPrice = ref(props.item?.OriginalPrice ?? props.item.Price);
 const comment = ref('');
 const isSubmitting = ref(false);
-const isCommentProvided = ref(false);  // Track if the manager has provided a comment
-
+const isCommentProvided = ref(false);  
 // Emit event when the comment is submitted
 const emit = defineEmits(['close', 'commentSubmitted']);
 
@@ -34,9 +33,7 @@ const submitComment = async () => {
 
   // Use the store's submit function
   orderStore.submitCommentToStore(
-    props.item,
     comment.value,
-    discountPercentage.value,
     authStore.managerUser
   );
 
@@ -77,12 +74,12 @@ const imageBackgroundColor = computed(() => {
                 <h3 class="text-lg font-semibold mb-4">Manager Approval Comment</h3>
                 <div class="flex justify-between">
                   <div class="flex">
-                    <img :src="`https://replicagunsca.b-cdn.net/images/products/small/${props.item?.ImageUrl ?? ''}`"
+                    <img :src="`https://replicagunsca.b-cdn.net/images/products/small/${props.item?.ItemImage ?? ''}`"
                       class="w-14 rounded-lg" alt="product-img" />
                     <div>
-                      <p class="font-semibold">{{ props.item?.Name ?? 'Unknown Item' }}</p>
+                      <p class="font-semibold">{{ props.item?.ItemName ?? 'Unknown Item' }}</p>
                       <p class="text-sm text-gray-500">Price: ${{ props.item?.Price ?? 0 }}</p>
-                      <p class="text-sm text-gray-500">Discount: {{ discountPercentage }}%</p>
+                      <p class="text-sm text-gray-500">Discount: {{ props.item?.Discount ?? 0 }}%</p>
                     </div>
                   </div>
                   <div class="flex">
