@@ -4,11 +4,28 @@ import { useToast } from 'vue-toastification';
 import Select from 'primevue/select';
 import Password from 'primevue/password';
 import { useAuthStore } from '@/stores/authStore';
+import { useOrderStore } from '@/stores/OrderStore';
 
 const authStore = useAuthStore();
+const orderStore = useOrderStore();
+
 const toast = useToast();
 const selectedUserId = ref(null); // Now track by id, not the whole object
 const password = ref(''); // Password input
+
+const props = defineProps({
+  item: {
+    type: Object,
+    required: true
+  }
+});
+
+function handleClose () {
+  if (props.item) {
+    orderStore.resetDiscount(props.item);
+  }
+  authStore.toggleManagerLoginPopup(); 
+}
 
 // Fetch managers when the modal opens
 onMounted(async () => {
@@ -82,7 +99,7 @@ const loginManager = async () => {
             <button @click="loginManager" class="mt-8 mr-2 bg-purple-500 text-white py-2 px-6 rounded-2xl hover:bg-purple-700">
               Login
             </button>
-            <button @click="authStore.toggleManagerLoginPopup" class="mt-8 bg-weather-primary rounded-2xl text-white bg-purple-500 hover:bg-purple-400 hover:text-white py-2 px-6">
+            <button @click="handleClose" class="mt-8 bg-weather-primary rounded-2xl text-white bg-purple-500 hover:bg-purple-400 hover:text-white py-2 px-6">
               Close
             </button>
           </div>

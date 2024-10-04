@@ -141,7 +141,9 @@ const pstRate = computed({
 </script>
 
 <template>
-  <AddManagerApprovalRequest />
+  <AddManagerApprovalRequest 
+   :item="selectedItemForComment" 
+  />
   <AddSales />
   <CommentPopup 
     v-if="showCommentPopup" 
