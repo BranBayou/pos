@@ -155,7 +155,7 @@ const pstRate = computed({
     <div v-for="(item, index) in order.orderItems" :key="index" class="collapse rounded-2xl bg-[#f4f5f7]">
       <input type="checkbox" :checked="isOpen[index]" @change="toggleAccordion(index)" />
       <div class="collapse-title text-md font-medium flex justify-between items-center p-0 px-3">
-        <span class="absolute top-0 left-0 border-2 bg-purple-500 rounded-full flex items-center justify-center w-5 h-5 text-center text-white m-1 p-1">
+        <span class="absolute top-0 left-0 border-2 bg-purple-200 rounded-full flex items-center justify-center w-5 h-5 text-center text-black m-1 p-1">
           {{ item.Qty }}
         </span>
         <div class="flex items-center gap-4">
