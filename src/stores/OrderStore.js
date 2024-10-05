@@ -6,6 +6,9 @@ const toast = useToast();
 
 export const useOrderStore = defineStore('orders', () => {
 
+  const selectedSalesPerson = ref(null);
+  const applySelectedSalesPersonForAll = ref(false);
+
   const state = reactive({
     orderItems: [], 
     approvalList: [], 
@@ -61,9 +64,14 @@ export const useOrderStore = defineStore('orders', () => {
       newItem.Price = Number(newItem.OriginalPrice);
     }
 
+    // Automatically assign the salesperson to the new item
+    if (applySelectedSalesPersonForAll.value && selectedSalesPerson.value) {
+      newItem.SalesPersonId = selectedSalesPerson.value;
+    }
+
       state.orderItems.push(newItem);
     }
-    calculateTaxes(); // Recalculate taxes after adding an item
+    calculateTaxes();
     saveOrderItemsToLocalStorage();
   }
 
@@ -111,8 +119,6 @@ export const useOrderStore = defineStore('orders', () => {
     }
   }
 
-  const selectedSalesPerson = ref(null);
-
   // Apply the selected salesperson to only the selected items in the order
   function setSelectedSalesPerson(salesPersonId, item) {
     const orderItem = state.orderItems.find(orderItem => orderItem.Sku === item.Sku);
@@ -131,7 +137,7 @@ export const useOrderStore = defineStore('orders', () => {
     state.orderItems.forEach(item => {
       item.SalesPersonId = salesPersonId;
     });
-    console.log('this all applied it')
+    applySelectedSalesPersonForAll.value = true;
     saveOrderItemsToLocalStorage();
   }
    

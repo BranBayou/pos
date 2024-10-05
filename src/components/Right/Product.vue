@@ -32,8 +32,8 @@ function toggleAccordion(index) {
 }
 
 const handleAddSales = (item) => {
-  selectedItemForSalesmen.value = item; // Set the selected item for sales
-  authStore.toggleAddSalesPopup(); // Open the AddSales popup
+  selectedItemForSalesmen.value = item; 
+  authStore.toggleAddSalesPopup();
 };
 
 
