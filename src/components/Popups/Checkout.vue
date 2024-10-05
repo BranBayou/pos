@@ -4,10 +4,15 @@ import { useAuthStore } from '@/stores/authStore';
 import { useOrderStore } from '@/stores/OrderStore';
 import axios from 'axios';
 import { useToast } from 'vue-toastification';
+import { jsPDF } from "jspdf";
 
 const authStore = useAuthStore();
 const orderStore = useOrderStore();
 const toast = useToast();
+const doc = new jsPDF();
+
+// doc.text("Hello world!", 10, 10);
+// doc.save("a4.pdf");
 
 // Selected payment methods and payment lines
 const selectedPaymentMethods = ref([]);
@@ -160,109 +165,214 @@ async function handleCheckout() {
     toast.error('An error occurred during checkout.');
   }
 }
+
+const generateInvoice = computed(() => {
+  const invoiceItems = orderStore.state.orderItems.map(item => ({
+    name: item.ItemName,
+    quantity: item.Qty,
+    price: item.Price,
+    total: (item.Qty * item.Price).toFixed(2)
+  }));
+
+  const subtotal = invoiceItems.reduce((acc, item) => acc + parseFloat(item.total), 0).toFixed(2);
+
+  const gst = orderStore.getTotalGstAmount;
+  const pst = orderStore.getTotalPstAmount;
+
+  const overallDiscount = orderStore.state.overallDiscount;
+  const discountAmount = (subtotal * (overallDiscount / 100)).toFixed(2);
+
+  const totalAmount = orderStore.getOrderTotal.toFixed(2);
+
+  return {
+    items: invoiceItems,
+    subtotal,
+    discountAmount,
+    gst,
+    pst,
+    totalAmount
+  };
+});
+
+function generatePDF() {
+  const doc = new jsPDF();
+  
+  // Add title
+  doc.setFontSize(18);
+  doc.text('Invoice', 105, 20, { align: 'center' });
+
+  // Add customer and date info (example data, customize as needed)
+  doc.setFontSize(12);
+  doc.text(`Customer: John Doe`, 20, 40);
+  doc.text(`Date: ${new Date().toLocaleDateString()}`, 160, 40);
+
+  // Generate table from invoice data
+  const tableColumnHeaders = ["Item", "Qty", "Price", "Total"];
+  const tableRows = generateInvoice.value.items.map(item => [
+    item.name,
+    item.quantity,
+    `$${item.price}`,
+    `$${item.total}`
+  ]);
+
+  // Add the table to the PDF
+  doc.autoTable({
+    head: [tableColumnHeaders],
+    body: tableRows,
+    startY: 50,
+    theme: 'grid',
+    styles: { halign: 'right' }
+  });
+
+  // Add totals section
+  doc.text(`Subtotal: $${generateInvoice.value.subtotal}`, 160, doc.lastAutoTable.finalY + 10);
+  doc.text(`Discount: $${generateInvoice.value.discountAmount}`, 160, doc.lastAutoTable.finalY + 20);
+  doc.text(`GST: $${generateInvoice.value.gst}`, 160, doc.lastAutoTable.finalY + 30);
+  doc.text(`PST: $${generateInvoice.value.pst}`, 160, doc.lastAutoTable.finalY + 40);
+  doc.text(`Total: $${generateInvoice.value.totalAmount}`, 160, doc.lastAutoTable.finalY + 50);
+
+  // Save or download the PDF
+  doc.save('invoice.pdf');
+}
 </script>
 
 
 <template>
   <Teleport to="body">
     <Transition name="modal-outer">
-      <div 
-        v-show="authStore.isCheckoutPopupVisible"
-        @click="authStore.toggleCheckoutPopup"
-        class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8"
-      >
+      <div v-show="authStore.isCheckoutPopupVisible" @click="authStore.toggleCheckoutPopup"
+        class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
         <Transition name="modal-inner" class="rounded-2xl">
-          <div
-            v-if="authStore.isCheckoutPopupVisible"
-            @click.stop
-            class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-30 w-10/12"
-          >
-            <div class="bg-white rounded-2xl shadow-lg p-6 w-full">
-              <h1 class="font-semibold text-[24px] pb-4">Checkout</h1>
-              
-              <div class="w-6/12 flex justify-between gap-3 mb-5 bg-gray-100 rounded-xl p-3">
-                <!-- Payment methods -->
-                <button
-                  v-for="method in paymentMethods"
-                  :key="method.id"
-                  class="w-24 border-2 px-5 py-3 rounded-xl bg-white hover:bg-gray-200"
-                  @click="addPaymentMethod(method)"
-                >
-                  <img :src="method.icon" :alt="method.name" class="mx-auto w-12 h-12">
-                </button>
-              </div>
+          <div v-if="authStore.isCheckoutPopupVisible" @click.stop
+            class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-30 w-10/12">
+            <div class="flex bg-white rounded-2xl shadow-lg p-6 w-full">
+              <div class="w-6/12">
+                <h1 class="font-semibold text-[24px] pb-4">Checkout</h1>
 
-              <div class="mb-5 w-6/12">
-                <h2 class="font-semibold text-lg mb-2">Selected Payments</h2>
-                <ul class="space-y-3">
-                  <li v-for="method in selectedPaymentMethods" :key="method.id" class="flex flex-col items-center justify-between bg-gray-100 p-3 rounded-lg shadow-sm">
-                    <div class="flex w-full justify-between">
-                      <img :src="paymentMethods.find(pm => pm.id === method.id).icon" alt="" class="w-10 h-10">
-                      <div class="relative flex items-center gap-4">
-                        <input 
-                          type="number" 
-                          v-model.number="method.amount" 
-                          @input="updatePaymentAmount(method, method.amount)"
-                          @keydown="preventNegativeInput"
-                          :max="remainingAmount"
-                          class="border-2 border-gray-300 rounded-md py-1 px-3 w-32 text-right focus:ring focus:ring-purple-200 focus:outline-none focus:border-purple-500 pr-10"
-                        >
-                        <!-- Clear Button inside Input -->
-                        <button 
-                          v-if="method.amount > 0" 
-                          @click="clearPaymentAmount(method)"
-                          class="absolute right-2 top-2 text-gray-500 hover:text-gray-700 text-lg"
-                          style="font-size: 14px;"
-                        >
-                          <i class="pi pi-times"></i>
+                <div class="flex justify-between gap-3 mb-5 bg-gray-100 rounded-xl p-3">
+                  <!-- Payment methods -->
+                  <button v-for="method in paymentMethods" :key="method.id"
+                    class="w-24 border-2 px-5 py-3 rounded-xl bg-white hover:bg-gray-200"
+                    @click="addPaymentMethod(method)">
+                    <img :src="method.icon" :alt="method.name" class="mx-auto w-12 h-12">
+                  </button>
+                </div>
+
+                <div class="mb-5">
+                  <h2 class="font-semibold text-lg mb-2">Selected Payments</h2>
+                  <ul class="space-y-3">
+                    <li v-for="method in selectedPaymentMethods" :key="method.id"
+                      class="flex flex-col items-center justify-between bg-gray-100 p-3 rounded-lg shadow-sm">
+                      <div class="flex w-full justify-between">
+                        <img :src="paymentMethods.find(pm => pm.id === method.id).icon" alt="" class="w-10 h-10">
+                        <div class="relative flex items-center gap-4">
+                          <input type="number" v-model.number="method.amount"
+                            @input="updatePaymentAmount(method, method.amount)" @keydown="preventNegativeInput"
+                            :max="remainingAmount"
+                            class="border-2 border-gray-300 rounded-md py-1 px-3 w-32 text-right focus:ring focus:ring-purple-200 focus:outline-none focus:border-purple-500 pr-10">
+                          <!-- Clear Button inside Input -->
+                          <button v-if="method.amount > 0" @click="clearPaymentAmount(method)"
+                            class="absolute right-2 top-2 text-gray-500 hover:text-gray-700 text-lg"
+                            style="font-size: 14px;">
+                            <i class="pi pi-times"></i>
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- Predictive Cash Amounts if Cash is selected -->
+                      <div v-if="method.name === 'Cash'" class="mt-2 w-full flex gap-2 justify-end">
+                        <button v-for="amount in predictiveCashAmounts" :key="amount" :disabled="amount > totalAmount"
+                          @click="setCashAmount(amount)"
+                          class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition disabled:bg-gray-300 disabled:cursor-not-allowed">
+                          ${{ amount }}
                         </button>
                       </div>
-                    </div>
-                    
-                    <!-- Predictive Cash Amounts if Cash is selected -->
-                    <div v-if="method.name === 'Cash'" class="mt-2 w-full flex gap-2 justify-end">
-                      <button 
-                        v-for="amount in predictiveCashAmounts" 
-                        :key="amount" 
-                        :disabled="amount > totalAmount"  
-                        @click="setCashAmount(amount)"
-                        class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition disabled:bg-gray-300 disabled:cursor-not-allowed"
-                      >
-                        ${{ amount }}
-                      </button>
-                    </div>
-                  </li>
-                </ul>
+                    </li>
+                  </ul>
 
-                <div class="flex items-center justify-between mt-2">
-                  <p :class="{'text-green-500': remainingAmount == 0, 'text-red-500': remainingAmount > 0}">
-                    Remaining balance: ${{ remainingAmount }}
-                    <span v-if="remainingAmount == 0" class="ml-2 text-green-500"><i class="pi pi-check"></i></span>
-                  </p>
+                  <div class="flex items-center justify-between mt-2">
+                    <p :class="{ 'text-green-500': remainingAmount == 0, 'text-red-500': remainingAmount > 0 }">
+                      Remaining balance: ${{ remainingAmount }}
+                      <span v-if="remainingAmount == 0" class="ml-2 text-green-500"><i class="pi pi-check"></i></span>
+                    </p>
+                  </div>
+                </div>
+
+                <p class="text-xl font-semibold mb-5">Total: ${{ totalAmount }}</p>
+
+                <div class="flex justify-end">
+                  <button @click="handleCheckout"
+                    class="bg-purple-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-purple-600 transition">
+                    Confirm and Checkout
+                  </button>
                 </div>
               </div>
-
-              <p class="text-xl font-semibold mb-5">Total: ${{ totalAmount }}</p>
-
-              <div class="w-6/12 flex justify-end">
-                <button 
-                  @click="handleCheckout"
-                  class="bg-purple-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-purple-600 transition"
-                >
-                  Confirm and Checkout
-                </button>
+              <div class="invoice-div w-6/12 mx-16 p-6 bg-gray-100 rounded-lg shadow-lg">
+                <h2 class="text-xl font-bold mb-3 text-center">Invoice</h2>
+                <div class="mb-5">
+                  <p><strong>Customer:</strong> {{ orderStore.state.customer.name || 'N/A' }}</p>
+                  <p><strong>Date:</strong> {{ new Date().toLocaleDateString() }}</p>
+                  <p><strong>Sold by:</strong> 
+                    {{ orderStore.selectedSalesPerson?.name || 'No Salesperson Assigned' }}
+                  </p>
+                </div>
+                <table class="w-full mb-5 border-collapse">
+                  <thead>
+                    <tr class="border-b-2 border-gray-300">
+                      <th class="text-left py-2 w-5/12">Item</th> 
+                      <th class="text-center py-2 w-2/12">Qty</th>
+                      <th class="text-right py-2 w-1/6">Price</th> 
+                      <th class="text-right py-2 w-3/12">Subtotal</th> 
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(item, index) in generateInvoice.items" :key="index" class="border-b-2 border-gray-300">
+                      <td class="py-2 overflow-hidden whitespace-nowrap text-ellipsis" style="max-width: 200px;">
+                        {{ item.name }}
+                      </td>
+                      <td class="py-2 text-center">{{ item.quantity }}</td>
+                      <td class="py-2 text-right">${{ item.price }}</td>
+                      <td class="py-2 text-right">${{ item.total }}</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="3" class="text-right font-semibold">Subtotal:</td>
+                      <td class="text-right">${{ generateInvoice.subtotal }}</td>
+                    </tr>
+                    <tr v-if="generateInvoice.discountAmount > 0">
+                      <td colspan="3" class="text-right font-semibold">Discount:</td>
+                      <td class="text-right">- ${{ generateInvoice.discountAmount }}</td>
+                    </tr>
+                    <tr>
+                      <td colspan="3" class="text-right font-semibold">GST:</td>
+                      <td class="text-right">${{ generateInvoice.gst }}</td>
+                    </tr>
+                    <tr>
+                      <td colspan="3" class="text-right font-semibold">PST:</td>
+                      <td class="text-right">${{ generateInvoice.pst }}</td>
+                    </tr>
+                    <tr class="font-bold">
+                      <td colspan="3" class="text-right font-bold">Total:</td>
+                      <td class="text-right font-bold">${{ generateInvoice.totalAmount }}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+                <!-- Button to generate PDF -->
+                <div class="flex justify-end">
+                  <button @click="generatePDF"
+                    class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition">
+                    Download PDF
+                  </button>
+                </div>
               </div>
             </div>
-          </div>        
+          </div>
         </Transition>
       </div>
     </Transition>
   </Teleport>
 </template>
-
-
-
-
 
 
 <style scoped>
