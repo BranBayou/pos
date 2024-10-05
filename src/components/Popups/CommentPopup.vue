@@ -34,7 +34,8 @@ const submitComment = async () => {
   // Use the store's submit function
   orderStore.submitCommentToStore(
     comment.value,
-    authStore.managerUser
+    authStore.managerUser,
+    props.item,
   );
 
   emit('commentSubmitted', comment.value);

@@ -5,6 +5,7 @@ import { useToast } from 'vue-toastification';
 const toast = useToast();
 
 export const useOrderStore = defineStore('orders', () => {
+
   const state = reactive({
     orderItems: [], 
     approvalList: [], 
@@ -16,7 +17,10 @@ export const useOrderStore = defineStore('orders', () => {
       email: '',
       note: ''
     }),
-    comments: [], 
+    comments: reactive({
+      text: '',
+      userId: '',
+    }), 
     payments: [],
     total: ref(0), 
     taxes: reactive([
@@ -24,14 +28,13 @@ export const useOrderStore = defineStore('orders', () => {
       { type: 'PST', rate: 7, amount: 0 }   
     ]),
   });
-  
 
   // Add or increment an order item
   function addOrderItem(item) {
     const existingItem = state.orderItems.find(orderItem =>
       orderItem.ItemId === item.BarCode
     );
-  
+
     if (existingItem) {
       existingItem.Qty++;
     } else {
@@ -48,7 +51,7 @@ export const useOrderStore = defineStore('orders', () => {
         Price: null,
         SalesPersonId: selectedSalesPerson.value?.SalesPersonId || null,
       };
-  
+
       // Apply the overall discount to newly added items
     if (state.overallDiscount > 0) {
       newItem.Price = Number(
@@ -57,13 +60,12 @@ export const useOrderStore = defineStore('orders', () => {
     } else {
       newItem.Price = Number(newItem.OriginalPrice);
     }
-  
+
       state.orderItems.push(newItem);
     }
     calculateTaxes(); // Recalculate taxes after adding an item
     saveOrderItemsToLocalStorage();
   }
-  
 
   // Increment quantity of a specific order item
   function incrementOrderItem(item) {
@@ -106,7 +108,6 @@ export const useOrderStore = defineStore('orders', () => {
     }
     if(state.orderItems.length === 0) {
       state.overallDiscount = 0;
-      localStorage.setItem('overallDiscount', 0);
     }
   }
 
@@ -166,7 +167,7 @@ export const useOrderStore = defineStore('orders', () => {
         email: '',
         note: ''
       };
-      state.comments = [];
+      state.comments = {};
       state.payments = [];
       state.taxes = [
         { type: 'GST', rate: 5, amount: 0 },
@@ -313,37 +314,27 @@ function updateOriginalPrice(item, originalPrice) {
     localStorage.setItem('newOrder', JSON.stringify(state));
   }
 
-  function submitCommentToStore(item, commentText, Discount, managerUser) {
+  function submitCommentToStore(commentText, managerUser, item) {
     const isCommentProvided = commentText.trim() !== '';
   
-    const commentData = {
-      item: {
-        name: item?.ItemName ?? 'Unknown Item',  // Ensure 'item' is used correctly
-        price: item?.Price ?? 0,  // This reflects the item price at the time of comment
-        imageUrl: item?.ImageUrl ?? '',
-        sku: item?.Sku ?? 'Unknown SKU',
-        Discount: Discount,
-      },
-      comment: commentText,
-      timestamp: new Date().toISOString(),
-      manager: managerUser,
-    };
-  
-    // Check if the state already contains the comment and update the array
-    state.comments.push(commentData); 
+    // Update the state.comments object directly
+    state.comments.text = commentText.value;
+    state.comments.userId = managerUser;
   
     saveOrderItemsToLocalStorage(); 
+    console.log(state.comments.text);
+    console.log(state.comments.userId);
   
     // Update the actual order item in the store
     if (isCommentProvided) {
-      updateDiscountPercentage(item, Discount);  
+      // Define the discount value based on your application's logic
+      const discountValue = item.Discount || 0; // Adjust as necessary
+      updateDiscountPercentage(item, discountValue);  
     } else {
       resetDiscount(item); 
     }
   }
   
-  
-
   onMounted(() => {
     loadOrderItemsFromLocalStorage();
   });
