@@ -113,10 +113,15 @@ export const useOrderStore = defineStore('orders', () => {
 
   const selectedSalesPerson = ref(null);
 
-  function setSelectedSalesPerson(salesPersonId) {
-    state.orderItems.forEach(item => {
-      item.SalesPersonId = salesPersonId; 
-    });
+  // Apply the selected salesperson to only the selected items in the order
+  function setSelectedSalesPerson(salesPersonId, item) {
+    const orderItem = state.orderItems.find(orderItem => orderItem.Sku === item.Sku);
+  
+    if (orderItem) {
+      orderItem.SalesPersonId = salesPersonId; 
+    } else {
+      console.error('Order item not found for the provided Sku.');
+    }
     saveOrderItemsToLocalStorage(); 
   }
   
@@ -126,6 +131,7 @@ export const useOrderStore = defineStore('orders', () => {
     state.orderItems.forEach(item => {
       item.SalesPersonId = salesPersonId;
     });
+    console.log('this all applied it')
     saveOrderItemsToLocalStorage();
   }
    

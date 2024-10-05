@@ -12,6 +12,7 @@ const authStore = useAuthStore();
 <template>
     <div>
         <button 
+         v-if="authStore.isUserLoggedIn"
          @click="handleManagerApproval"
          class="bg-white text-center p-5 rounded-2xl flex gap-5 my-3 w-full"
         >

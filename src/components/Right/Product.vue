@@ -25,10 +25,17 @@ const isOpen = ref(Array(props.order.orderItems.length).fill(false));
 const showCommentPopup = ref(false);
 const selectedItemForComment = ref(null);
 const backupDiscountPercentage = ref(null);
+const selectedItemForSalesmen = ref(null);
 
 function toggleAccordion(index) {
   isOpen.value[index] = !isOpen.value[index];
 }
+
+const handleAddSales = (item) => {
+  selectedItemForSalesmen.value = item; // Set the selected item for sales
+  authStore.toggleAddSalesPopup(); // Open the AddSales popup
+};
+
 
 // Computed property to check if overall discount is applied
 const isOverallDiscountApplied = computed(() => props.order.overallDiscount > 0);
@@ -138,13 +145,14 @@ const pstRate = computed({
     orderStore.updatePstRate(value);  
   }
 });
+
 </script>
 
 <template>
   <AddManagerApprovalRequest 
    :item="selectedItemForComment" 
   />
-  <AddSales />
+  <AddSales :item="selectedItemForSalesmen" />
   <CommentPopup 
     v-if="showCommentPopup" 
     :item="selectedItemForComment" 
@@ -201,12 +209,13 @@ const pstRate = computed({
               <p>{{ item.MaxQty }}</p>
             </span>
             <button 
-              @click="authStore.toggleAddSalesPopup"
+              @click="handleAddSales(item)"
               class="flex flex-col items-center"
             >
               <i class="pi pi-user bg-purple-200 p-3 rounded-full" style="font-size: 20px;"></i>
               <p>{{ item.SalesPersonId ? item.SalesPersonId.name : 'No Salesperson Selected' }}</p>
             </button>
+
           </div>
         </div>
 
