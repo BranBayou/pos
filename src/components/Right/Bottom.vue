@@ -98,8 +98,8 @@ const isOverallDiscountDisabled = computed(() => {
 });
 </script>
 
-<template>
-  <div v-if="(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" class="flex flex-col justify-end" style="min-height: 50%;"> 
+<template> 
+  <div v-if="(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" class="flex flex-col justify-end bg-white pb-2 mb-2 rounded-b-2xl" style="min-height: 50%;"> 
     <AddManagerApprovalRequest />
     <CommentPopup 
       v-if="showCommentPopup" 

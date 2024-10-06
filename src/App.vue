@@ -15,7 +15,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <section class="h-screen px-4 relative bg-[#f4f5f7]">
+    <section class="h-screen px-4 relative">
         <div class="container-xl lg:container m-auto">
 
             <!-- Show Loading Spinner while loading is true -->
