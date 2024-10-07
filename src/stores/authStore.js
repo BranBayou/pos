@@ -32,6 +32,11 @@ export const useAuthStore = defineStore('auth', () => {
   const isCheckoutPopupVisible = ref(false);
   const showCommentsModal = ref(false); 
 
+  const isAddCommentButtonMoved = ref(false);
+  const isAddManagerApprovalButtonMoved = ref(false);
+  const isWalkInCustomerButtonMoved = ref(false)
+
+
   const storeId = '3XoymAusFEOcrifyfM1Tfw';
 
   // Fetch Cashier
@@ -207,6 +212,18 @@ async function login(userId, pin) {
      console.log('Show comments modal:', !showCommentsModal.value);
    }
 
+   function toggleAddCommentButtonMoved () {
+     isAddCommentButtonMoved.value =!isAddCommentButtonMoved.value;
+   }
+
+   function toggleAddManagerApprovalButtonMoved () {
+     isAddManagerApprovalButtonMoved.value =!isAddManagerApprovalButtonMoved.value;
+   }
+
+   function toggleWalkInCustomerButtonMoved () {
+     isWalkInCustomerButtonMoved.value =!isWalkInCustomerButtonMoved.value;
+   }
+
   return {
     isUserLoggedIn,
     currentUser,
@@ -244,7 +261,13 @@ async function login(userId, pin) {
     isCheckoutPopupVisible,
     toggleCheckoutPopup,
     showCommentsModal,
-    toggleShowCommentsModal
+    toggleShowCommentsModal,
+    isAddCommentButtonMoved,
+    toggleAddCommentButtonMoved,
+    isAddManagerApprovalButtonMoved,
+    toggleAddManagerApprovalButtonMoved,
+    isWalkInCustomerButtonMoved,
+    toggleWalkInCustomerButtonMoved,
   };
 });
 

@@ -19,7 +19,7 @@ import { useAuthStore } from '@/stores/authStore';
 
 const authStore = useAuthStore();
 
-const logoutRole = ref(null); // Track which role is triggering logout confirmation
+const logoutRole = ref(null); 
 
 // Modal control for Login
 const modalActive = ref(null);
@@ -65,20 +65,20 @@ watch(() => authStore.isUserLoggedIn, (newValue) => {
 // State for buttons moved from the child component
 const movedButtons = ref([]);
 
-const moveButtonToParent = (buttonName) => {
-  const buttonIndex = buttons.value.findIndex(button => button.name === buttonName);
-  if (buttonIndex !== -1) {
-    const [button] = buttons.value.splice(buttonIndex, 1);
-    movedButtons.value.push(button);
-  }
-};
+// const moveButtonToParent = (buttonName) => {
+//   const buttonIndex = buttons.value.findIndex(button => button.name === buttonName);
+//   if (buttonIndex !== -1) {
+//     const [button] = buttons.value.splice(buttonIndex, 1);
+//     movedButtons.value.push(button);
+//   }
+// };
 
-// Initial buttons array
-const buttons = ref([
-  { name: 'AddComment', component: AddComment },
-  { name: 'AddManagerApproval', component: AddManagerApproval },
-  { name: 'WalkInCustomer', component: WalkInCustomer },
-]);
+// // Initial buttons array
+// const buttons = ref([
+//   { name: 'AddComment', component: AddComment },
+//   { name: 'AddManagerApproval', component: AddManagerApproval },
+//   { name: 'WalkInCustomer', component: WalkInCustomer },
+// ]);
 
 // Countdown and inactivity logic
 const countdown = ref(60);
@@ -205,17 +205,29 @@ const hasEmptyComment = ref(false); // Reactive tracking for empty comments
     <ItemsSearch v-if="authStore.isUserLoggedIn" />
     <OpenDrawer v-if="authStore.isUserLoggedIn" />
 
-    <AddBehavior @moveButtonToParent="moveButtonToParent" />
+    <AddBehavior />
 
     <!-- Render moved buttons -->
-    <div v-for="button in movedButtons" :key="button.name">
+    <!-- <div v-for="button in movedButtons" :key="button.name">
       <component
         :is="button.component"
         @commentAdded="handleCommentAdded"
         @managerApproval="handleManagerApproval"
         @walkInCustomer="handleWalkInCustomer"
       />
-    </div>
+    </div> -->
+    <AddComment 
+     v-if="authStore.isAddCommentButtonMoved"
+     @click="handleCommentAdded"
+    />
+    <AddManagerApproval 
+     v-if="authStore.isAddManagerApprovalButtonMoved" 
+     @click="handleManagerApproval" 
+    />
+    <WalkInCustomer 
+     v-if="authStore.isWalkInCustomerButtonMoved"
+     @click="handleWalkInCustomer" 
+    />
 
     <button
       :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)"

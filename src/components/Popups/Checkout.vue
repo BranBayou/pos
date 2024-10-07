@@ -308,7 +308,7 @@ function generatePDF() {
                 </div>
               </div>
               <div class="invoice-div w-6/12 mx-16 p-6 bg-gray-100 rounded-lg shadow-lg">
-                <h2 class="text-xl font-bold mb-3 text-center">Invoice</h2>
+                <h2 class="text-xl font-bold mb-3">DefaultPOSDowntown</h2>
                 <div class="mb-5">
                   <p><strong>Customer:</strong> {{ orderStore.state.customer.name || 'N/A' }}</p>
                   <p><strong>Date:</strong> {{ new Date().toLocaleDateString() }}</p>
