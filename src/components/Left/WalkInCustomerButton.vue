@@ -1,5 +1,6 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
+import { useOrderStore } from '@/stores/OrderStore';
 import { computed } from 'vue';
 
 
@@ -8,9 +9,10 @@ const emit = defineEmits(['walkInCustomer']);
 
 // Get access to the store
 const authStore = useAuthStore();
+const orderStore = useOrderStore();
 
 // Use computed to ensure selectedCustomer is reactive
-const selectedCustomer = computed(() => authStore.selectedCustomer);
+const selectedCustomer = computed(() => orderStore.state.customer);
 
 // Function to handle walk-in customer
 const handleWalkInCustomer = () => {

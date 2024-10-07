@@ -14,6 +14,16 @@ const doc = new jsPDF();
 // doc.text("Hello world!", 10, 10);
 // doc.save("a4.pdf");
 
+const isInvoiceVisible = ref(false);
+
+function showInvoice() {
+  isInvoiceVisible.value = true;
+}
+
+function closeInvoice() {
+  isInvoiceVisible.value = false;
+}
+
 // Selected payment methods and payment lines
 const selectedPaymentMethods = ref([]);
 
@@ -298,16 +308,22 @@ function generatePDF() {
                   </div>
                 </div>
 
-                <p class="text-xl font-semibold mb-5">Total: ${{ totalAmount }}</p>
+                <p class="text-xl font-semibold mb-5">Total: ${{ totalAmount.toFixed(2) }}</p>
 
-                <div class="flex justify-end">
+                <div class="flex justify-end gap-3">
+                  <button
+                    @click="showInvoice"
+                    class="bg-purple-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-purple-600 transition"
+                  >
+                    Invoice
+                  </button>
                   <button @click="handleCheckout"
                     class="bg-purple-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-purple-600 transition">
                     Confirm and Checkout
                   </button>
                 </div>
               </div>
-              <div class="invoice-div w-6/12 mx-16 p-6 bg-gray-100 rounded-lg shadow-lg">
+              <div v-if="isInvoiceVisible" class="invoice-div w-6/12 mx-16 p-6 bg-gray-100 rounded-lg shadow-lg">
                 <h2 class="text-xl font-bold mb-3">DefaultPOSDowntown</h2>
                 <div class="mb-5">
                   <p><strong>Customer:</strong> {{ orderStore.state.customer.name || 'N/A' }}</p>

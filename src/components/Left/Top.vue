@@ -16,8 +16,10 @@ import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
 import { useAuthStore } from '@/stores/authStore';
+import { useOrderStore } from '@/stores/OrderStore';
 
 const authStore = useAuthStore();
+const orderStore = useOrderStore();
 
 const logoutRole = ref(null); 
 
@@ -25,7 +27,17 @@ const logoutRole = ref(null);
 const modalActive = ref(null);
 const toggleModal = () => {
   modalActive.value = !modalActive.value;
+
+  if (modalActive.value) {
+    // Retrieve the last user from localStorage
+    const lastUser = JSON.parse(localStorage.getItem('lastUser'));
+    if (lastUser) {
+      // Call the setLastUser method with the stored data
+      authStore.setLastUser(lastUser);
+    }
+  }
 };
+
 
 const toggleisLogoutConfirmationVisible = (role) => {
   logoutRole.value = role; // Set the role for logout confirmation
@@ -62,24 +74,6 @@ watch(() => authStore.isUserLoggedIn, (newValue) => {
   }
 });
 
-// State for buttons moved from the child component
-const movedButtons = ref([]);
-
-// const moveButtonToParent = (buttonName) => {
-//   const buttonIndex = buttons.value.findIndex(button => button.name === buttonName);
-//   if (buttonIndex !== -1) {
-//     const [button] = buttons.value.splice(buttonIndex, 1);
-//     movedButtons.value.push(button);
-//   }
-// };
-
-// // Initial buttons array
-// const buttons = ref([
-//   { name: 'AddComment', component: AddComment },
-//   { name: 'AddManagerApproval', component: AddManagerApproval },
-//   { name: 'WalkInCustomer', component: WalkInCustomer },
-// ]);
-
 // Countdown and inactivity logic
 const countdown = ref(60);
 let countdownInterval = null;
@@ -93,11 +87,23 @@ const startCountdown = () => {
       countdown.value -= 1;
     } else {
       clearInterval(countdownInterval);
-      authStore.logout(authStore.userRole ); 
-      authStore.logout(authStore.managerRole); 
+
+      // Save last user to localStorage before logging out
+      localStorage.setItem('lastUser', JSON.stringify({
+        currentUser: authStore.currentUser,
+        userRole: authStore.userRole,
+        managerUser: authStore.managerUser,
+        managerRole: authStore.managerRole,
+      }));
+
+      // Perform the logout
+      authStore.logout(authStore.userRole); 
+      authStore.logout(authStore.managerRole);
     }
   }, 10000000);
 };
+
+
 
 const resetCountdown = () => {
   startCountdown();
@@ -225,7 +231,7 @@ const hasEmptyComment = ref(false); // Reactive tracking for empty comments
      @click="handleManagerApproval" 
     />
     <WalkInCustomer 
-     v-if="authStore.isWalkInCustomerButtonMoved"
+     v-if="authStore.isWalkInCustomerButtonMoved || orderStore.state.customer.name != ''"
      @click="handleWalkInCustomer" 
     />
 

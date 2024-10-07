@@ -152,6 +152,17 @@ async function login(userId, pin) {
       localStorage.removeItem('managerRole');
     }
   }
+
+  // authStore.js or similar file
+  function setLastUser(lastUser) {
+    // Ensure the role is correctly set based on the last user
+    currentUser.value = lastUser.currentUser || ''; 
+    managerUser.value = lastUser.managerUser || '';
+    userRole.value = lastUser.userRole || '';
+    managerRole.value = lastUser.managerRole || '';
+  }
+  
+
   
   // Toggle Login input type
   function toggleLoginInput() {
@@ -268,6 +279,7 @@ async function login(userId, pin) {
     toggleAddManagerApprovalButtonMoved,
     isWalkInCustomerButtonMoved,
     toggleWalkInCustomerButtonMoved,
+    setLastUser,
   };
 });
 

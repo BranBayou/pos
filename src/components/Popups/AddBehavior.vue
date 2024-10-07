@@ -1,11 +1,13 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
+import { useOrderStore } from '@/stores/OrderStore';
 import { ref } from 'vue';
 import AddComment from '../Left/AddCommentButton.vue';
 import AddManagerApproval from '../Left/AddManagerApprovalButton.vue';
 import WalkInCustomer from '../Left/WalkInCustomerButton.vue';
 
 const authStore = useAuthStore();
+const orderStore = useOrderStore();
 
 const isAddCommentButtonMovedFromAddBeaviour = ref(false);
 const isAddManagerApprovalButtonMovedFromAddBeaviour = ref(false);
@@ -55,7 +57,7 @@ function handleClickWalkinCustomer () {
           <div v-if="authStore.isAddBehaviourPopup" class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-50 w-10/12">
             <div class="bg-white rounded-2xl shadow-lg p-6 w-full">
               <h1 class="font-semibold text-[24px]">Add Behaviour</h1>
-              <div class="bg-[#f4f5f7] rounded-2xl">
+              <div class="bg-[#f4f5f7] rounded-2xl p-3 flex gap-3">
                 <AddComment 
                  v-if="!isAddCommentButtonMovedFromAddBeaviour"
                  @click="handleClickAddComment"
@@ -65,13 +67,14 @@ function handleClickWalkinCustomer () {
                   @click="handleClickAddManager"
                 />
                 <WalkInCustomer 
-                  v-if="!isWalkinCustomerMovedFromAddBeaviour"
+                  v-if="!isWalkinCustomerMovedFromAddBeaviour && orderStore.state.customer.name === ''"
                   @click="handleClickWalkinCustomer"
                 />
+                <div v-if="isAddCommentButtonMovedFromAddBeaviour && isAddManagerApprovalButtonMovedFromAddBeaviour && isWalkinCustomerMovedFromAddBeaviour">
+                  <p class="text-center text-gray-500 w-full">No more behaviour</p>
+                </div>
               </div>
-              <div>
-                <p class="text-center text-gray-500">No more behaviour</p>
-              </div>
+              
             </div> 
           </div>        
         </Transition>
