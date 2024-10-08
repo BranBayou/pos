@@ -20,10 +20,7 @@ export const useOrderStore = defineStore('orders', () => {
       email: '',
       note: ''
     }),
-    comments: reactive({
-      text: '',
-      userId: '',
-    }), 
+    comments: [], 
     payments: [],
     total: ref(0), 
     taxes: reactive([
@@ -179,7 +176,7 @@ export const useOrderStore = defineStore('orders', () => {
         email: '',
         note: ''
       };
-      state.comments = {};
+      state.comments = [];
       state.payments = [];
       state.taxes = [
         { type: 'GST', rate: 5, amount: 0 },
@@ -327,25 +324,43 @@ function updateOriginalPrice(item, originalPrice) {
   }
 
   function submitCommentToStore(commentText, managerUser, item) {
-    const isCommentProvided = commentText.trim() !== '';
+    const isCommentProvided = commentText.trim() !== ''; 
+    const existingCommentIndex = state.comments.findIndex(comment => comment.item.sku === item.Sku);
   
-    // Update the state.comments object directly
-    state.comments.text = commentText.value;
-    state.comments.userId = managerUser;
+    // Create the comment object regardless of whether the text is provided or not
+    const newComment = {
+      item: {
+        name: item?.ItemName ?? 'Unknown Item',
+        price: item?.Price ?? 0,
+        imageUrl: item?.ImageUrl ?? '',
+        sku: item?.Sku ?? 'Unknown SKU',
+        discount: item.Discount,  
+      },
+      text: commentText.trim(),
+      userId: managerUser,
+      timestamp: new Date().toISOString()
+    };
   
-    saveOrderItemsToLocalStorage(); 
-    console.log(state.comments.text);
-    console.log(state.comments.userId);
-  
-    // Update the actual order item in the store
-    if (isCommentProvided) {
-      // Define the discount value based on your application's logic
-      const discountValue = item.Discount || 0; // Adjust as necessary
-      updateDiscountPercentage(item, discountValue);  
+    // Update or add the new comment in the state.comments array
+    if (existingCommentIndex > -1) {
+      state.comments[existingCommentIndex] = newComment;
     } else {
-      resetDiscount(item); 
+      state.comments.push(newComment);
     }
+
+    // Apply the discount only if a valid comment is provided
+    if (isCommentProvided) {
+      const discountValue = item.Discount || 0;
+      updateDiscountPercentage(item, discountValue);
+    } else {
+      resetDiscount(item);
+    }
+  
+    saveOrderItemsToLocalStorage();
   }
+  
+  
+  
   
   onMounted(() => {
     loadOrderItemsFromLocalStorage();

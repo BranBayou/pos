@@ -8,21 +8,38 @@ const authStore = useAuthStore();
 const orderStore = useOrderStore();
 
 const comments = ref([]);
-// Track which comment is being edited
-const isEditing = ref({}); 
-// Track new comment inputs per comment
-const newComments = ref([]); 
+const isEditing = ref({}); // Track which comment is being edited
+const newComments = ref([]); // Track new comment inputs per comment
 
-// Function to load comments from local storage
-const loadCommentsFromLocalStorage = () => {
-  comments.value = JSON.parse(localStorage.getItem('comments')) || [];
-  // Initialize newComments for each comment
-  comments.value.forEach(() => newComments.value.push(''));
+// Function to load comments from the store
+const loadCommentsFromStore = () => {
+  // Load comments from orderStore's state
+  comments.value = orderStore.state.comments.map(comment => ({
+    ...comment,
+    comment: comment.text || '', // Initialize the comment text
+    discountPercentage: comment.item.discount || 0 // Track the discount percentage
+  }));
+
+  // Initialize isEditing and newComments arrays for editing
+  comments.value.forEach((_, index) => {
+    isEditing.value[index] = false;
+    newComments.value[index] = comments.value[index].comment || '';
+  });
 };
 
-// Function to save updated comments to local storage
-const saveCommentsToLocalStorage = () => {
-  localStorage.setItem('comments', JSON.stringify(comments.value));
+// Function to save updated comments to the store and apply any related discount logic
+const saveCommentsToStore = () => {
+  comments.value.forEach((comment, index) => {
+    const orderItem = orderStore.state.orderItems.find(item => item.Sku === comment.item.sku);
+
+    if (orderItem) {
+      // Save the edited comment and apply the discount if necessary
+      orderStore.submitCommentToStore(newComments.value[index], authStore.userId, orderItem);
+    }
+  });
+
+  // Save the updated state to local storage
+  orderStore.saveOrderItemsToLocalStorage();
 };
 
 // Function to handle comment editing
@@ -52,38 +69,35 @@ const saveNewComment = (index) => {
   );
 
   if (orderItem) {
-    // Update the discount and price in the orderItem
-    orderStore.updateDiscountPercentage(orderItem, commentItem.discountPercentage);
+    // Now, apply the discount from the comment
+    orderStore.submitCommentToStore(currentComment, authStore.userId, orderItem);
   } else {
     console.error('Order item not found in the store.');
     return;
   }
 
-  // Update the comment in the comments array
-  comments.value[index].comment = currentComment;
-  comments.value[index].item.discountPercentage = commentItem.discountPercentage;
-
-  // Save the updated comments to local storage
-  saveCommentsToLocalStorage();
-
   // Exit edit mode for the current comment
   isEditing.value[index] = false;
+
+  // Save the updated comments to the store and local storage
+  saveCommentsToStore();
 };
 
-// Handle to cancel editing
+// Handle cancel editing
 const cancelEdit = (index) => {
   isEditing.value[index] = false;
 };
 
-// Handle to delete a comment
+// Handle deleting a comment
 const deleteComment = (index) => {
-  comments.value.splice(index, 1); 
-  saveCommentsToLocalStorage(); 
+  comments.value.splice(index, 1);
+  // Save the updated comments to the store and local storage
+  saveCommentsToStore();
 };
 
 // Fetch the comments when the component is mounted
 onMounted(() => {
-  loadCommentsFromLocalStorage();
+  loadCommentsFromStore();
 });
 
 const emit = defineEmits(['close']);
@@ -97,25 +111,24 @@ const emit = defineEmits(['close']);
           <div class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-50 w-10/12 max-h-full overflow-y-auto">
             <div class="bg-white rounded-2xl p-6 w-full shadow-lg">
               <h3 class="text-lg font-semibold mb-4">Saved Comments</h3>
-              
+
               <div v-if="comments.length === 0" class="text-center text-gray-500">
                 No comments available.
               </div>
-              
+
               <div v-for="(comment, index) in comments" :key="index" class="mb-4 pb-4 bg-[#f4f5f7] p-3 rounded-md">
                 <div class="flex items-center justify-between mb-2">
                   <div class="flex">
                     <img :src="`https://replicagunsca.b-cdn.net/images/products/small/${comment.item.imageUrl}`"
                       class="w-14 rounded-lg" alt="product-img" />
                     <div class="ml-4">
-                      <p class="font-semibold">Approved {{ comment.item.discountPercentage }}% discount on {{ comment.item.name }}</p>
+                      <p class="font-semibold">Approved {{ comment.item.discount }}% discount on {{ comment.item.name }}</p>
                       <p class="text-sm text-gray-500">Price: ${{ comment.item.price }}</p>
-                      <p class="text-sm text-gray-500">SKU: {{ comment.item.sku }}</p>
                     </div>
                   </div>
                   <div class="text-right flex gap-3">
                     <div class="">
-                      <p class="text-sm text-gray-500">Approved by: <span class="font-semibold">{{ comment.manager }}</span></p>
+                      <p class="text-sm text-gray-500">Approved by: <span class="font-semibold">{{ comment.userId }}</span></p>
                       <p class="text-sm text-gray-500">{{ new Date(comment.timestamp).toLocaleString() }}</p>
                     </div>
                     <img :src="msgIcon" :class="comment.comment ? 'bg-green-400' : 'bg-red-400'" class="rounded-md p-1" alt="Comment Icon">
@@ -156,6 +169,8 @@ const emit = defineEmits(['close']);
     </Transition>
   </Teleport>
 </template>
+
+
 
 
 <style scoped>
