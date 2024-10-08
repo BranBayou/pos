@@ -165,7 +165,7 @@ const emit = defineEmits(['close']);
 
                 <!-- Display the saved comment if not being edited -->
                 <div v-else class="text-sm flex justify-between">
-                  <p>Reason: {{ comment.comment.trim() ? comment.comment : 'Add a reason' }} </p>
+                  <p>Reason: {{ comment.comment.trim() ? comment.comment : 'Add a reason ...' }} </p>
                   <div class="flex gap-2">
                     <button @click="handleEdit(index)" class="px-4 py-2 bg-gray-200 text-black rounded-lg"><i class="pi pi-pencil"></i></button>
                     <button @click="deleteComment(index)" class="px-4 py-2 bg-gray-200 text-black rounded-lg">

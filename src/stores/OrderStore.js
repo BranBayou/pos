@@ -355,8 +355,9 @@ function updateOriginalPrice(item, originalPrice) {
     } else {
       resetDiscount(item);
     }
-  
+    
     saveOrderItemsToLocalStorage();
+    window.dispatchEvent(new Event('comment-saved'));
   }
   
   const formatDate = (timestamp) => {

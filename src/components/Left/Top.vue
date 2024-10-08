@@ -152,17 +152,21 @@ onUnmounted(() => {
 });
 
 const hasEmptyComment = ref(false); // Reactive tracking for empty comments
-  const getAllComments = ref([]); // Reactive array for all comments
-  // Function to update the comments and check for empty commentText
-  const updateComments = () => {
-    getAllComments.value = JSON.parse(localStorage.getItem('comments')) || [];
-    hasEmptyComment.value = getAllComments.value.some(comment => !comment.comment.trim());
-  };
-  // Call updateComments on mounted
-  onMounted(() => {
-    updateComments();
-  });
-  window.addEventListener('comment-saved', updateComments);
+const getAllComments = ref([]); // Reactive array for all comments
+
+// Function to update the comments and check for empty commentText
+const updateComments = () => {
+  const storedState = JSON.parse(localStorage.getItem('newOrder')) || {};
+  getAllComments.value = storedState.comments || [];
+  hasEmptyComment.value = getAllComments.value.some(comment => !comment.text.trim());
+};
+
+
+// Call updateComments on mounted and when comments are saved
+onMounted(() => {
+  updateComments();
+});
+window.addEventListener('comment-saved', updateComments);
 
 </script>
 
@@ -205,23 +209,18 @@ const hasEmptyComment = ref(false); // Reactive tracking for empty comments
       <i @click="handleAuthAction('Manager')" ref="myButton" class="pi pi-user text-purple-500 bg-purple-100 p-4 rounded-full cursor-pointer" style="font-size: 1.875rem;"></i>
       <span class="font-medium">{{ authStore.isManagerLoggedIn ? authStore.managerUser : 'Logged out' }}</span>
 
-      <img :src="msgIcon" :class="hasEmptyComment ? 'bg-red-500' : 'bg-green-200'" class="rounded-md cursor-pointer p-2" alt="" @click="authStore.toggleShowCommentsModal">
+      <img 
+        :src="msgIcon" 
+        :class="hasEmptyComment ? 'bg-red-400' : 'bg-green-400'" 
+        class="rounded-md cursor-pointer p-2" 
+        alt="Comment Icon" 
+        @click="authStore.toggleShowCommentsModal"
+      />
     </div>
 
     <ItemsSearch v-if="authStore.isUserLoggedIn" />
     <OpenDrawer v-if="authStore.isUserLoggedIn" />
-
     <AddBehavior />
-
-    <!-- Render moved buttons -->
-    <!-- <div v-for="button in movedButtons" :key="button.name">
-      <component
-        :is="button.component"
-        @commentAdded="handleCommentAdded"
-        @managerApproval="handleManagerApproval"
-        @walkInCustomer="handleWalkInCustomer"
-      />
-    </div> -->
     <AddComment 
      v-if="authStore.isAddCommentButtonMoved"
      @click="handleCommentAdded"
@@ -234,7 +233,6 @@ const hasEmptyComment = ref(false); // Reactive tracking for empty comments
      v-if="authStore.isWalkInCustomerButtonMoved || orderStore.state.customer.name != ''"
      @click="handleWalkInCustomer" 
     />
-
     <button
       :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)"
       @click="authStore.toggleAddBehaviourPopup"
