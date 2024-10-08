@@ -65,23 +65,31 @@ const saveNewComment = (index) => {
 
   // Apply the discount to the order item in the store
   const orderItem = orderStore.state.orderItems.find(
-    (item) => item.Sku === commentItem.sku // Match orderItem with comment item based on SKU
+    (item) => item.Sku === commentItem.sku
   );
 
   if (orderItem) {
-    // Now, apply the discount from the comment
+    // Apply the discount from the comment to the order item
+    orderItem.Discount = commentItem.discount || 0;
+
+    // Recalculate the price based on the discount
+    orderItem.Price = (orderItem.OriginalPrice * (1 - orderItem.Discount / 100)).toFixed(2);
+
+    // Update the `comment.comment` to reflect the saved comment
+    comments.value[index].comment = currentComment;  // Update the displayed comment immediately
+
+    // Save the comment to the store
     orderStore.submitCommentToStore(currentComment, authStore.userId, orderItem);
   } else {
     console.error('Order item not found in the store.');
     return;
   }
 
-  // Exit edit mode for the current comment
   isEditing.value[index] = false;
-
-  // Save the updated comments to the store and local storage
   saveCommentsToStore();
 };
+
+
 
 // Handle cancel editing
 const cancelEdit = (index) => {
@@ -108,9 +116,15 @@ const emit = defineEmits(['close']);
     <Transition name="modal-outer">
       <div class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
         <Transition name="modal-inner" class="rounded-2xl">
-          <div class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-50 w-10/12 max-h-full overflow-y-auto">
+          <div
+            class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-50 w-10/12 max-h-full overflow-y-auto">
             <div class="bg-white rounded-2xl p-6 w-full shadow-lg">
-              <h3 class="text-lg font-semibold mb-4">Saved Comments</h3>
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold mb-4">Saved Comments</h3>
+                <div class="flex justify-end">
+                  <button @click="emit('close')" class="px-4 py-2 bg-gray-200 text-black rounded-lg"><i class="pi pi-times"></i></button>
+                </div>
+              </div>
 
               <div v-if="comments.length === 0" class="text-center text-gray-500">
                 No comments available.
@@ -122,45 +136,43 @@ const emit = defineEmits(['close']);
                     <img :src="`https://replicagunsca.b-cdn.net/images/products/small/${comment.item.imageUrl}`"
                       class="w-14 rounded-lg" alt="product-img" />
                     <div class="ml-4">
-                      <p class="font-semibold">Approved {{ comment.item.discount }}% discount on {{ comment.item.name }}</p>
+                      <p class="font-semibold">Approved {{ comment.item.discount }}% discount on {{ comment.item.name }}
+                      </p>
                       <p class="text-sm text-gray-500">Price: ${{ comment.item.price }}</p>
                     </div>
                   </div>
                   <div class="text-right flex gap-3">
                     <div class="">
-                      <p class="text-sm text-gray-500">Approved by: <span class="font-semibold">{{ comment.userId }}</span></p>
-                      <p class="text-sm text-gray-500">{{ new Date(comment.timestamp).toLocaleString() }}</p>
+                      <p class="text-sm text-gray-500">Approved by: <span class="font-semibold">{{ authStore.managerUser
+                          }}</span></p>
+                      <p class="text-sm text-gray-500">{{ orderStore.formatDate(comment.timestamp) }}</p>
                     </div>
-                    <img :src="msgIcon" :class="comment.comment ? 'bg-green-400' : 'bg-red-400'" class="rounded-md p-1" alt="Comment Icon">
+                    <img :src="msgIcon" :class="newComments[index].trim() ? 'bg-green-400' : 'bg-red-400'"
+                      class="rounded-md p-1" alt="Comment Icon" />
                   </div>
                 </div>
 
-                <!-- Display editable textarea if the comment is empty or being edited -->
-                <div v-if="isEditing[index] || !comment.comment" class="mt-2">
-                  <textarea
-                    v-model="newComments[index]"
-                    rows="2"
-                    class="w-full border rounded-lg p-2"
-                    placeholder="Enter your comment"
-                  ></textarea>
+                <!-- Display editable textarea if the comment is being edited -->
+                <div v-if="isEditing[index]" class="mt-2">
+                  <textarea v-model="newComments[index]" rows="2" class="w-full border rounded-lg p-2"
+                    placeholder="Edit your comment"></textarea>
                   <div class="mt-2 flex justify-end gap-2">
-                    <button @click="saveNewComment(index)" class="px-4 py-2 bg-purple-600 text-white rounded-lg">Save</button>
-                    <button @click="cancelEdit(index)" class="px-4 py-2 bg-gray-300 rounded-lg">Cancel</button>
+                    <button @click="saveNewComment(index)"
+                      class="px-4 py-2 bg-purple-600 text-white rounded-lg"><i class="pi pi-save"></i></button>
+                    <button @click="cancelEdit(index)" class="px-4 py-2 bg-gray-300 rounded-lg"><i class="pi pi-undo"></i></button>
                   </div>
                 </div>
 
-                <!-- Display comment if it exists and is not being edited -->
+                <!-- Display the saved comment if not being edited -->
                 <div v-else class="text-sm flex justify-between">
-                  <p>Reason: {{ comment.comment }}</p>
-                  <button @click="deleteComment(index)" class="px-4 py-2 bg-gray-500 text-white rounded-lg">
-                    <i class="pi pi-trash"></i>
-                  </button>
+                  <p>Reason: {{ comment.comment.trim() ? comment.comment : 'Add a reason' }} </p>
+                  <div class="flex gap-2">
+                    <button @click="handleEdit(index)" class="px-4 py-2 bg-gray-200 text-black rounded-lg"><i class="pi pi-pencil"></i></button>
+                    <button @click="deleteComment(index)" class="px-4 py-2 bg-gray-200 text-black rounded-lg">
+                      <i class="pi pi-trash"></i>
+                    </button>
+                  </div>
                 </div>
-              </div>
-
-              <!-- Close Button -->
-              <div class="mt-4 flex justify-end">
-                <button @click="emit('close')" class="px-4 py-2 bg-purple-600 text-white rounded-lg">Close</button>
               </div>
             </div>
           </div>

@@ -96,10 +96,10 @@ const imageBackgroundColor = computed(() => {
                   placeholder="Enter your comment"></textarea>
 
                 <div class="mt-4 flex justify-end gap-4">
-                  <button @click="cancelComment" class="px-4 py-2 bg-gray-300 rounded-lg">Cancel</button>
-                  <button @click="submitComment" :disabled="isSubmitting" class="px-4 py-2 bg-purple-600 text-white rounded-lg">
-                    {{ isSubmitting ? 'Submitting...' : 'Submit' }}
+                  <button @click="submitComment" :disabled="isSubmitting" class="px-4 py-2 bg-purple-500 text-white rounded-lg">
+                    <i class="pi pi-save"></i>
                   </button>
+                  <button @click="cancelComment" class="px-4 py-2 bg-gray-300 rounded-lg"><i class="pi pi-times"></i></button>
                 </div>
               </div>
             </div>

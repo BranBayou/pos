@@ -332,7 +332,7 @@ function updateOriginalPrice(item, originalPrice) {
       item: {
         name: item?.ItemName ?? 'Unknown Item',
         price: item?.Price ?? 0,
-        imageUrl: item?.ImageUrl ?? '',
+        imageUrl: item?.ItemImage ?? '',
         sku: item?.Sku ?? 'Unknown SKU',
         discount: item.Discount,  
       },
@@ -359,6 +359,14 @@ function updateOriginalPrice(item, originalPrice) {
     saveOrderItemsToLocalStorage();
   }
   
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit', 
+      month: 'short', 
+      year: 'numeric'
+    }).replace(/ /g, '-');
+  };
   
   
   
@@ -397,6 +405,7 @@ function updateOriginalPrice(item, originalPrice) {
     updatePstRate,
     updateOrderTotal,
     saveOrderItemsToLocalStorage,
+    formatDate,
   };
 });
 

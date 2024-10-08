@@ -31,6 +31,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAddCustomerPopupVisible = ref(false);
   const isCheckoutPopupVisible = ref(false);
   const showCommentsModal = ref(false); 
+  
 
   const isAddCommentButtonMoved = ref(false);
   const isAddManagerApprovalButtonMoved = ref(false);
