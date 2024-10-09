@@ -60,7 +60,7 @@ function deleteDraftOrder(index) {
                     <div class="flex flex-col items-center justify-center gap-4">
                       <!-- Assuming each draft has items, show the first product image from the draft -->
                       <img 
-                        v-if="draft.orderItems && draft.orderItems[0]?.ImageUrl" 
+                        v-if="draft.orderItems && draft.orderItems[0]?.ItemImage" 
                         @click="loadDraftOrder(draft)"
                         :src="`https://replicagunsca.b-cdn.net/images/products/small/${draft.orderItems[0]?.ItemImage || 'placeholder.png'}`" 
                         class="rounded-lg" 

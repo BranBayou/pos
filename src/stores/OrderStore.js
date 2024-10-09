@@ -427,18 +427,46 @@ function fetchDraftOrders() {
 // Load a draft order back into newOrder
 function loadDraftOrder(draftIndex) {
   const selectedDraft = draftOrders.value[draftIndex];
-  
-  if (selectedDraft) {
-    // Load the selected draft into the active order state
-    state.orderItems = [...selectedDraft.orderItems];
-    state.overallDiscount = selectedDraft.overallDiscount;
-    state.customer = { ...selectedDraft.customer };
-    state.comments = [...selectedDraft.comments];
-    state.payments = [...selectedDraft.payments];
-    state.taxes = [...selectedDraft.taxes];
-    state.total = selectedDraft.total;
 
-    // Save the selected draft back to localStorage as newOrder (active order)
+  if (selectedDraft) {
+    // Merge order items
+    selectedDraft.orderItems.forEach(draftItem => {
+      const existingItem = state.orderItems.find(item => item.ItemId === draftItem.ItemId);
+
+      if (existingItem) {
+        // If item exists in the current order, increase the quantity
+        existingItem.Qty += draftItem.Qty;
+      } else {
+        // If item does not exist, add it to the order
+        state.orderItems.push({ ...draftItem });
+      }
+    });
+
+    // Merge comments
+    state.comments.push(...selectedDraft.comments);
+
+    // Merge payments
+    state.payments.push(...selectedDraft.payments);
+
+    // Merge taxes
+    state.taxes = [...selectedDraft.taxes];
+
+    // Handle overall discount - you can modify this logic if necessary
+    state.overallDiscount = Math.max(state.overallDiscount, selectedDraft.overallDiscount);
+
+    // Load the selected customer if none is currently selected
+    if (!state.customer.id) {
+      state.customer = { ...selectedDraft.customer };
+    } else {
+      // Optionally: Log or notify that the current customer is being retained
+      console.log('Active customer retained:', state.customer);
+      toast.info('Current customer retained in the order.');
+    }
+
+    // Recalculate the total after merging the draft order
+    state.total = state.orderItems.reduce((total, item) => total + (item.Price * item.Qty), 0);
+
+    // Save the updated active order to localStorage as newOrder
     saveOrderItemsToLocalStorage();
 
     // Remove the selected draft from the draftOrders array
@@ -447,11 +475,13 @@ function loadDraftOrder(draftIndex) {
     // Update the draftOrders in localStorage
     localStorage.setItem('draftOrders', JSON.stringify(draftOrders.value));
 
-    toast.success('Draft order loaded and removed from drafts successfully!');
+    toast.success('Draft order merged into the current order successfully!');
   } else {
     toast.error('Failed to load the selected draft order.');
   }
 }
+
+
 
 
 // Remove a draft order
