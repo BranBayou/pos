@@ -360,6 +360,8 @@ function updateOriginalPrice(item, originalPrice) {
     window.dispatchEvent(new Event('comment-saved'));
   }
   
+
+// Iso date format   
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
     return date.toLocaleDateString('en-GB', {
@@ -369,7 +371,107 @@ function updateOriginalPrice(item, originalPrice) {
     }).replace(/ /g, '-');
   };
   
+  const draftOrders = ref([]); 
+  // Draft orders 
+// Save the current state as a draft
+function saveOrderAsDraft() {
+  if (state.orderItems.length === 0) {
+    console.log('No active order items to save as draft');
+    toast.error('Cannot save an empty order as draft!');
+    return; 
+  }
+
+  // Create a new draft object from the current state
+  const draft = {
+    orderItems: [...state.orderItems], 
+    overallDiscount: state.overallDiscount, 
+    customer: { ...state.customer }, 
+    comments: [...state.comments],
+    payments: [...state.payments],
+    taxes: [...state.taxes],
+    total: state.total,
+    timestamp: Date.now(), 
+  };
+
+  // Add the new draft to the draftOrders array
+  draftOrders.value.push(draft);
+
+  // Save the updated draft orders to localStorage
+  localStorage.setItem('draftOrders', JSON.stringify(draftOrders.value));
+
+  // Clear the current state (active order)
+  state.orderItems = []; 
+  state.overallDiscount = 0;
+  state.customer = { id: '', name: '', phone: '', email: '', note: '' };
+  state.comments = [];
+  state.payments = [];
+  state.total = 0;
+  state.taxes = [
+    { type: 'GST', rate: 5, amount: 0 },
+    { type: 'PST', rate: 7, amount: 0 }
+  ];
+
+  // Remove the active order from localStorage
+  localStorage.removeItem('newOrder');
+  toast.success('Order saved as draft!');
+}
+
+// Fetch the draft orders from localStorage and update the reactive array
+function fetchDraftOrders() {
+  const savedDrafts = JSON.parse(localStorage.getItem('draftOrders')) || [];
+  draftOrders.value = savedDrafts;
+  console.log('Fetched drafts:', draftOrders.value);
+  return draftOrders.value;
+}
+
+// Load a draft order back into newOrder
+function loadDraftOrder(draftIndex) {
+  const selectedDraft = draftOrders.value[draftIndex];
   
+  if (selectedDraft) {
+    // Load the selected draft into the active order state
+    state.orderItems = [...selectedDraft.orderItems];
+    state.overallDiscount = selectedDraft.overallDiscount;
+    state.customer = { ...selectedDraft.customer };
+    state.comments = [...selectedDraft.comments];
+    state.payments = [...selectedDraft.payments];
+    state.taxes = [...selectedDraft.taxes];
+    state.total = selectedDraft.total;
+
+    // Save the selected draft back to localStorage as newOrder (active order)
+    saveOrderItemsToLocalStorage();
+
+    // Remove the selected draft from the draftOrders array
+    draftOrders.value.splice(draftIndex, 1);
+
+    // Update the draftOrders in localStorage
+    localStorage.setItem('draftOrders', JSON.stringify(draftOrders.value));
+
+    toast.success('Draft order loaded and removed from drafts successfully!');
+  } else {
+    toast.error('Failed to load the selected draft order.');
+  }
+}
+
+
+// Remove a draft order
+function removeDraftOrder(draftIndex) {
+  if (draftIndex >= 0 && draftIndex < draftOrders.value.length) {
+    draftOrders.value.splice(draftIndex, 1);
+    // Update localStorage with the modified draftOrders array
+    localStorage.setItem('draftOrders', JSON.stringify(draftOrders.value));
+    toast.success('Draft order removed successfully!');
+  } else {
+    toast.error('Invalid draft order index.');
+  }
+}
+
+const showDraftList = ref(false); 
+// Toggle the draft list visibility
+function toggleDraftList() {
+  showDraftList.value = !showDraftList.value;
+  console.log('order notification toggeled');
+}
   
   onMounted(() => {
     loadOrderItemsFromLocalStorage();
@@ -392,14 +494,15 @@ function updateOriginalPrice(item, originalPrice) {
     setSelectedSalesPerson,
     applySalesPersonToAllItems,
     applyOverallDiscount,
-    // saveOrderAsDraft,
-    // // fetchDraftOrders,
-    // loadDraftOrder,
-    // showDraftList,
-    // toggleDraftList,
-    // draftOrders,
+    saveOrderAsDraft,
+    fetchDraftOrders,
+    loadDraftOrder,
+    showDraftList,
+    toggleDraftList,
+    draftOrders,
     submitCommentToStore,
     loadOrderItemsFromLocalStorage,
+    removeDraftOrder,
     // recalculateTotal,
     updateOriginalPrice,
     updateGstRate,
