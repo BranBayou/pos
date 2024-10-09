@@ -17,8 +17,15 @@ const doc = new jsPDF();
 const isInvoiceVisible = ref(false);
 
 function showInvoice() {
-  isInvoiceVisible.value = true;
+  if (remainingAmount.value === '0.00') {
+    isInvoiceVisible.value = true;
+    console.log("Invoice is visible:", isInvoiceVisible.value);
+  } else {
+    toast.error('Please allocate the full payment before generating an invoice.');
+    console.log("Invoice is not visible. Remaining amount:", remainingAmount.value);
+  }
 }
+
 
 function closeInvoice() {
   isInvoiceVisible.value = false;
@@ -29,11 +36,11 @@ const selectedPaymentMethods = ref([]);
 
 // Available payment methods
 const paymentMethods = [
-  { id: '1', name: 'American Express', icon: '/american-express.svg' },
-  { id: '2', name: 'MasterCard', icon: '/mastercard.svg' },
-  { id: '3', name: 'PayPal', icon: '/paypal.svg' },
+  { id: '5', name: 'Cash', icon: '/cash.svg' },
   { id: '4', name: 'Visa', icon: '/visa.svg' },
-  { id: '5', name: 'Cash', icon: '/cash.svg' }
+  { id: '2', name: 'MasterCard', icon: '/mastercard.svg' },
+  { id: '1', name: 'American Express', icon: '/american-express.svg' },
+  { id: '3', name: 'PayPal', icon: '/paypal.svg' },
 ];
 
 // Total order amount
@@ -72,7 +79,7 @@ function clearPaymentAmount(method) {
 const predictiveCashAmounts = computed(() => {
   const total = parseFloat(totalAmount.value);
   if (!isNaN(total)) {
-    return [20, 50, 100, 200, 500];
+    return [10, 20, 50, 100];
   }
   return [];
 });
@@ -114,6 +121,15 @@ watch(selectedPaymentMethods, (newVal) => {
     newVal[newVal.length - 1].amount = (parseFloat(newVal[newVal.length - 1].amount) + parseFloat(remainingAmount.value)).toFixed(2);
   }
 });
+
+// handle remove payment method
+function removePaymentMethod(methodId) {
+  const index = selectedPaymentMethods.value.findIndex(method => method.id === methodId);
+  if (index !== -1) {
+    selectedPaymentMethods.value.splice(index, 1);
+    toast.success('Payment method removed.');
+  }
+}
 
 // handle checkout and API submission
 async function handleCheckout() {
@@ -177,48 +193,63 @@ async function handleCheckout() {
 }
 
 const generateInvoice = computed(() => {
-  const invoiceItems = orderStore.state.orderItems.map(item => ({
-    name: item.ItemName,
-    quantity: item.Qty,
-    price: item.Price,
-    total: (item.Qty * item.Price).toFixed(2)
-  }));
+  const invoiceItems = orderStore.state.orderItems?.map(item => ({
+    name: item.ItemName || 'Unknown Item',
+    quantity: item.Qty || 1,
+    price: item.Price || 0,
+    total: ((item.Qty || 1) * (item.Price || 0)).toFixed(2)
+  })) || [];
 
   const subtotal = invoiceItems.reduce((acc, item) => acc + parseFloat(item.total), 0).toFixed(2);
 
-  const gst = orderStore.getTotalGstAmount;
-  const pst = orderStore.getTotalPstAmount;
-
-  const overallDiscount = orderStore.state.overallDiscount;
+  // Calculate overall discount
+  const overallDiscount = orderStore.state.overallDiscount || 0;
   const discountAmount = (subtotal * (overallDiscount / 100)).toFixed(2);
 
-  const totalAmount = orderStore.getOrderTotal.toFixed(2);
+  // Calculate the taxable amount (after discount)
+  const taxableAmount = (subtotal - discountAmount).toFixed(2);
+
+  // Assuming that the store provides the percentage rates for GST and PST
+  const gstRate = orderStore.gstRate || 5; // Example GST rate
+  const pstRate = orderStore.pstRate || 7; // Example PST rate
+
+  // Calculate GST and PST as portions of the subtotal (included in the total)
+  const gst = ((gstRate / (100 + gstRate + pstRate)) * taxableAmount).toFixed(2);
+  const pst = ((pstRate / (100 + gstRate + pstRate)) * taxableAmount).toFixed(2);
+
+  // The total remains the same as the subtotal since GST and PST are part of it
+  const totalAmount = taxableAmount;
 
   return {
     items: invoiceItems,
-    subtotal,
-    discountAmount,
-    gst,
-    pst,
-    totalAmount
+    subtotal: subtotal || '0.00',
+    discountAmount: discountAmount || '0.00',
+    gst: gst || '0.00',
+    pst: pst || '0.00',
+    totalAmount: totalAmount || '0.00'
   };
 });
+
 
 function generatePDF() {
   const doc = new jsPDF();
   
+  console.log("Generating PDF...");
+
   // Add title
   doc.setFontSize(18);
   doc.text('Invoice', 105, 20, { align: 'center' });
 
-  // Add customer and date info (example data, customize as needed)
+  // Add customer and date info
   doc.setFontSize(12);
-  doc.text(`Customer: John Doe`, 20, 40);
+  doc.text(`Customer: ${orderStore.state.customer.name || 'N/A'}`, 20, 40);
   doc.text(`Date: ${new Date().toLocaleDateString()}`, 160, 40);
+
+  console.log("Added customer and date info");
 
   // Generate table from invoice data
   const tableColumnHeaders = ["Item", "Qty", "Price", "Total"];
-  const tableRows = generateInvoice.value.items.map(item => [
+  const tableRows = generateInvoice.items.map(item => [
     item.name,
     item.quantity,
     `$${item.price}`,
@@ -234,15 +265,20 @@ function generatePDF() {
     styles: { halign: 'right' }
   });
 
+  console.log("Added items table");
+
   // Add totals section
-  doc.text(`Subtotal: $${generateInvoice.value.subtotal}`, 160, doc.lastAutoTable.finalY + 10);
-  doc.text(`Discount: $${generateInvoice.value.discountAmount}`, 160, doc.lastAutoTable.finalY + 20);
-  doc.text(`GST: $${generateInvoice.value.gst}`, 160, doc.lastAutoTable.finalY + 30);
-  doc.text(`PST: $${generateInvoice.value.pst}`, 160, doc.lastAutoTable.finalY + 40);
-  doc.text(`Total: $${generateInvoice.value.totalAmount}`, 160, doc.lastAutoTable.finalY + 50);
+  doc.text(`Subtotal: $${generateInvoice.subtotal}`, 160, doc.lastAutoTable.finalY + 10);
+  doc.text(`Discount: $${generateInvoice.discountAmount}`, 160, doc.lastAutoTable.finalY + 20);
+  doc.text(`GST: $${generateInvoice.gst}`, 160, doc.lastAutoTable.finalY + 30);
+  doc.text(`PST: $${generateInvoice.pst}`, 160, doc.lastAutoTable.finalY + 40);
+  doc.text(`Total: $${generateInvoice.totalAmount}`, 160, doc.lastAutoTable.finalY + 50);
+
+  console.log("Added totals");
 
   // Save or download the PDF
   doc.save('invoice.pdf');
+  console.log("PDF saved");
 }
 </script>
 
@@ -272,8 +308,8 @@ function generatePDF() {
                   <h2 class="font-semibold text-lg mb-2">Selected Payments</h2>
                   <ul class="space-y-3">
                     <li v-for="method in selectedPaymentMethods" :key="method.id"
-                      class="flex flex-col items-center justify-between bg-gray-100 p-3 rounded-lg shadow-sm">
-                      <div class="flex w-full justify-between">
+                      class="flex flex-col items-center justify-between bg-gray-100 p-3 rounded-lg shadow-sm relative group">
+                      <div class="flex w-full justify-between px-5 py-3">
                         <img :src="paymentMethods.find(pm => pm.id === method.id).icon" alt="" class="w-10 h-10">
                         <div class="relative flex items-center gap-4">
                           <input type="number" v-model.number="method.amount"
@@ -289,8 +325,14 @@ function generatePDF() {
                         </div>
                       </div>
 
+                      <!-- Remove Payment Method Button - Visible on Hover -->
+                      <button @click="removePaymentMethod(method.id)"
+                        class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:gray-red-700">
+                        <i class="pi pi-times"></i>
+                      </button>
+
                       <!-- Predictive Cash Amounts if Cash is selected -->
-                      <div v-if="method.name === 'Cash'" class="mt-2 w-full flex gap-2 justify-end">
+                      <div v-if="method.name === 'Cash'" class="mt-2 w-full flex gap-2 justify-end px-5">
                         <button v-for="amount in predictiveCashAmounts" :key="amount" :disabled="amount > totalAmount"
                           @click="setCashAmount(amount)"
                           class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition disabled:bg-gray-300 disabled:cursor-not-allowed">
@@ -311,10 +353,8 @@ function generatePDF() {
                 <p class="text-xl font-semibold mb-5">Total: ${{ totalAmount.toFixed(2) }}</p>
 
                 <div class="flex justify-end gap-3">
-                  <button
-                    @click="showInvoice"
-                    class="bg-purple-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-purple-600 transition"
-                  >
+                  <button @click="showInvoice"
+                    class="bg-purple-500 text-white px-6 py-3 rounded-xl font-semibold hover:bg-purple-600 transition">
                     Invoice
                   </button>
                   <button @click="handleCheckout"
@@ -323,26 +363,30 @@ function generatePDF() {
                   </button>
                 </div>
               </div>
+              <!-- Invoice Section -->
               <div v-if="isInvoiceVisible" class="invoice-div w-6/12 mx-16 p-6 bg-gray-100 rounded-lg shadow-lg">
-                <h2 class="text-xl font-bold mb-3">DefaultPOSDowntown</h2>
+                <h2 class="text-xl font-bold mb-3">Invoice</h2>
                 <div class="mb-5">
                   <p><strong>Customer:</strong> {{ orderStore.state.customer.name || 'N/A' }}</p>
-                  <p><strong>Date:</strong> {{ new Date().toLocaleDateString() }}</p>
-                  <p><strong>Sold by:</strong> 
+                  <p><strong>Date:</strong> {{ orderStore.formatDate(Date.now()) }}</p>
+                  <p><strong>Sold by:</strong>
                     {{ orderStore.selectedSalesPerson?.name || 'No Salesperson Assigned' }}
                   </p>
                 </div>
+
                 <table class="w-full mb-5 border-collapse">
                   <thead>
                     <tr class="border-b-2 border-gray-300">
-                      <th class="text-left py-2 w-5/12">Item</th> 
+                      <th class="text-left py-2 w-5/12">Item</th>
                       <th class="text-center py-2 w-2/12">Qty</th>
-                      <th class="text-right py-2 w-1/6">Price</th> 
-                      <th class="text-right py-2 w-3/12">Subtotal</th> 
+                      <th class="text-right py-2 w-1/6">Price</th>
+                      <th class="text-right py-2 w-3/12">Subtotal</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(item, index) in generateInvoice.items" :key="index" class="border-b-2 border-gray-300">
+                    <!-- Correctly check if the items array has elements -->
+                    <tr v-if="generateInvoice?.items?.length > 0" v-for="(item, index) in generateInvoice.items"
+                      :key="index" class="border-b-2 border-gray-300">
                       <td class="py-2 overflow-hidden whitespace-nowrap text-ellipsis" style="max-width: 200px;">
                         {{ item.name }}
                       </td>
@@ -350,30 +394,40 @@ function generatePDF() {
                       <td class="py-2 text-right">${{ item.price }}</td>
                       <td class="py-2 text-right">${{ item.total }}</td>
                     </tr>
+
+                    <!-- Fallback message if no items exist -->
+                    <tr v-else>
+                      <td colspan="4" class="text-center py-4">No items found in the invoice.</td>
+                    </tr>
                   </tbody>
+
                   <tfoot>
                     <tr>
                       <td colspan="3" class="text-right font-semibold">Subtotal:</td>
-                      <td class="text-right">${{ generateInvoice.subtotal }}</td>
+                      <!-- Correctly binding subtotal -->
+                      <td class="text-right">${{ generateInvoice?.subtotal || '0.00' }}</td>
                     </tr>
-                    <tr v-if="generateInvoice.discountAmount > 0">
+                    <tr v-if="generateInvoice?.discountAmount > 0">
                       <td colspan="3" class="text-right font-semibold">Discount:</td>
-                      <td class="text-right">- ${{ generateInvoice.discountAmount }}</td>
+                      <td class="text-right">- ${{ generateInvoice?.discountAmount || '0.00' }}</td>
                     </tr>
                     <tr>
                       <td colspan="3" class="text-right font-semibold">GST:</td>
-                      <td class="text-right">${{ generateInvoice.gst }}</td>
+                      <td class="text-right">${{ generateInvoice?.gst || '0.00' }}</td>
                     </tr>
                     <tr>
                       <td colspan="3" class="text-right font-semibold">PST:</td>
-                      <td class="text-right">${{ generateInvoice.pst }}</td>
+                      <td class="text-right">${{ generateInvoice?.pst || '0.00' }}</td>
                     </tr>
                     <tr class="font-bold">
                       <td colspan="3" class="text-right font-bold">Total:</td>
-                      <td class="text-right font-bold">${{ generateInvoice.totalAmount }}</td>
+                      <td class="text-right font-bold">${{ generateInvoice?.totalAmount || '0.00' }}</td>
                     </tr>
                   </tfoot>
+
+
                 </table>
+
                 <!-- Button to generate PDF -->
                 <div class="flex justify-end">
                   <button @click="generatePDF"
@@ -382,6 +436,8 @@ function generatePDF() {
                   </button>
                 </div>
               </div>
+
+
             </div>
           </div>
         </Transition>
