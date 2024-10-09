@@ -156,7 +156,7 @@ const resetForm = () => {
                   </div>
                   <div class="card flex justify-center">
                     <label class="block mb-1">Phone</label>
-                    <InputMask v-model="newCustomer.phone" mask="+19 999-999-999" placeholder="+19 999-999-999" class="w-full !p-2 !bg-gray-100 !rounded custom-input" />
+                    <InputMask v-model="newCustomer.phone" mask="+1 999-999-9999" placeholder="+1 999-999-9999" class="w-full !p-2 !bg-gray-100 !rounded custom-input" />
                   </div>
                   <div class="mb-4">
                     <label class="block mb-1">Email</label>
