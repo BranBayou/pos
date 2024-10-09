@@ -434,21 +434,14 @@ function loadDraftOrder(draftIndex) {
       const existingItem = state.orderItems.find(item => item.ItemId === draftItem.ItemId);
 
       if (existingItem) {
-        // If item exists in the current order, increase the quantity
         existingItem.Qty += draftItem.Qty;
       } else {
-        // If item does not exist, add it to the order
         state.orderItems.push({ ...draftItem });
       }
     });
 
-    // Merge comments
     state.comments.push(...selectedDraft.comments);
-
-    // Merge payments
     state.payments.push(...selectedDraft.payments);
-
-    // Merge taxes
     state.taxes = [...selectedDraft.taxes];
 
     // Handle overall discount - you can modify this logic if necessary
@@ -465,14 +458,11 @@ function loadDraftOrder(draftIndex) {
 
     // Recalculate the total after merging the draft order
     state.total = state.orderItems.reduce((total, item) => total + (item.Price * item.Qty), 0);
-
-    // Save the updated active order to localStorage as newOrder
+    
     saveOrderItemsToLocalStorage();
 
-    // Remove the selected draft from the draftOrders array
     draftOrders.value.splice(draftIndex, 1);
 
-    // Update the draftOrders in localStorage
     localStorage.setItem('draftOrders', JSON.stringify(draftOrders.value));
 
     toast.success('Draft order merged into the current order successfully!');

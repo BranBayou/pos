@@ -7,7 +7,6 @@ const orderStore = useOrderStore();
 
 // Function to load a draft order
 function loadDraftOrder(draft) {
-  console.log('from draft',draft.orderItems[0]); // Add this line to log the image URL
   const draftIndex = orderStore.draftOrders.indexOf(draft);
   if (draftIndex !== -1) {
     orderStore.loadDraftOrder(draftIndex);
@@ -17,7 +16,7 @@ function loadDraftOrder(draft) {
 
 // Helper function to calculate the total number of items in a draft
 function getTotalItems(draft) {
-  return draft.orderItems.reduce((total, item) => total + item.Qty, 0); // Assuming Qty is the correct key for quantity
+  return draft.orderItems.reduce((total, item) => total + item.Qty, 0); 
 }
 
 // Helper function to calculate the number of unique SKUs in a draft
@@ -28,7 +27,7 @@ function getUniqueSKUs(draft) {
 
 // Function to delete a draft order from the store and localStorage
 function deleteDraftOrder(index) {
-  orderStore.removeDraftOrder(index); // Use the function from the store to remove the draft
+  orderStore.removeDraftOrder(index);
 }
 </script>
 

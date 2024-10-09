@@ -19,18 +19,29 @@ const filteredProducts = computed(() => {
 
   const query = searchQuery.value.toLowerCase();
 
-  const productsMatchingSku = store.products.filter(product => 
-    product.Sku && product.Sku.toLowerCase().includes(query)
-  ).sort((a, b) => a.Sku.localeCompare(b.Sku));
+  // Create a Map to store products by unique SKUs
+  const productMap = new Map();
 
-  const productsMatchingName = store.products.filter(product => 
-    product.Name && product.Name.toLowerCase().includes(query)
-  ).sort((a, b) => a.Name.localeCompare(b.Name));
+  // Filter products by SKU and add them to the Map (unique SKUs only)
+  store.products.forEach(product => {
+    if (product.Sku && product.Sku.toLowerCase().includes(query)) {
+      productMap.set(product.Sku, product);
+    }
+  });
 
-  const combinedResults = [...new Set([...productsMatchingSku, ...productsMatchingName])];
+  // Filter products by Name and add them to the Map (ensuring unique SKUs)
+  store.products.forEach(product => {
+    if (product.Name && product.Name.toLowerCase().includes(query)) {
+      if (!productMap.has(product.Sku)) {
+        productMap.set(product.Sku, product);
+      }
+    }
+  });
 
-  return combinedResults.slice(0, 5);
+  // Convert the Map to an array and return the first 5 results
+  return Array.from(productMap.values()).slice(0, 5);
 });
+
 
 function handleClick(product) {
   orderStore.addOrderItem(product);
