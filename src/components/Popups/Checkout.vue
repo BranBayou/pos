@@ -17,7 +17,7 @@ const doc = new jsPDF();
 const isInvoiceVisible = ref(false);
 
 function showInvoice() {
-  if (remainingAmount.value === '0.00') {
+  if (remainingAmount.value === '-0.00') {
     isInvoiceVisible.value = true;
     console.log("Invoice is visible:", isInvoiceVisible.value);
   } else {
@@ -158,59 +158,88 @@ async function handleCheckout() {
     return;
   }
 
+  // Calculate the total allocated amount from the selected payment methods
   const totalAllocated = selectedPaymentMethods.value.reduce(
     (acc, method) => acc + parseFloat(method.amount || 0),
     0
   );
 
-  if (Math.abs(totalAllocated.toFixed(2) - totalAmount.value.toFixed(2)) > 0.01) {
+  // Ensure the allocated amount matches the total order amount
+  if (Math.abs(totalAllocated.toFixed(2) - orderStore.state.total.toFixed(2)) > 0.01) {
     toast.error('Payment allocation does not match the total amount.');
     return;
   }
 
+  // Prepare the payload for API submission
   const payload = {
+    // Map order items to API format
     ItemList: orderStore.state.orderItems.map(item => ({
-      ItemId: item.id,
-      Qty: item.qty,
-      Discount: item.discountPercentage || 0,
-      TaxesWaived: false,
-      SalesPersonId: item.salesPerson || 'defaultSalesPersonId'
+      ItemId: item.ItemId,
+      Qty: item.Qty,
+      Discount: item.Discount || 0,
+      TaxesWaived: item.TaxesWaived,
+      SalesPersonId: item.SalesPersonId || 'defaultSalesPersonId'
     })),
-    ApprovalList: [], 
+    
+    // Approval list if any (empty for now)
+    ApprovalList: orderStore.state.approvalList.map(approval => ({
+      UserId: approval.UserId,
+      Approved: approval.Approved,
+      Reason: approval.Reason || ''
+    })),
+
+    // Overall discount
     OverallDiscount: orderStore.state.overallDiscount || 0,
+
+    // Customer details
     Customer: {
-      id: '',
-      Name: '',
-      Phone: '',
-      Email: '',
-      Note: ''
+      id: orderStore.state.customer.id || '',
+      Name: orderStore.state.customer.name || '',
+      Phone: orderStore.state.customer.phone || '',
+      Email: orderStore.state.customer.email || '',
+      Note: orderStore.state.customer.note || ''
     },
-    Comments: [
-      {
-        UserId: authStore.managerUser.id, 
-        Text: ''
-      }
-    ],
-    Payment: selectedPaymentMethods.value.map(method => ({
-      TaxId: method.id,
-      Percentage: (method.amount / totalAmount.value) * 100
+
+    // Comments list
+    Comments: orderStore.state.comments.map(comment => ({
+      UserId: comment.userId || authStore.managerUser.id, 
+      Text: comment.text || ''
     })),
-    Total: totalAmount.value
+
+    // Payment details
+    Payment: selectedPaymentMethods.value.map(method => ({
+      PaymentMethodId: method.id,
+      Amount: method.amount,
+      Percentage: (method.amount / orderStore.state.total) * 100
+    })),
+
+    Taxes: orderStore.state.taxes.map(tax => ({
+      TaxId: tax.type,
+      Amount: tax.rate,
+    })),
+
+    // Total order amount
+    Total: orderStore.state.total
   };
 
+  console.log('Payload data:', payload);
+
   try {
+    // API call to place the order
     const response = await axios.post('/api/NewOrder', payload);
     if (response.status === 200) {
       toast.success('Order placed successfully');
-      authStore.toggleCheckoutPopup();
-      orderStore.clearOrder();
+      authStore.toggleCheckoutPopup(); // Close the checkout popup
+      orderStore.clearOrder(); // Clear the order after successful checkout
     } else {
       toast.error('Failed to place the order.');
     }
   } catch (error) {
+    console.error('Checkout error:', error);
     toast.error('An error occurred during checkout.');
   }
 }
+
 
 const generateInvoice = computed(() => {
   const invoiceItems = orderStore.state.orderItems?.map(item => ({
@@ -415,13 +444,29 @@ function generatePDF() {
                       <td class="py-2 text-right">${{ item.price }}</td>
                       <td class="py-2 text-right">${{ item.total }}</td>
                     </tr>
+                    
 
                     <!-- Fallback message if no items exist -->
                     <tr v-else>
                       <td colspan="4" class="text-center py-4">No items found in the invoice.</td>
                     </tr>
                   </tbody>
-
+                  <thead>
+                    <tr class="border-b-2 border-gray-300">
+                      <th class="text-left py-2 w-6/12">Payment Method</th>
+                      <th class="text-right py-2 w-1/6"></th>
+                      <th class="text-right py-2 w-1/6"></th>
+                      <th class="text-right py-2 w-6/12">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(method, index) in selectedPaymentMethods" :key="index" class="border-b-2 border-gray-300">
+                      <td class="py-2 text-left">{{ method.name }}:</td>
+                      <td class="py-2 text-left"></td>
+                      <td class="py-2 text-left"></td>
+                      <td class="py-2 text-right">${{ method.amount || '0.00' }}</td>
+                    </tr>
+                  </tbody>
                   <tfoot>
                     <tr>
                       <td colspan="3" class="text-right font-semibold">Subtotal:</td>
