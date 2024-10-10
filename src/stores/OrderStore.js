@@ -106,15 +106,67 @@ export const useOrderStore = defineStore('orders', () => {
     const index = state.orderItems.findIndex(orderItem =>
       orderItem.ItemId === item.ItemId
     );
+    
     if (index !== -1) {
-      state.orderItems.splice(index, 1);
-      calculateTaxes(); 
-      saveOrderItemsToLocalStorage(); 
+      state.orderItems.splice(index, 1); // Remove the item
+      calculateTaxes(); // Recalculate taxes
+      saveOrderItemsToLocalStorage(); // Persist order items in localStorage
     }
-    if(state.orderItems.length === 0) {
+  
+    // If all items are deleted, reset the overall discount but keep other state information intact
+    if (state.orderItems.length === 0) {
       state.overallDiscount = 0;
+      // Optionally, you can reset other parts of the order as needed
+      state.customer = { id: '', name: '', phone: '', email: '', note: '' };
+      state.payments = [];
+      state.comments = [];
+      state.total = 0;
     }
   }
+  
+  function addOrderItem(item) {
+    const existingItem = state.orderItems.find(orderItem =>
+      orderItem.ItemId === item.BarCode
+    );
+  
+    if (existingItem) {
+      existingItem.Qty++; // Increment quantity if the item already exists
+    } else {
+      const newItem = {
+        ItemId: item.BarCode,
+        Sku: item.Sku,
+        ItemName: item.Name,
+        ItemImage: item.ImageUrl,
+        Qty: 1,
+        MaxQty: item.MaxQty,
+        Discount: item.Discount || 0,
+        TaxesWaived: false,
+        OriginalPrice: item.Price,
+        Price: null,
+        SalesPersonId: selectedSalesPerson.value?.SalesPersonId || null,
+      };
+  
+      // Apply the overall discount to newly added items
+      if (state.overallDiscount > 0) {
+        newItem.Price = Number(
+          (newItem.OriginalPrice * (1 - state.overallDiscount / 100)).toFixed(2)
+        );
+      } else {
+        newItem.Price = Number(newItem.OriginalPrice);
+      }
+  
+      // Automatically assign the salesperson to the new item
+      if (applySelectedSalesPersonForAll.value && selectedSalesPerson.value) {
+        newItem.SalesPersonId = selectedSalesPerson.value;
+      }
+  
+      state.orderItems.push(newItem); // Add the new item to orderItems
+    }
+  
+    calculateTaxes(); // Recalculate taxes after adding the item
+    saveOrderItemsToLocalStorage(); // Save order items in localStorage
+  }
+  
 
   // Apply the selected salesperson to only the selected items in the order
   function setSelectedSalesPerson(salesPersonId, item) {

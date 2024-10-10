@@ -9,21 +9,29 @@ const toast = useToast();
 const orderStore = useOrderStore();
 const authStore = useAuthStore();
 
+// Total items calculation, returning 0 if not logged in
 const totalItems = computed(() => {
-  return Array.isArray(orderStore.state.orderItems) 
-    ? orderStore.state.orderItems.reduce((total, item) => total + item.Qty, 0) 
-    : 0;
-});
-
-const totalSkus = computed(() => {
-  if (Array.isArray(orderStore.state.orderItems)) {
-    const skus = orderStore.state.orderItems.map(item => item.ItemId); 
-    return new Set(skus).size; 
+  if (authStore.isUserLoggedIn || authStore.isManagerLoggedIn) {
+    return Array.isArray(orderStore.state.orderItems)
+      ? orderStore.state.orderItems.reduce((total, item) => total + item.Qty, 0)
+      : 0;
+  } else {
+    return 0;  // Return 0 if not logged in
   }
-  return 0;
 });
 
+// Total skus calculation, returning 0 if not logged in
+const totalSkus = computed(() => {
+  if (authStore.isUserLoggedIn || authStore.isManagerLoggedIn) {
+    if (Array.isArray(orderStore.state.orderItems)) {
+      const skus = orderStore.state.orderItems.map(item => item.ItemId);
+      return new Set(skus).size;
+    }
+  }
+  return 0;  // Return 0 if not logged in
+});
 
+// Handle checkout popup
 function handleCheckoutPopup() {
   if (totalItems.value > 0) {
     authStore.toggleCheckoutPopup(); 
@@ -32,6 +40,7 @@ function handleCheckoutPopup() {
   }
 }
 </script>
+
 
 
 <template>
@@ -51,6 +60,7 @@ function handleCheckoutPopup() {
     </button>
   </div>
 </template>
+
 
 
 

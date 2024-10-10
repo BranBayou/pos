@@ -143,6 +143,7 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.removeItem('token');
       localStorage.removeItem('currentUser');
       localStorage.removeItem('userRole');
+      fetchCashiers();
     } else if (role === 'Manager') {
       // Only log out the manager
       isManagerLoggedIn.value = false;

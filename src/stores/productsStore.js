@@ -50,7 +50,7 @@ export const useProductStore = defineStore('product', {
                     this.totalFileSize += fileSize;
                 }
 
-                console.log(`Total file size to download: ${this.totalFileSize} bytes`);
+                // console.log(`Total file size to download: ${this.totalFileSize} bytes`);
 
                 // Helper function to process large arrays in chunks
                 const processProductsInChunks = (productsArray) => {
