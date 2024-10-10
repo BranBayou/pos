@@ -210,15 +210,15 @@ export const useOrderStore = defineStore('orders', () => {
     gstTax.amount = gstTotal.toFixed(2);
     pstTax.amount = pstTotal.toFixed(2);
 
-    saveOrderItemsToLocalStorage();  // Save the updated state to localStorage
+    saveOrderItemsToLocalStorage();  
   }
 
   // Function to update GST rate and recalculate taxes
   function updateGstRate(rate) {
     const gstTax = state.taxes.find(tax => tax.type === 'GST');
     if (gstTax) {
-      gstTax.rate = Number(rate);  // Update the rate
-      calculateTaxes();  // Recalculate taxes based on new rate
+      gstTax.rate = Number(rate); 
+      calculateTaxes();
     }
   }
 
@@ -226,8 +226,8 @@ export const useOrderStore = defineStore('orders', () => {
   function updatePstRate(rate) {
     const pstTax = state.taxes.find(tax => tax.type === 'PST');
     if (pstTax) {
-      pstTax.rate = Number(rate);  // Update the rate
-      calculateTaxes();  // Recalculate taxes based on new rate
+      pstTax.rate = Number(rate);  
+      calculateTaxes(); 
     }
   }
 

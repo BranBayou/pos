@@ -76,21 +76,41 @@ function clearPaymentAmount(method) {
 }
 
 // handle predictive cash amounts
+// Handle predictive cash amounts based on the total price
 const predictiveCashAmounts = computed(() => {
   const total = parseFloat(totalAmount.value);
   if (!isNaN(total)) {
-    return [10, 20, 50, 100];
+    // Calculate the next nearest amounts to the total price
+    if (total <= 20) {
+      return [20, 50, 100]; // If the total is <= 20, show $20, $50, $100
+    } else if (total <= 50) {
+      return [50, 100, 200]; // If the total is <= 50, show $50, $100, $200
+    } else if (total <= 100) {
+      return [100, 200]; // If the total is <= 100, show $100, $200, $500
+    } else {
+      return [100, 200]; // Default amounts for higher values
+    }
   }
   return [];
 });
+
 
 // handle update cash amount based on button click
 function setCashAmount(amount) {
   const cashMethod = selectedPaymentMethods.value.find(method => method.name === 'Cash');
   if (cashMethod) {
-    cashMethod.amount = amount.toFixed(2);
+    const remaining = parseFloat(remainingAmount.value);
+    if (amount > remaining) {
+      cashMethod.amount = remaining.toFixed(2);
+    } else {
+      cashMethod.amount = amount.toFixed(2);
+    }
+  } else {
+    addPaymentMethod({ id: '5', name: 'Cash', icon: '/cash.svg' });
+    setCashAmount(amount);
   }
 }
+
 
 // Prevent negative input on typing
 function preventNegativeInput(event) {
@@ -160,15 +180,15 @@ async function handleCheckout() {
     OverallDiscount: orderStore.state.overallDiscount || 0,
     Customer: {
       id: '',
-      Name: 'Customer Name',
-      Phone: '123-456-7890',
-      Email: 'customer@example.com',
-      Note: 'Optional note'
+      Name: '',
+      Phone: '',
+      Email: '',
+      Note: ''
     },
     Comments: [
       {
         UserId: authStore.managerUser.id, 
-        Text: 'Order comments here'
+        Text: ''
       }
     ],
     Payment: selectedPaymentMethods.value.map(method => ({
@@ -209,15 +229,13 @@ const generateInvoice = computed(() => {
   // Calculate the taxable amount (after discount)
   const taxableAmount = (subtotal - discountAmount).toFixed(2);
 
-  // Assuming that the store provides the percentage rates for GST and PST
-  const gstRate = orderStore.gstRate || 5; // Example GST rate
-  const pstRate = orderStore.pstRate || 7; // Example PST rate
+  const gstRate = orderStore.gstRate || 5; 
+  const pstRate = orderStore.pstRate || 7; 
 
   // Calculate GST and PST as portions of the subtotal (included in the total)
   const gst = ((gstRate / (100 + gstRate + pstRate)) * taxableAmount).toFixed(2);
   const pst = ((pstRate / (100 + gstRate + pstRate)) * taxableAmount).toFixed(2);
 
-  // The total remains the same as the subtotal since GST and PST are part of it
   const totalAmount = taxableAmount;
 
   return {
@@ -333,9 +351,12 @@ function generatePDF() {
 
                       <!-- Predictive Cash Amounts if Cash is selected -->
                       <div v-if="method.name === 'Cash'" class="mt-2 w-full flex gap-2 justify-end px-5">
-                        <button v-for="amount in predictiveCashAmounts" :key="amount" :disabled="amount > totalAmount"
+                        <button 
+                          v-for="amount in predictiveCashAmounts" 
+                          :key="amount" 
                           @click="setCashAmount(amount)"
-                          class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition disabled:bg-gray-300 disabled:cursor-not-allowed">
+                          class="bg-gray-200 p-2 rounded hover:bg-gray-300"
+                        >
                           ${{ amount }}
                         </button>
                       </div>
