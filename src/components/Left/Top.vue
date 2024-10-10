@@ -171,7 +171,7 @@ window.addEventListener('comment-saved', updateComments);
 </script>
 
 <template>
-  <div class="my-7 grid grid-cols-2 gap-4 overflow-y-auto" style="max-height: 450px;">
+  <div class="my-7 grid grid-cols-1 lg:grid-cols-2 gap-4 overflow-y-auto" style="max-height: 450px;">
     <LogoutConfirmation v-if="authStore.isLogoutConfirmationVisible" :role="logoutRole" />
 
     <Login @close-modal="toggleModal" :modalActive="modalActive" />
@@ -199,7 +199,7 @@ window.addEventListener('comment-saved', updateComments);
     </div>
 
     <!-- Manager Section -->
-    <div v-show="authStore.isManagerLoggedIn" class="relative flex items-center justify-center bg-white w-full py-2 px-2 gap-3 rounded-2xl my-3">  
+    <div v-show="authStore.isManagerLoggedIn" class="relative flex items-center justify-start lg:justify-center bg-white w-full py-2 px-2 gap-3 rounded-2xl my-3">  
       <div>
         <button class="flex flex-col items-center">
           <img style="width: 30px;" src="/manager.svg" alt="Manager Image">
