@@ -17,7 +17,7 @@ const doc = new jsPDF();
 const isInvoiceVisible = ref(false);
 
 function showInvoice() {
-  if (remainingAmount.value === '-0.00') {
+  if (remainingAmount.value === '0.00') {
     isInvoiceVisible.value = true;
     console.log("Invoice is visible:", isInvoiceVisible.value);
   } else {
