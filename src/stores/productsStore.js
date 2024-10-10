@@ -10,8 +10,8 @@ export const useProductStore = defineStore('product', {
     actions: {
         async fetchProducts() {
             const storeId = '3XoymAusFEOcrifyfM1Tfw';
-            const startTime = Date.now();
-            const chunkSize = 10000;
+            const chunkSize = 10000;  // Number of products per chunk
+
             try {
                 // Fetch the list of file URLs first
                 const response = await fetch('/api/File/GetFiles', {
@@ -21,35 +21,39 @@ export const useProductStore = defineStore('product', {
                 });
 
                 const fileUrls = await response.json();
-                // console.log('File URLs:', fileUrls);
-
                 const totalFiles = fileUrls.length;
-                let loadedScripts = 0;
 
-                // Reset products array and loading percentage
+                // Reset state
                 this.products = [];
                 this.loadingPercentage = 0;
                 this.isLoading = true;
 
+                let processedProducts = 0;  // Total products processed
+                let estimatedTotalProducts = 1000000;  // Example estimate of total products
+                let scriptsLoaded = 0;  // Scripts loaded counter
+
+                // Time-based loading percentage increment
+                const timeBasedLoader = setInterval(() => {
+                    if (this.loadingPercentage < 99) {
+                        this.loadingPercentage += 1;  // Increment percentage over time
+                    }
+                }, 100);  // Increment every 100ms (adjust as needed)
+
                 // Helper function to process large arrays in chunks
                 const processProductsInChunks = (productsArray) => {
-                    const totalProducts = productsArray.length;
+                    const total = productsArray.length;
+                    estimatedTotalProducts += total;  // Estimate total number of products
                     let processed = 0;
 
                     const processChunk = () => {
                         const chunk = productsArray.slice(processed, processed + chunkSize);
-                        this.products.push(...chunk);
+                        this.products.push(...chunk);  // Add chunk to products array
                         processed += chunkSize;
+                        processedProducts += chunk.length;  // Track total processed products
 
-                        // Update loading percentage based on the processed items
-                        this.loadingPercentage = Math.round((processed / totalProducts) * 100);
-
-                        if (processed < totalProducts) {
+                        if (processed < total) {
                             // Process the next chunk asynchronously
-                            // Yield control back to the browser
-                            setTimeout(processChunk, 0); 
-                        } else {
-                            // console.log('All products processed');
+                            setTimeout(processChunk, 0);
                         }
                     };
 
@@ -59,53 +63,40 @@ export const useProductStore = defineStore('product', {
                 // Load each file by dynamically injecting <script> tags
                 fileUrls.forEach((file, index) => {
                     const script = document.createElement('script');
-                    script.src = `https://localhost:7293/GenJs/${file.fileUrl}`;  
+                    script.src = `https://localhost:7293/GenJs/${file.fileUrl}?${Date.now()}`;
                     script.async = true;
 
-                    // When the script is loaded
                     script.onload = () => {
-                        // console.log(`Script ${index + 1} loaded from ${file.fileUrl}`);
-
                         if (window.products && Array.isArray(window.products)) {
-                            // Process the large products array in chunks
-                            processProductsInChunks(window.products);
-                            // console.log('Loaded products:', window.products);
+                            processProductsInChunks(window.products);  // Process products
                         } else {
-                            console.warn(`No valid products array found in the script: ${file.fileUrl}`);
+                            console.warn(`No valid products array found in ${file.fileUrl}`);
                         }
 
-                        // Update loading percentage for each script
-                        loadedScripts++;
-                        this.loadingPercentage = Math.round((loadedScripts / totalFiles) * 100);
-
-                        if (this.loadingPercentage === 100) {
-                            this.isLoading = false;
+                        scriptsLoaded++;
+                        if (scriptsLoaded === totalFiles) {
+                            // When all scripts are loaded, stop the time-based loader and finalize percentage
+                            clearInterval(timeBasedLoader);
+                            this.loadingPercentage = 100;
+                            this.isLoading = false;  // All products loaded, stop loading
                         }
                     };
 
                     script.onerror = (error) => {
                         console.error(`Error loading script from ${file.fileUrl}`, error);
-                        console.log(`Failed to load ${file.fileUrl}. Possible reasons: incorrect URL, file not found, or server error.`);
                     };
 
                     // Inject the script into the document head
                     document.head.appendChild(script);
                 });
 
-                const elapsedTime = Date.now() - startTime;
-
-                // Set a fallback timeout to ensure the loading completes even if something goes wrong
-                setTimeout(() => {
-                    if (this.loadingPercentage < 100) {
-                        this.loadingPercentage = 100;
-                    }
-                    this.isLoading = false;
-                }, elapsedTime);
             } catch (error) {
                 console.error('Error fetching files:', error);
                 this.loadingPercentage = 0;
-                this.isLoading = true;
+                this.isLoading = true;  // Keep loading state on error
             }
         }
     }
 });
+
+
