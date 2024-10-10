@@ -51,23 +51,15 @@ function handleClick(product) {
 
 <template>
     <div class="relative w-full">
-        <input 
-            v-model="searchQuery"
-            :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" 
-            type="text" 
-            name="barcode-search" 
-            id="barcode-search" 
-            class="bg-gray-100 border-0 outline-none p-2 rounded-lg w-full pr-10" 
+        <input v-model="searchQuery" :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" type="text"
+            name="barcode-search" id="barcode-search"
+            class="bg-gray-100 border-0 outline-none p-2 rounded-lg w-full pr-10"
             :class="{ 'opacity-50 cursor-not-allowed': !(authStore.isUserLoggedIn || authStore.isManagerLoggedIn) }"
-            placeholder="Scan or Enter Barcode"
-        >
+            placeholder="Scan or Enter Barcode">
 
         <!-- Clear Button (X) -->
-        <button 
-            v-if="searchQuery" 
-            @click="clearSearch"
-            class="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
-        >
+        <button v-if="searchQuery" @click="clearSearch"
+            class="absolute right-2 top-2 text-gray-500 hover:text-gray-700">
             <i class="pi pi-times"></i>
         </button>
     </div>
@@ -76,17 +68,25 @@ function handleClick(product) {
         <p>No products found.</p>
     </div>
 
-    <div v-else-if="filteredProducts.length > 0" class="absolute top-full left-0 overflow-y-auto w-full bg-white shadow-xl rounded-2xl z-50" style="max-height: 620px;">
+    <div v-else-if="filteredProducts.length > 0"
+        class="absolute top-full left-0 overflow-y-auto w-full bg-white shadow-xl rounded-2xl z-50"
+        style="max-height: 620px;">
         <table class="min-w-full bg-white border border-gray-200">
+            <thead>
+                <tr class="border-b bg-gray-100">
+                    <th class="py-2 px-4 text-left text-gray-600 font-medium">Image</th>
+                    <th class="py-2 px-4 text-left text-gray-600 font-medium">Product Name</th>
+                    <th class="py-2 px-4 text-left text-gray-600 font-medium">SKU</th>
+                    <th class="py-2 px-4 text-left text-gray-600 font-medium">Max Qty</th>
+                    <th class="py-2 px-4 text-left text-gray-600 font-medium">Price</th>
+                </tr>
+            </thead>
             <tbody>
-                <tr 
-                    @click="handleClick(product)" 
-                    v-for="product in filteredProducts" 
-                    :key="product.Sku" 
-                    class="border-t cursor-pointer hover:bg-gray-50"
-                >
+                <tr @click="handleClick(product)" v-for="product in filteredProducts" :key="product.Sku"
+                    class="border-t cursor-pointer hover:bg-gray-50">
                     <td class="py-1 px-4">
-                        <img :src="`https://replicagunsca.b-cdn.net/images/products/small/${product.ImageUrl}`" alt="Product Image" class="w-16 h-16 object-cover">
+                        <img :src="`https://replicagunsca.b-cdn.net/images/products/small/${product.ImageUrl}`"
+                            alt="Product Image" class="w-16 h-16 object-cover">
                     </td>
                     <td class="py-1 px-4">{{ product.Name }}</td>
                     <td class="py-1 px-4">{{ product.Sku }}</td>
@@ -95,6 +95,7 @@ function handleClick(product) {
                 </tr>
             </tbody>
         </table>
+
     </div>
 </template>
 

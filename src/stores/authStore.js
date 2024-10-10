@@ -31,6 +31,12 @@ export const useAuthStore = defineStore('auth', () => {
   const isAddCustomerPopupVisible = ref(false);
   const isCheckoutPopupVisible = ref(false);
   const showCommentsModal = ref(false); 
+  
+
+  const isAddCommentButtonMoved = ref(false);
+  const isAddManagerApprovalButtonMoved = ref(false);
+  const isWalkInCustomerButtonMoved = ref(false)
+
 
   const storeId = '3XoymAusFEOcrifyfM1Tfw';
 
@@ -45,10 +51,8 @@ export const useAuthStore = defineStore('auth', () => {
       });
       const cashiers = response.data.filter(user => user.role === 'Cashier');
       usersList.value = cashiers;
-      console.log('Fetched Cashier Users:', usersList.value);
     } catch (error) {
       toast.error('Failed to load users', error.message);
-      console.error('Failed to load users:', error.message);
     }
   }
 
@@ -63,10 +67,8 @@ export const useAuthStore = defineStore('auth', () => {
       });
       const managers = response.data.filter(user => user.role === 'Manager');
       managerUsersList.value = managers;
-      console.log('Fetched Manager Users:', managerUsersList.value);
     } catch (error) {
       toast.error('Failed to load users', error.message);
-      console.error('Failed to load users:', error.message);
     }
   }
 
@@ -82,8 +84,17 @@ export const useAuthStore = defineStore('auth', () => {
           'store-id': storeId,
         }
       });
+      
+      const { jwt: authToken, role, fullName } = response.data || {}; // Ensure response has valid data
+      
+      if (!authToken || !role || !fullName) {
+        throw new Error('Invalid response from server');
+      }
   
-      const { jwt: authToken, role, fullName } = response.data; // Matching API's response
+      // Allow login only for Cashier or Manager
+      if (role !== 'Cashier' && role !== 'Manager') {
+        throw new Error('Unauthorized role');
+      }
   
       // If cashier logs in
       if (role === 'Cashier') {
@@ -94,8 +105,9 @@ export const useAuthStore = defineStore('auth', () => {
         currentUser.value = fullName;
         userRole.value = role;
         isUserLoggedIn.value = true;
+        toast.success(`Welcome back, ${fullName}`);
       }
-  
+    
       // If manager logs in
       if (role === 'Manager') {
         localStorage.setItem('managerToken', authToken);
@@ -105,17 +117,20 @@ export const useAuthStore = defineStore('auth', () => {
         managerUser.value = fullName;
         managerRole.value = role;
         isManagerLoggedIn.value = true;
+        toast.success(`Welcome back, ${fullName}`);
       }
   
-      toast.success(`Welcome back ${fullName}`);
       console.log('Current User:', currentUser.value, 'Role:', userRole.value);
     } catch (error) {
-      toast.error('Login failed!');
+      if (error.message === 'Unauthorized role') {
+        toast.error('You are not authorized to log in.');
+      } else {
+        toast.error('Login failed!');
+      }
       console.error('Login failed:', error.response?.data?.errors || error.message);
-      throw error;
+      throw error; // Re-throw the error so that it can be caught outside if needed
     }
   }
-  
 
   // Logout Function
   function logout(role) {
@@ -128,6 +143,7 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.removeItem('token');
       localStorage.removeItem('currentUser');
       localStorage.removeItem('userRole');
+      fetchCashiers();
     } else if (role === 'Manager') {
       // Only log out the manager
       isManagerLoggedIn.value = false;
@@ -139,6 +155,17 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.removeItem('managerRole');
     }
   }
+
+  // authStore.js or similar file
+  function setLastUser(lastUser) {
+    // Ensure the role is correctly set based on the last user
+    currentUser.value = lastUser.currentUser || ''; 
+    managerUser.value = lastUser.managerUser || '';
+    userRole.value = lastUser.userRole || '';
+    managerRole.value = lastUser.managerRole || '';
+  }
+  
+
   
   // Toggle Login input type
   function toggleLoginInput() {
@@ -199,6 +226,18 @@ export const useAuthStore = defineStore('auth', () => {
      console.log('Show comments modal:', !showCommentsModal.value);
    }
 
+   function toggleAddCommentButtonMoved () {
+     isAddCommentButtonMoved.value =!isAddCommentButtonMoved.value;
+   }
+
+   function toggleAddManagerApprovalButtonMoved () {
+     isAddManagerApprovalButtonMoved.value =!isAddManagerApprovalButtonMoved.value;
+   }
+
+   function toggleWalkInCustomerButtonMoved () {
+     isWalkInCustomerButtonMoved.value =!isWalkInCustomerButtonMoved.value;
+   }
+
   return {
     isUserLoggedIn,
     currentUser,
@@ -236,7 +275,14 @@ export const useAuthStore = defineStore('auth', () => {
     isCheckoutPopupVisible,
     toggleCheckoutPopup,
     showCommentsModal,
-    toggleShowCommentsModal
+    toggleShowCommentsModal,
+    isAddCommentButtonMoved,
+    toggleAddCommentButtonMoved,
+    isAddManagerApprovalButtonMoved,
+    toggleAddManagerApprovalButtonMoved,
+    isWalkInCustomerButtonMoved,
+    toggleWalkInCustomerButtonMoved,
+    setLastUser,
   };
 });
 

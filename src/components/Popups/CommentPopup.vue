@@ -17,12 +17,11 @@ const props = defineProps({
 });
 
 // Check if props.item is defined and has discountPercentage; provide a fallback of 0 if not.
-const discountPercentage = ref(props.item?.discountPercentage ?? 0); // Use optional chaining to avoid error
+const discountPercentage = ref(props.item?.discountPercentage ?? 0); 
 const originalPrice = ref(props.item?.OriginalPrice ?? props.item.Price);
 const comment = ref('');
 const isSubmitting = ref(false);
-const isCommentProvided = ref(false);  // Track if the manager has provided a comment
-
+const isCommentProvided = ref(false);  
 // Emit event when the comment is submitted
 const emit = defineEmits(['close', 'commentSubmitted']);
 
@@ -34,10 +33,9 @@ const submitComment = async () => {
 
   // Use the store's submit function
   orderStore.submitCommentToStore(
-    props.item,
     comment.value,
-    discountPercentage.value,
-    authStore.managerUser
+    authStore.managerUser,
+    props.item,
   );
 
   emit('commentSubmitted', comment.value);
@@ -77,12 +75,12 @@ const imageBackgroundColor = computed(() => {
                 <h3 class="text-lg font-semibold mb-4">Manager Approval Comment</h3>
                 <div class="flex justify-between">
                   <div class="flex">
-                    <img :src="`https://replicagunsca.b-cdn.net/images/products/small/${props.item?.ImageUrl ?? ''}`"
+                    <img v-if="props.item.ItemImage" :src="`https://replicagunsca.b-cdn.net/images/products/small/${props.item?.ItemImage ?? ''}`"
                       class="w-14 rounded-lg" alt="product-img" />
                     <div>
-                      <p class="font-semibold">{{ props.item?.Name ?? 'Unknown Item' }}</p>
-                      <p class="text-sm text-gray-500">Price: ${{ props.item?.Price ?? 0 }}</p>
-                      <p class="text-sm text-gray-500">Discount: {{ discountPercentage }}%</p>
+                      <p class="font-semibold">{{ props.item?.ItemName ?? 'Overall Discount' }}</p>
+                      <p v-if="props.item.Price" class="text-sm text-gray-500">Price: ${{ props.item?.Price ?? 0 }}</p>
+                      <p class="text-sm text-gray-500">Discount: {{ props.item?.Discount ?? discountPercentage }}%</p>
                     </div>
                   </div>
                   <div class="flex">
@@ -98,10 +96,10 @@ const imageBackgroundColor = computed(() => {
                   placeholder="Enter your comment"></textarea>
 
                 <div class="mt-4 flex justify-end gap-4">
-                  <button @click="cancelComment" class="px-4 py-2 bg-gray-300 rounded-lg">Cancel</button>
-                  <button @click="submitComment" :disabled="isSubmitting" class="px-4 py-2 bg-purple-600 text-white rounded-lg">
-                    {{ isSubmitting ? 'Submitting...' : 'Submit' }}
+                  <button @click="submitComment" :disabled="isSubmitting" class="px-4 py-2 bg-purple-500 text-white rounded-lg">
+                    <i class="pi pi-save"></i>
                   </button>
+                  <button @click="cancelComment" class="px-4 py-2 bg-gray-300 rounded-lg"><i class="pi pi-times"></i></button>
                 </div>
               </div>
             </div>

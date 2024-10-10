@@ -4,20 +4,34 @@ import { useToast } from 'vue-toastification';
 import Select from 'primevue/select';
 import Password from 'primevue/password';
 import { useAuthStore } from '@/stores/authStore';
+import { useOrderStore } from '@/stores/OrderStore';
 
 const authStore = useAuthStore();
+const orderStore = useOrderStore();
+
 const toast = useToast();
-const selectedUserId = ref(null); // Now track by id, not the whole object
-const password = ref(''); // Password input
+const selectedUserId = ref(null);
+const password = ref('');
+
+const props = defineProps({
+  item: {
+    type: Object,
+    required: true
+  }
+});
+
+function handleClose () {
+  if (props.item) {
+    orderStore.resetDiscount(props.item);
+  }
+  authStore.toggleManagerLoginPopup(); 
+}
 
 // Fetch managers when the modal opens
 onMounted(async () => {
   try {
-    await authStore.fetchManager(); // Fetch managers using the store function
-    
-    // Check if the managerUsersList is populated
-    console.log('MGR' ,authStore.managerUsersList);
-    
+    await authStore.fetchManager(); 
+
     if (authStore.managerUsersList && authStore.managerUsersList.length === 0) {
       toast.error('No managers available');
     }
@@ -29,6 +43,12 @@ onMounted(async () => {
 
 // Function to handle manager login
 const loginManager = async () => {
+
+  if (authStore.isManagerLoggedIn) {
+    toast.info('Manager is already logged in');
+    return;
+  }
+
   try {
     const selectedUser = authStore.managerUsersList.find(user => user.id === selectedUserId.value);
     const userIdValue = selectedUser?.id;
@@ -39,16 +59,32 @@ const loginManager = async () => {
       return;
     }
 
-    // Call the login function from the authStore
     await authStore.login(userIdValue, password.value);
 
-    // Reset and close the modal after successful login
     password.value = '';
-    authStore.toggleManagerLoginPopup(); // Close popup after login
-    toast.success('Manager logged in successfully!');
+    authStore.toggleManagerLoginPopup();
   } catch (error) {
     toast.error('Manager login failed');
-    console.error('Manager login failed:', error);
+  }
+};
+
+const clearLastCharacter = () => {
+  password.value = password.value.slice(0, -1);
+};
+
+// Handle password input for numeric keypad
+const handlePasswordInput = (num) => {
+  if (password.value.length < 6) {
+    password.value += num; 
+  }
+  if (password.value.length === 6) {
+
+    if (password.value.length === 6 && !isNaN(password.value)) {
+      login();
+    } else {
+      toast.error('Please enter a valid 6-digit PIN');
+      password.value = ''; 
+    }
   }
 };
 </script>
@@ -76,15 +112,37 @@ const loginManager = async () => {
               </div>
               <div class="flex justify-center items-center gap-2 border-2 rounded-2xl py-3 px-3">
                 <i class="pi pi-lock"></i>
-                <Password v-model="password" :feedback="false" placeholder="******" class=" w-full mx-auto" />
+                <Password v-model="password" @keyup.enter="loginManager" :feedback="false" placeholder="******" class=" w-full mx-auto" />
               </div>
+              <div class="grid grid-cols-3 gap-4">
+                <button @click="handlePasswordInput(i)" v-for="i in 9" :key="i"
+                        class="mx-auto hover:bg-purple-500 w-12 h-12 border-2 bg-transparent hover:text-white text-16px font-semibold rounded-full transition duration-300 ease-in-out">
+                  {{ i }}
+                </button>
+              </div>
+
+              <div class="grid grid-cols-3 gap-4 mx-auto">
+                <button @click="clearLastCharacter"
+                      class="mx-auto hover:bg-purple-500 w-12 h-12 border-2 bg-transparent hover:text-white text-16px font-semibold rounded-full transition duration-300 ease-in-out">
+                  <i class="pi pi-delete-left"></i>
+                </button>
+                <button @click="handlePasswordInput(0)"
+                      class="mx-auto hover:bg-purple-500 w-12 h-12 border-2 bg-transparent hover:text-white text-16px font-semibold rounded-full transition duration-300 ease-in-out">
+                  0
+                </button>
+                <button @click="loginManager" type="submit"
+                      class="mx-auto hover:bg-purple-500 w-12 h-12 border-2 bg-transparent hover:text-white text-16px font-semibold rounded-full transition duration-300 ease-in-out">
+                  <i class="pi pi-check"></i>
+                </button>
+              </div>
+              
+              
+              
             </div>
-            <button @click="loginManager" class="mt-8 mr-2 bg-purple-500 text-white py-2 px-6 rounded-2xl hover:bg-purple-700">
-              Login
-            </button>
-            <button @click="authStore.toggleManagerLoginPopup" class="mt-8 bg-weather-primary rounded-2xl text-white bg-purple-500 hover:bg-purple-400 hover:text-white py-2 px-6">
+            <button @click="handleClose" class="mt-8 bg-weather-primary rounded-2xl text-white bg-purple-500 hover:bg-purple-400 hover:text-white py-2 px-6">
               Close
             </button>
+            
           </div>
         </Transition>
       </div>

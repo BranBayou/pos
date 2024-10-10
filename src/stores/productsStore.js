@@ -6,15 +6,16 @@ export const useProductStore = defineStore('product', {
         products: [],
         loadingPercentage: 0,
         isLoading: true,
+        totalFileSize: 0,  // Total size of all files in bytes
+        loadedFileSize: 0,  // Total size of files downloaded in bytes
     }),
     actions: {
         async fetchProducts() {
             const storeId = '3XoymAusFEOcrifyfM1Tfw';
-            const startTime = Date.now();
-            const chunkSize = 10000; // Process in chunks of 1000 items
+            const chunkSize = 10000;  // Number of products per chunk
 
             try {
-                // Fetch the list of file URLs first
+                // Fetch the list of file URLs and metadata first
                 const response = await fetch('/api/File/GetFiles', {
                     headers: {
                         'store-id': storeId,
@@ -22,94 +23,118 @@ export const useProductStore = defineStore('product', {
                 });
 
                 const fileUrls = await response.json();
-                console.log('File URLs:', fileUrls);
-
                 const totalFiles = fileUrls.length;
-                let loadedScripts = 0;
 
-                // Reset products array and loading percentage
+                // Reset state
                 this.products = [];
                 this.loadingPercentage = 0;
                 this.isLoading = true;
+                this.totalFileSize = 0;
+                this.loadedFileSize = 0;
+
+                // Helper function to get the file size using a HEAD request
+                const getFileSize = async (url) => {
+                    const headResponse = await fetch(url, { method: 'HEAD' });
+                    if (headResponse.ok) {
+                        return parseInt(headResponse.headers.get('Content-Length'), 10);  // File size in bytes
+                    } else {
+                        console.error(`Failed to fetch file size for ${url}`);
+                        return 0;
+                    }
+                };
+
+                // First, get the total size of all files
+                for (const file of fileUrls) {
+                    const fileUrl = `https://localhost:7293/GenJs/${file.fileUrl}?${Date.now()}`;
+                    const fileSize = await getFileSize(fileUrl);  // Get size of each file
+                    this.totalFileSize += fileSize;
+                }
+
+                // console.log(`Total file size to download: ${this.totalFileSize} bytes`);
 
                 // Helper function to process large arrays in chunks
                 const processProductsInChunks = (productsArray) => {
-                    const totalProducts = productsArray.length;
+                    const total = productsArray.length;
                     let processed = 0;
 
                     const processChunk = () => {
                         const chunk = productsArray.slice(processed, processed + chunkSize);
-                        this.products.push(...chunk);
+                        this.products.push(...chunk);  // Add chunk to products array
                         processed += chunkSize;
 
-                        // Update loading percentage based on the processed items
-                        this.loadingPercentage = Math.round((processed / totalProducts) * 100);
-
-                        if (processed < totalProducts) {
+                        if (processed < total) {
                             // Process the next chunk asynchronously
-                            setTimeout(processChunk, 0); // Yield control back to the browser
-                        } else {
-                            console.log('All products processed');
+                            setTimeout(processChunk, 0);
                         }
                     };
 
-                    // Start processing the first chunk
                     processChunk();
                 };
 
-                // Load each file by dynamically injecting <script> tags
-                fileUrls.forEach((file, index) => {
-                    const script = document.createElement('script');
-                    script.src = `https://localhost:7293/GenJs/${file.fileUrl}`;  // Adjust the URL to point to the correct server
-                    script.async = true;
+                // Function to download and inject each file, tracking progress
+                const loadFile = async (file) => {
+                    return new Promise((resolve, reject) => {
+                        const xhr = new XMLHttpRequest();
+                        const fileUrl = `https://localhost:7293/GenJs/${file.fileUrl}?${Date.now()}`;
+                        xhr.open('GET', fileUrl, true);
+                        xhr.responseType = 'text';  // Expecting JavaScript code as text
 
-                    // When the script is loaded
-                    script.onload = () => {
-                        console.log(`Script ${index + 1} loaded from ${file.fileUrl}`);
+                        // Track download progress
+                        let currentFileLoaded = 0;
+                        xhr.onprogress = (event) => {
+                            if (event.lengthComputable) {
+                                // Track only the difference between the last update and the current progress
+                                const increment = event.loaded - currentFileLoaded;
+                                this.loadedFileSize += increment;
+                                currentFileLoaded = event.loaded;
 
-                        // Assuming the external script exposes a global variable like `window.products`
-                        if (window.products && Array.isArray(window.products)) {
-                            // Process the large products array in chunks
-                            processProductsInChunks(window.products);
-                            console.log('Loaded products:', window.products);
-                        } else {
-                            console.warn(`No valid products array found in the script: ${file.fileUrl}`);
-                        }
+                                // Calculate loading percentage
+                                this.loadingPercentage = Math.min(100, Math.round((this.loadedFileSize / this.totalFileSize) * 100));
+                            }
+                        };
 
-                        // Clear window.products after use to avoid conflicts with future scripts
-                        // delete window.products;
+                        xhr.onload = () => {
+                            if (xhr.status === 200) {
+                                const script = document.createElement('script');
+                                script.textContent = xhr.responseText;
+                                document.head.appendChild(script);  // Inject the script into the document
 
-                        // Update loading percentage for each script
-                        loadedScripts++;
-                        this.loadingPercentage = Math.round((loadedScripts / totalFiles) * 100);
+                                if (window.products && Array.isArray(window.products)) {
+                                    processProductsInChunks(window.products);  // Process products
+                                } else {
+                                    console.warn(`No valid products array found in ${file.fileUrl}`);
+                                }
 
-                        if (this.loadingPercentage === 100) {
-                            this.isLoading = false;
-                        }
-                    };
+                                resolve();
+                            } else {
+                                console.error(`Error loading script from ${file.fileUrl}: ${xhr.statusText}`);
+                                reject(new Error(xhr.statusText));
+                            }
+                        };
 
-                    script.onerror = (error) => {
-                        console.error(`Error loading script from ${file.fileUrl}`, error);
-                        console.log(`Failed to load ${file.fileUrl}. Possible reasons: incorrect URL, file not found, or server error.`);
-                    };
+                        xhr.onerror = () => {
+                            console.error(`Error loading script from ${file.fileUrl}`);
+                            reject(new Error('Network error'));
+                        };
 
-                    // Inject the script into the document head
-                    document.head.appendChild(script);
-                });
+                        xhr.send();
+                    });
+                };
 
-                const elapsedTime = Date.now() - startTime;
+                // Load each file and track progress
+                for (const file of fileUrls) {
+                    await loadFile(file);
+                }
 
-                // Set a fallback timeout to ensure the loading completes even if something goes wrong
-                setTimeout(() => {
-                    if (this.loadingPercentage < 100) {
-                        this.loadingPercentage = 100;
-                    }
-                    this.isLoading = false;
-                }, elapsedTime);
+                // When all files are downloaded, finalize the loading state
+                this.loadingPercentage = 100;
+                this.isLoading = false;
+                console.log('All products loaded.');
+
             } catch (error) {
                 console.error('Error fetching files:', error);
                 this.loadingPercentage = 0;
-                this.isLoading = true;
+                this.isLoading = true;  // Keep loading state on error
             }
         }
     }

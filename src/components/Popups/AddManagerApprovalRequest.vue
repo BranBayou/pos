@@ -7,10 +7,20 @@ const orderStore = useOrderStore();
 
 const authStore = useAuthStore();
 
+const props = defineProps({
+  item: {
+    type: Object,
+    required: true,
+  },
+});
+
 // Function to handle click and toggle popups correctly
 const handleCacel = () => {
   authStore.toggleAddManagerApprovalRequest();
   orderStore.state.overallDiscount = 0;
+  if (props.item) {
+    orderStore.resetDiscount(props.item);
+  }
   console.log("when cancel", orderStore.state.overallDiscount);
 }
 
@@ -26,7 +36,9 @@ const handleClick = () => {
   <Teleport to="body">
     <Transition name="modal-outer">
       <div class="">
-        <ManagerLoginPopup />
+        <ManagerLoginPopup
+         :item="props.item"
+        />
         <div v-show="authStore.isAddManagerApprovalRequest" class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
           <Transition name="modal-inner" class="rounded-2xl">
             <div v-if="authStore.isAddManagerApprovalRequest" class="fixed top-44 z-50 flex items-center justify-center bg-black bg-opacity-50 w-2/5">

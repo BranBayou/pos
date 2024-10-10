@@ -16,9 +16,13 @@ const isPopupCanceled = ref(false); // Track if the popup was canceled
 const isCommentSubmitted = ref(false); // Track if the comment was successfully submitted
 
 // Computed values for order total, GST, PST, and Discount
-const gstAmount = computed(() => orderStore.getGstAmount);
-const pstAmount = computed(() => orderStore.getPstAmount);
+const gstAmount = computed(() => orderStore.getTotalGstAmount);
+const pstAmount = computed(() => orderStore.getTotalPstAmount);
 const orderTotal = computed(() => orderStore.getOrderTotal);
+
+watch(orderTotal, (newValue) => {
+  orderStore.updateOrderTotal(newValue);  // Update the store's total
+});
 
 // Handle overall discount input with necessary checks
 const handleOverallDiscountInput = (discount) => {
@@ -90,12 +94,12 @@ const handleCommentPopupCancel = () => {
 
 // Disable overall discount if any item has a discount
 const isOverallDiscountDisabled = computed(() => {
-  return orderStore.state.orderItems.some(item => item.discountPercentage > 0);
+  return orderStore.state.orderItems.some(item => item.Discount > 0);
 });
 </script>
 
-<template>
-  <div v-if="(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" class="flex flex-col justify-end" style="min-height: 50%;"> 
+<template> 
+  <div v-if="(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" class="flex flex-col justify-end bg-white pb-2 mb-2 rounded-b-2xl" style="min-height: 50%;"> 
     <AddManagerApprovalRequest />
     <CommentPopup 
       v-if="showCommentPopup" 
@@ -124,11 +128,11 @@ const isOverallDiscountDisabled = computed(() => {
     <div>
       <div class="flex items-center justify-between rounded-2xl bg-[#f4f5f7] mx-3 my-2 py-4 px-3">
         <p>GST %</p>
-        <p>${{ gstAmount.toFixed(2) }}</p>
+        <p>${{ gstAmount }}</p>
       </div>
       <div class="flex items-center justify-between rounded-2xl bg-[#f4f5f7] mx-3 my-2 py-4 px-3">
         <p>PST %</p>
-        <p>${{ pstAmount.toFixed(2) }}</p>
+        <p>${{ pstAmount }}</p>
       </div>
     </div>
 

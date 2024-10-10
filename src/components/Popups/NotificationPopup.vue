@@ -2,26 +2,21 @@
 import { ref } from 'vue';
 import { useOrderStore } from '@/stores/OrderStore';
 
-const props = defineProps({
-  draftOrders: Array
-});
-
 // Get order store
 const orderStore = useOrderStore();
 
 // Function to load a draft order
 function loadDraftOrder(draft) {
-  orderStore.loadDraftOrder(draft); // This calls the function to load the draft in the store
-}
-
-function handleClick(draft) {
-  loadDraftOrder(draft); // Pass the selected draft to loadDraftOrder
-  orderStore.toggleDraftList(); // Close the draft list after loading the draft
+  const draftIndex = orderStore.draftOrders.indexOf(draft);
+  if (draftIndex !== -1) {
+    orderStore.loadDraftOrder(draftIndex);
+    orderStore.toggleDraftList();
+  }
 }
 
 // Helper function to calculate the total number of items in a draft
 function getTotalItems(draft) {
-  return draft.orderItems.reduce((total, item) => total + item.qty, 0);
+  return draft.orderItems.reduce((total, item) => total + item.Qty, 0); 
 }
 
 // Helper function to calculate the number of unique SKUs in a draft
@@ -32,10 +27,10 @@ function getUniqueSKUs(draft) {
 
 // Function to delete a draft order from the store and localStorage
 function deleteDraftOrder(index) {
-  orderStore.draftOrders.splice(index, 1); // Remove the draft from the store's draftOrders array
-  localStorage.setItem('draftOrders', JSON.stringify(orderStore.draftOrders)); // Update localStorage
+  orderStore.removeDraftOrder(index);
 }
 </script>
+
 
 <template>
   <Teleport to="body">
@@ -63,26 +58,21 @@ function deleteDraftOrder(index) {
                   <div class="collapse-title text-xl font-medium flex justify-center items-center mx-auto">
                     <div class="flex flex-col items-center justify-center gap-4">
                       <!-- Assuming each draft has items, show the first product image from the draft -->
-                      <img v-if="draft.orderItems && draft.orderItems[0]?.ImageUrl" @click="handleClick(draft)"
-                        :src="`https://replicagunsca.b-cdn.net/images/products/small/${draft.orderItems[0].ImageUrl}`"
-                        class="rounded-lg" alt="product-img" />
+                      <img 
+                        v-if="draft.orderItems && draft.orderItems[0]?.ItemImage" 
+                        @click="loadDraftOrder(draft)"
+                        :src="`https://replicagunsca.b-cdn.net/images/products/small/${draft.orderItems[0]?.ItemImage || 'placeholder.png'}`" 
+                        class="rounded-lg" 
+                        alt="product-img" 
+                      />
                       <div>
-                        <!-- Display the total price of the draft order -->
-                        <!-- <p class="font-semibold" v-if="draft.orderItems && draft.orderItems.length">
-            ${{ draft.orderItems.reduce((total, item) => total + (item.Price * item.qty), 0).toFixed(2) }}
-          </p> -->
-                        <!-- Optional: Show discount information if present -->
-                        <!-- <p v-if="draft.orderItems[0]?.discountPercentage" class="text-sm">
-            {{ draft.orderItems[0].discountPercentage }}% discount applied
-          </p> -->
                       </div>
                       <!-- Display the total number of items and unique SKUs -->
                       <div class="flex gap-2">
-                        <p @click="handleClick(draft)" class="text-sm font-semibold">{{ getTotalItems(draft) }} items </p>
-                        <p @click="handleClick(draft)" class="text-sm font-semibold">{{ getUniqueSKUs(draft)}} SKUs</p>
+                        <p @click="loadDraftOrder(draft)" class="text-sm font-semibold">{{ getTotalItems(draft) }} items </p>
+                        <p @click="loadDraftOrder(draft)" class="text-sm font-semibold">{{ getUniqueSKUs(draft)}} SKUs</p>
                       </div>
-                      <p @click="handleClick(draft)" class="text-base font-medium">{{ new
-                        Date(draft.timestamp).toLocaleString() }}</p>
+                      <p @click="loadDraftOrder(draft)" class="text-base font-medium">{{ orderStore.formatDate(draft.timestamp) }}</p>
                     </div>
                   </div>
 
@@ -97,11 +87,11 @@ function deleteDraftOrder(index) {
                             :src="`https://replicagunsca.b-cdn.net/images/products/small/${item.ImageUrl}`"
                             class="w-10 rounded-lg" alt="product-img" />
                           <div>
-                            <p class="text-base font-semibold">{{ item.Name }}</p>
-                            <p class="text-sm text-gray-600">Qty: {{ item.qty }}</p>
+                            <p class="text-base font-semibold">{{ item.ItemName }}</p>
+                            <p class="text-sm text-gray-600">Qty: {{ item.Qty }}</p>
                           </div>
                         </div>
-                        <p class="font-semibold">${{ (item.Price * item.qty).toFixed(2) }}</p>
+                        <p class="font-semibold">${{ (item.Price * item.Qty).toFixed(2) }}</p>
                       </li>
                     </ul>
                   </div>
@@ -109,14 +99,12 @@ function deleteDraftOrder(index) {
               </ul>
             </div>
           </div>
-          <p v-else class="bg-white my-10 h-20 px-20 flex justify-center items-center rounded-2xl font-semibold">No
-            drafts available</p>
+          <p v-else class="bg-white my-10 h-20 px-20 flex justify-center items-center rounded-2xl font-semibold">No drafts available</p>
         </Transition>
       </div>
     </Transition>
   </Teleport>
 </template>
-
 
 
 <style scoped>

@@ -10,15 +10,24 @@ const authStore = useAuthStore();
 const orderStore = useOrderStore();
 const applyToAllItems = ref(false); // Track if the user wants to apply the salesperson to all items
 
+const props = defineProps({
+  item: {
+    type: Object,
+    required: true,
+  },
+});
+
 // Method to handle the button click
 const addSalesPerson = () => {
   if (orderStore.selectedSalesPerson) {
     if (applyToAllItems.value) {
       // Apply the selected salesperson to all items in the order
       orderStore.applySalesPersonToAllItems(orderStore.selectedSalesPerson);
+      console.log('this all triggered');
     } else {
       // Only set the selected person in the store (no apply to all items)
-      orderStore.setSelectedSalesPerson(orderStore.selectedSalesPerson);
+      orderStore.setSelectedSalesPerson(orderStore.selectedSalesPerson, props.item);
+      console.log('passed props',props.item);
     }
     authStore.toggleAddSalesPopup(); // Optionally close the popup
   }

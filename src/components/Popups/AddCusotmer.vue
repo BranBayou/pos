@@ -1,9 +1,13 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
+import { useCustomerStore } from '@/stores/customerStore';
+import { useOrderStore } from '@/stores/OrderStore'; // Import the order store
 import { ref, computed, onMounted } from 'vue';
 import InputMask from 'primevue/inputmask';
 
 const authStore = useAuthStore();
+const customerStore = useCustomerStore();
+const orderStore = useOrderStore(); // Initialize the order store
 
 const value = ref(''); // Phone mask value
 
@@ -22,15 +26,15 @@ const displayedCustomer = ref(null);
 
 // Fetch customers when component mounts
 onMounted(() => {
-  // authStore.fetchCustomers();
+  customerStore.fetchCustomers(); // Fetch the customers from customerStore
 });
 
 // Computed property to filter customers based on the search query
 const filteredCustomers = computed(() => {
   if (!searchQuery.value) {
-    return authStore.customersList.slice(0, 3); // Show first 3 customers by default
+    return customerStore.customersList.slice(0, 3); // Show first 3 customers by default
   }
-  return authStore.customersList.filter(customer => 
+  return customerStore.customersList.filter(customer => 
     customer.name.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
     customer.phone.includes(searchQuery.value) || 
     customer.email.toLowerCase().includes(searchQuery.value.toLowerCase())
@@ -39,22 +43,46 @@ const filteredCustomers = computed(() => {
 
 // Function to handle customer selection from the list
 const selectCustomer = (customer) => {
-  authStore.setSelectedCustomer(customer); // Store the selected customer in the store
+  // Store the selected customer in both authStore and customerStore
+  authStore.setSelectedCustomer(customer); 
+  customerStore.selectedCustomer = customer;
+
+  // Update the customer details in orderStore's state.customer
+  orderStore.state.customer = {
+    id: '', // Add logic to assign customer ID if needed
+    name: customer.name,
+    phone: customer.phone,
+    email: customer.email,
+    note: customer.note,
+  };
+  orderStore.saveOrderItemsToLocalStorage();
   authStore.toggleAddCustomerPopup(); // Close the popup
 };
 
-// Function to handle form submission (adding new customer for display only)
+// Function to handle form submission (adding new customer for display)
 const submitNewCustomer = () => {
   if (newCustomer.value.name && newCustomer.value.phone && newCustomer.value.email) {
-    // Store the new customer locally (for display)
-    displayedCustomer.value = { ...newCustomer.value };
+    // Store the new customer in customerStore
+    const newCustomerEntry = { ...newCustomer.value };
+    customerStore.customersList.push(newCustomerEntry);
 
-    // Set it as the selected customer (for consistency with the listed customer selection)
-    authStore.setSelectedCustomer(displayedCustomer.value);
+    // Set the new customer as selected in both authStore and customerStore
+    authStore.setSelectedCustomer(newCustomerEntry);
+    customerStore.selectedCustomer = newCustomerEntry;
 
+    // Update the customer details in orderStore's state.customer
+    orderStore.state.customer = {
+      id: '', // Add logic to assign customer ID if needed
+      name: newCustomerEntry.name,
+      phone: newCustomerEntry.phone,
+      email: newCustomerEntry.email,
+      note: newCustomerEntry.note,
+    };
+    console.log(orderStore.state.customer)
+    
     // Close the popup
     authStore.toggleAddCustomerPopup();
-
+    orderStore.saveOrderItemsToLocalStorage();
     // Reset the form after submission
     resetForm();
   } else {
@@ -72,6 +100,8 @@ const resetForm = () => {
   };
 };
 </script>
+
+
 
 <template>
   <Teleport to="body">
@@ -126,7 +156,7 @@ const resetForm = () => {
                   </div>
                   <div class="card flex justify-center">
                     <label class="block mb-1">Phone</label>
-                    <InputMask v-model="newCustomer.phone" mask="+19 999-999-999" placeholder="+19 999-999-999" class="w-full !p-2 !bg-gray-100 !rounded custom-input" />
+                    <InputMask v-model="newCustomer.phone" mask="+1 999-999-9999" placeholder="+1 999-999-9999" class="w-full !p-2 !bg-gray-100 !rounded custom-input" />
                   </div>
                   <div class="mb-4">
                     <label class="block mb-1">Email</label>

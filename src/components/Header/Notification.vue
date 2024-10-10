@@ -17,8 +17,10 @@ const draftOrders = ref([]);
 
 // Fetch draft orders once on component mount
 onMounted(() => {
-  draftOrders.value = orderStore.fetchDraftOrders();
+  // Fetch the draft orders from the order store
+  draftOrders.value = orderStore.fetchDraftOrders(); // Ensure fetchDraftOrders returns the correct data
 
+  // Initialize the tippy tooltip for notifications
   tippy('#notiTooltip', {
     content: 'Notifications',
     animation: 'scale',
@@ -28,6 +30,7 @@ onMounted(() => {
 // Compute the number of draft orders
 const draftCount = computed(() => draftOrders.value.length);
 </script>
+
 
 <template>
   <div class="relative cursor-pointer" id="notiTooltip" @click="orderStore.toggleDraftList">
@@ -51,5 +54,6 @@ const draftCount = computed(() => draftOrders.value.length);
     <NotificationPopup v-if="orderStore.showDraftList" :draftOrders="draftOrders" />
   </div>
 </template>
+
 
   

@@ -6,6 +6,10 @@
     font-family: "Poppins", sans-serif;
 }
 
+html {
+    background-color: #f4f5f7 !important;
+}
+
 .p-select-list-container {
     background-color: white;
     /* border-left: 2px solid #E0E0E0;

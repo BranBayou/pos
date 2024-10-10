@@ -9,31 +9,39 @@ const toast = useToast();
 const orderStore = useOrderStore();
 const authStore = useAuthStore();
 
+// Total items calculation, returning 0 if not logged in
 const totalItems = computed(() => {
-  // Ensure that orderItems is always treated as an array
-  return Array.isArray(orderStore.getOrderItems) 
-    ? orderStore.getOrderItems.reduce((total, item) => total + item.qty, 0) 
-    : 0;
-});
-
-const totalSkus = computed(() => {
-  if (Array.isArray(orderStore.getOrderItems)) {
-    const skus = orderStore.getOrderItems.map(item => item.Sku);
-    return new Set(skus).size; // Using Set to get unique SKUs
+  if (authStore.isUserLoggedIn || authStore.isManagerLoggedIn) {
+    return Array.isArray(orderStore.state.orderItems)
+      ? orderStore.state.orderItems.reduce((total, item) => total + item.Qty, 0)
+      : 0;
+  } else {
+    return 0;  // Return 0 if not logged in
   }
-  return 0;
 });
 
+// Total skus calculation, returning 0 if not logged in
+const totalSkus = computed(() => {
+  if (authStore.isUserLoggedIn || authStore.isManagerLoggedIn) {
+    if (Array.isArray(orderStore.state.orderItems)) {
+      const skus = orderStore.state.orderItems.map(item => item.ItemId);
+      return new Set(skus).size;
+    }
+  }
+  return 0;  // Return 0 if not logged in
+});
 
-// Function to handle checkout popup visibility
+// Handle checkout popup
 function handleCheckoutPopup() {
   if (totalItems.value > 0) {
-    authStore.toggleCheckoutPopup(); // Only show the popup if there are items in the cart
+    authStore.toggleCheckoutPopup(); 
   } else {
     toast.error('Please add order items before checking out.');
   }
 }
 </script>
+
+
 
 <template>
   <div class="bg-white w-full rounded-2xl flex items-center content-between gap-5 my-5 px-5">
@@ -52,6 +60,7 @@ function handleCheckoutPopup() {
     </button>
   </div>
 </template>
+
 
 
 

@@ -1,25 +1,46 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
+import { useOrderStore } from '@/stores/OrderStore';
 import { ref } from 'vue';
 import AddComment from '../Left/AddCommentButton.vue';
 import AddManagerApproval from '../Left/AddManagerApprovalButton.vue';
 import WalkInCustomer from '../Left/WalkInCustomerButton.vue';
 
 const authStore = useAuthStore();
+const orderStore = useOrderStore();
+
+const isAddCommentButtonMovedFromAddBeaviour = ref(false);
+const isAddManagerApprovalButtonMovedFromAddBeaviour = ref(false);
+const isWalkinCustomerMovedFromAddBeaviour = ref(false);
 
 const emit = defineEmits(['moveButtonToParent']);
 
-const buttons = ref([
-  { name: 'AddComment', component: AddComment },
-  { name: 'AddManagerApproval', component: AddManagerApproval },
-  { name: 'WalkInCustomer', component: WalkInCustomer },
-]);
+// const buttons = ref([
+//   { name: 'AddComment', component: AddComment },
+//   { name: 'AddManagerApproval', component: AddManagerApproval },
+//   { name: 'WalkInCustomer', component: WalkInCustomer },
+// ]);
 
 function moveButtonToParent(buttonName) {
   emit('moveButtonToParent', buttonName);
   
   // Remove the button from the child component's buttons array
   buttons.value = buttons.value.filter(button => button.name !== buttonName);
+}
+
+function handleClickAddComment() {
+  authStore.toggleAddCommentButtonMoved();
+  isAddCommentButtonMovedFromAddBeaviour.value = true;
+}
+
+function handleClickAddManager () {
+  authStore.toggleAddManagerApprovalButtonMoved();
+  isAddManagerApprovalButtonMovedFromAddBeaviour.value = true;
+}
+
+function handleClickWalkinCustomer () {
+  authStore.toggleWalkInCustomerButtonMoved();
+  isWalkinCustomerMovedFromAddBeaviour.value = true;
 }
 
 </script>
@@ -36,14 +57,24 @@ function moveButtonToParent(buttonName) {
           <div v-if="authStore.isAddBehaviourPopup" class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-50 w-10/12">
             <div class="bg-white rounded-2xl shadow-lg p-6 w-full">
               <h1 class="font-semibold text-[24px]">Add Behaviour</h1>
-              <div class="bg-[#f4f5f7] rounded-2xl" v-if="buttons.length > 0">
-                <div v-for="button in buttons" :key="button.name" class="flex px-3">
-                  <component :is="button.component" @click="moveButtonToParent(button.name)" />
+              <div class="bg-[#f4f5f7] rounded-2xl p-3 flex gap-3">
+                <AddComment 
+                 v-if="!isAddCommentButtonMovedFromAddBeaviour"
+                 @click="handleClickAddComment"
+                />
+                <AddManagerApproval 
+                  v-if="!isAddManagerApprovalButtonMovedFromAddBeaviour"
+                  @click="handleClickAddManager"
+                />
+                <WalkInCustomer 
+                  v-if="!isWalkinCustomerMovedFromAddBeaviour && orderStore.state.customer.name === ''"
+                  @click="handleClickWalkinCustomer"
+                />
+                <div v-if="isAddCommentButtonMovedFromAddBeaviour && isAddManagerApprovalButtonMovedFromAddBeaviour && isWalkinCustomerMovedFromAddBeaviour">
+                  <p class="text-center text-gray-500 w-full">No more behaviour</p>
                 </div>
               </div>
-              <div v-else>
-                <p class="text-center text-gray-500">No more behaviour</p>
-              </div>
+              
             </div> 
           </div>        
         </Transition>
