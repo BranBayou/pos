@@ -75,12 +75,12 @@ const imageBackgroundColor = computed(() => {
                 <h3 class="text-lg font-semibold mb-4">Manager Approval Comment</h3>
                 <div class="flex justify-between">
                   <div class="flex">
-                    <img :src="`https://replicagunsca.b-cdn.net/images/products/small/${props.item?.ItemImage ?? ''}`"
+                    <img v-if="props.item.ItemImage" :src="`https://replicagunsca.b-cdn.net/images/products/small/${props.item?.ItemImage ?? ''}`"
                       class="w-14 rounded-lg" alt="product-img" />
                     <div>
-                      <p class="font-semibold">{{ props.item?.ItemName ?? 'Unknown Item' }}</p>
-                      <p class="text-sm text-gray-500">Price: ${{ props.item?.Price ?? 0 }}</p>
-                      <p class="text-sm text-gray-500">Discount: {{ props.item?.Discount ?? 0 }}%</p>
+                      <p class="font-semibold">{{ props.item?.ItemName ?? 'Overall Discount' }}</p>
+                      <p v-if="props.item.Price" class="text-sm text-gray-500">Price: ${{ props.item?.Price ?? 0 }}</p>
+                      <p class="text-sm text-gray-500">Discount: {{ props.item?.Discount ?? discountPercentage }}%</p>
                     </div>
                   </div>
                   <div class="flex">
