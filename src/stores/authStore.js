@@ -51,10 +51,8 @@ export const useAuthStore = defineStore('auth', () => {
       });
       const cashiers = response.data.filter(user => user.role === 'Cashier');
       usersList.value = cashiers;
-      console.log('Fetched Cashier Users:', usersList.value);
     } catch (error) {
       toast.error('Failed to load users', error.message);
-      console.error('Failed to load users:', error.message);
     }
   }
 
@@ -69,10 +67,8 @@ export const useAuthStore = defineStore('auth', () => {
       });
       const managers = response.data.filter(user => user.role === 'Manager');
       managerUsersList.value = managers;
-      console.log('Fetched Manager Users:', managerUsersList.value);
     } catch (error) {
       toast.error('Failed to load users', error.message);
-      console.error('Failed to load users:', error.message);
     }
   }
 

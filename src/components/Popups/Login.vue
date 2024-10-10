@@ -25,7 +25,7 @@ defineProps({
 onMounted(() => {
   // If the user is already logged in, no need to fetch users
   if (authStore.token && authStore.currentUser) {
-    console.log('User session restored:', authStore.currentUser);
+    // console.log('User session restored:', authStore.currentUser);
   } else {
     // Fetch Cashiers if the user is not logged in yet
     authStore.fetchCashiers();
@@ -53,7 +53,6 @@ const login = async () => {
   // Validation: Ensure both userId and pin are provided and PIN is exactly 6 digits
   if (!userId || !pin || pin.length !== 6 || isNaN(pin)) {
     toast.error('Please enter a valid 6-digit PIN');
-    console.error('Invalid PIN format or missing user ID');
     return;
   }
 

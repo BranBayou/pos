@@ -41,8 +41,6 @@ export const useCustomerStore = defineStore('customers', () => {
 
   // Simulate fetching customers
   function fetchCustomers() {
-    toast.success('Customers loaded successfully');
-    console.log('Fetched Customers:', customersList);
   }
 
   return {

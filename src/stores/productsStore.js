@@ -21,7 +21,7 @@ export const useProductStore = defineStore('product', {
                 });
 
                 const fileUrls = await response.json();
-                console.log('File URLs:', fileUrls);
+                // console.log('File URLs:', fileUrls);
 
                 const totalFiles = fileUrls.length;
                 let loadedScripts = 0;
@@ -49,7 +49,7 @@ export const useProductStore = defineStore('product', {
                             // Yield control back to the browser
                             setTimeout(processChunk, 0); 
                         } else {
-                            console.log('All products processed');
+                            // console.log('All products processed');
                         }
                     };
 
@@ -64,12 +64,12 @@ export const useProductStore = defineStore('product', {
 
                     // When the script is loaded
                     script.onload = () => {
-                        console.log(`Script ${index + 1} loaded from ${file.fileUrl}`);
+                        // console.log(`Script ${index + 1} loaded from ${file.fileUrl}`);
 
                         if (window.products && Array.isArray(window.products)) {
                             // Process the large products array in chunks
                             processProductsInChunks(window.products);
-                            console.log('Loaded products:', window.products);
+                            // console.log('Loaded products:', window.products);
                         } else {
                             console.warn(`No valid products array found in the script: ${file.fileUrl}`);
                         }

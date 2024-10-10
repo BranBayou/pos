@@ -420,7 +420,7 @@ function saveOrderAsDraft() {
 function fetchDraftOrders() {
   const savedDrafts = JSON.parse(localStorage.getItem('draftOrders')) || [];
   draftOrders.value = savedDrafts;
-  console.log('Fetched drafts:', draftOrders.value);
+  // console.log('Fetched drafts:', draftOrders.value);
   return draftOrders.value;
 }
 
