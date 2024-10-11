@@ -210,6 +210,7 @@ window.addEventListener('comment-saved', updateComments);
       <span class="font-medium">{{ authStore.isManagerLoggedIn ? authStore.managerUser : 'Logged out' }}</span>
 
       <img 
+        v-if="orderStore.state.comments.length > 0"
         :src="msgIcon" 
         :class="hasEmptyComment ? 'bg-red-400' : 'bg-green-400'" 
         class="rounded-md cursor-pointer p-2" 
