@@ -370,6 +370,26 @@ function updateOriginalPrice(item, originalPrice) {
     saveOrderItemsToLocalStorage();
   }
 
+  function addToApprovalList({ ManagerId, ManagerApprovalId, ItemId, isOverallDiscount }) {
+    // Create an approval object with the required fields
+    const approval = {
+      ManagerId: ManagerId,  
+      ManagerApprovalId: ManagerApprovalId, 
+      ItemId: ItemId || null, 
+      isOverallDiscount: isOverallDiscount || false, 
+      id: '' 
+    };
+  
+    // Add the new approval entry to the state.approvalList
+    state.approvalList.push(approval);
+  
+    // Optionally, persist the updated approvalList to local storage
+    saveOrderItemsToLocalStorage();
+  
+    // Notify that approval has been added (optional, for debugging)
+    console.log('Approval added:', approval);
+  }
+
   // Save orderItems to localStorage
   function saveOrderItemsToLocalStorage() {
     localStorage.setItem('newOrder', JSON.stringify(state));
@@ -404,6 +424,13 @@ function updateOriginalPrice(item, originalPrice) {
     if (isCommentProvided) {
       const discountValue = item.Discount || 0;
       updateDiscountPercentage(item, discountValue);
+      addToApprovalList({
+        ManagerId: managerUser,
+        ItemId: item?.ItemId, 
+        ManagerApprovalId: '',
+        isOverallDiscount: state.overallDiscount
+      })
+
     } else {
       resetDiscount(item);
     }
