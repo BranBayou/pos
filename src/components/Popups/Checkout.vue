@@ -76,19 +76,18 @@ function clearPaymentAmount(method) {
 }
 
 // handle predictive cash amounts
-// Handle predictive cash amounts based on the total price
 const predictiveCashAmounts = computed(() => {
   const total = parseFloat(totalAmount.value);
   if (!isNaN(total)) {
     // Calculate the next nearest amounts to the total price
     if (total <= 20) {
-      return [20, 50, 100]; // If the total is <= 20, show $20, $50, $100
+      return [20, 50, 100]; 
     } else if (total <= 50) {
-      return [50, 100, 200]; // If the total is <= 50, show $50, $100, $200
+      return [50, 100, 200]; 
     } else if (total <= 100) {
-      return [100, 200]; // If the total is <= 100, show $100, $200, $500
+      return [100, 200]; 
     } else {
-      return [100, 200]; // Default amounts for higher values
+      return [100, 200]; 
     }
   }
   return [];
@@ -182,10 +181,13 @@ async function handleCheckout() {
     })),
     
     // Approval list if any (empty for now)
+    // Approval list (updated structure)
     ApprovalList: orderStore.state.approvalList.map(approval => ({
-      UserId: approval.UserId,
-      Approved: approval.Approved,
-      Reason: approval.Reason || ''
+      ManagerId: approval.ManagerId || 'defaultManagerId',
+      ManagerApprovalId: approval.ManagerApprovalId || 'defaultApprovalId',
+      ItemId: approval.ItemId || null,
+      isOverallDiscount: approval.isOverallDiscount || false,
+      id: approval.id || '' // Using a function to generate unique IDs
     })),
 
     // Overall discount
@@ -230,7 +232,7 @@ async function handleCheckout() {
     if (response.status === 200) {
       toast.success('Order placed successfully');
       authStore.toggleCheckoutPopup(); // Close the checkout popup
-      orderStore.clearOrder(); // Clear the order after successful checkout
+      orderStore.clearOrder(); 
     } else {
       toast.error('Failed to place the order.');
     }
