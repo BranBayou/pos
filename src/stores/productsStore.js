@@ -59,7 +59,7 @@ export const useProductStore = defineStore('product', {
 
                     const processChunk = () => {
                         const chunk = productsArray.slice(processed, processed + chunkSize);
-                        this.products.push(...chunk);  // Add chunk to products array
+                        this.products.push(...chunk); 
                         processed += chunkSize;
 
                         if (processed < total) {

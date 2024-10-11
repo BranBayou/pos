@@ -85,7 +85,7 @@ export const useAuthStore = defineStore('auth', () => {
         }
       });
       
-      const { jwt: authToken, role, fullName } = response.data || {}; // Ensure response has valid data
+      const { jwt: authToken, role, fullName } = response.data || {}; 
       
       if (!authToken || !role || !fullName) {
         throw new Error('Invalid response from server');
@@ -128,7 +128,7 @@ export const useAuthStore = defineStore('auth', () => {
         toast.error('Login failed!');
       }
       console.error('Login failed:', error.response?.data?.errors || error.message);
-      throw error; // Re-throw the error so that it can be caught outside if needed
+      throw error; 
     }
   }
 

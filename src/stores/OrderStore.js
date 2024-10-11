@@ -451,7 +451,7 @@ function updateOriginalPrice(item, originalPrice) {
   };
   
   const draftOrders = ref([]); 
-  // Draft orders 
+
 // Save the current state as a draft
 function saveOrderAsDraft() {
   if (state.orderItems.length === 0) {
