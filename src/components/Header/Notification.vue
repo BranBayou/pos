@@ -15,6 +15,13 @@ const orderStore = useOrderStore();
 // Reactive variable to store draft orders, fetched once
 const draftOrders = ref([]);
 
+function handleToggleDraftList() {
+  if (authStore.isUserLoggedIn || authStore.isManagerLoggedIn) {
+    orderStore.toggleDraftList();
+  }
+}
+
+
 // Fetch draft orders once on component mount
 onMounted(() => {
   // Fetch the draft orders from the order store
@@ -33,7 +40,10 @@ const draftCount = computed(() => draftOrders.value.length);
 
 
 <template>
-  <div class="relative cursor-pointer" id="notiTooltip" @click="orderStore.toggleDraftList">
+  <div
+   :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)"
+   class="relative cursor-pointer" id="notiTooltip" 
+   @click="handleToggleDraftList">
     <!-- Notification Icon to toggle the draft list -->
     <i
       :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)"

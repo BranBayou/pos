@@ -13,7 +13,11 @@ const authStore = useAuthStore();
 const orderStore = useOrderStore();
 
 function saveOrderAsDraft() {
-  orderStore.saveOrderAsDraft();
+
+  if (authStore.isUserLoggedIn || authStore.isManagerLoggedIn) {
+    orderStore.saveOrderAsDraft();
+  }
+
 }
 
 onMounted(async () => {
