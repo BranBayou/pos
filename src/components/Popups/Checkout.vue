@@ -179,8 +179,7 @@ async function handleCheckout() {
       TaxesWaived: item.TaxesWaived,
       SalesPersonId: item.SalesPersonId || 'defaultSalesPersonId'
     })),
-    
-    // Approval list if any (empty for now)
+
     // Approval list (updated structure)
     ApprovalList: orderStore.state.approvalList.map(approval => ({
       ManagerId: approval.ManagerId || 'defaultManagerId',
