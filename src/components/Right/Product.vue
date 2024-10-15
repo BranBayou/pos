@@ -63,23 +63,32 @@ const storeOriginalValue = (key, item) => {
 };
 
 const checkValueChanged = (key, item) => {
-  const originalValue = originalValues.value[item.ItemId]?.[key];
-  if (item[key] !== originalValue) {
+  const originalValue = parseFloat(originalValues.value[item.ItemId]?.[key] || 0);
+  const currentValue = parseFloat(item[key] || 0);
+
+  // Only trigger manager permission if the value has changed
+  if (currentValue !== originalValue) {
     checkManagerPermission(item);
   }
 };
 
 
+
 // Handle price input and recalculate discount based on the original price
 const handlePriceInput = (item) => {
-  if (item.Price <= 0) {
-    item.Price = item.OriginalPrice; 
-  } else {
-    const discount = ((1 - item.Price / item.OriginalPrice) * 100).toFixed(2);
-    item.Discount = discount > 0 ? discount : 0;
+  if (item.Price < 0) {
+    item.Price = 0; // Prevent negative prices
+  } else if (item.Price > item.OriginalPrice) {
+    item.Price = item.OriginalPrice; // Cap the price to original
   }
-  orderStore.updateDiscountPercentage(item, item.Discount);
+  
+  // Avoid applying discount while user is typing
+  const discount = ((1 - item.Price / item.OriginalPrice) * 100).toFixed(2);
+  item.Discount = discount > 0 ? discount : 0;
+
+  // Delay store update until blur event
 };
+
 
 // Handle discount input and recalculate the price based on the original price
 const handleDiscountInput = (item) => {
@@ -224,19 +233,24 @@ const pstRate = computed({
           <span class="flex items-center justify-start gap-2">
             <i class="pi pi-dollar" style="font-size: 24px;"></i>
             <input 
-              type="number" 
-              class="border-2 rounded-lg w-28 text-center py-1" 
-              v-model.number="item.Price" 
-              :min="0"
-              @focus="storeOriginalValue('Price', item)"  
-              @input="handlePriceInput(item)" 
-              @blur="checkValueChanged('Price', item)"  
-              :disabled="isOverallDiscountApplied"
-              :class="{
-                'bg-purple-500 opacity-30 text-white cursor-not-allowed': isOverallDiscountApplied,
-                'bg-white': !isOverallDiscountApplied
-              }"
-            />
+  type="number" 
+  class="border-2 rounded-lg w-28 text-center py-1" 
+  v-model.number="item.Price" 
+  :min="0" 
+  @focus="storeOriginalValue('Price', item)"  
+  @input="handlePriceInput(item)" 
+  @blur="() => {
+    item.Price = parseFloat(item.Price).toFixed(2);
+    checkValueChanged('Price', item); // Proper comparison before triggering
+    orderStore.updateDiscountPercentage(item, item.Discount);
+  }"
+  :disabled="isOverallDiscountApplied"
+  :class="{
+    'bg-purple-500 opacity-30 text-white cursor-not-allowed': isOverallDiscountApplied,
+    'bg-white': !isOverallDiscountApplied
+  }"
+/>
+
           </span>
           
           <span class="flex items-center justify-start py-5 gap-2">
