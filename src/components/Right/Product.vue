@@ -233,24 +233,23 @@ const pstRate = computed({
           <span class="flex items-center justify-start gap-2">
             <i class="pi pi-dollar" style="font-size: 24px;"></i>
             <input 
-  type="number" 
-  class="border-2 rounded-lg w-28 text-center py-1" 
-  v-model.number="item.Price" 
-  :min="0" 
-  @focus="storeOriginalValue('Price', item)"  
-  @input="handlePriceInput(item)" 
-  @blur="() => {
-    item.Price = parseFloat(item.Price).toFixed(2);
-    checkValueChanged('Price', item); // Proper comparison before triggering
-    orderStore.updateDiscountPercentage(item, item.Discount);
-  }"
-  :disabled="isOverallDiscountApplied"
-  :class="{
-    'bg-purple-500 opacity-30 text-white cursor-not-allowed': isOverallDiscountApplied,
-    'bg-white': !isOverallDiscountApplied
-  }"
-/>
-
+              type="number" 
+              class="border-2 rounded-lg w-28 text-center py-1" 
+              v-model.number="item.Price" 
+              :min="0" 
+              @focus="storeOriginalValue('Price', item)"  
+              @input="handlePriceInput(item)" 
+              @blur="() => {
+                item.Price = parseFloat(item.Price).toFixed(2);
+                checkValueChanged('Price', item); 
+                orderStore.updateDiscountPercentage(item, item.Discount);
+              }"
+              :disabled="isOverallDiscountApplied"
+              :class="{
+                'bg-purple-500 opacity-30 text-white cursor-not-allowed': isOverallDiscountApplied,
+                'bg-white': !isOverallDiscountApplied
+              }"
+            />
           </span>
           
           <span class="flex items-center justify-start py-5 gap-2">
