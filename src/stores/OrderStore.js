@@ -66,7 +66,7 @@ export const useOrderStore = defineStore('orders', () => {
       newItem.SalesPersonId = selectedSalesPerson.value;
     }
 
-      state.orderItems.push(newItem);
+      state.orderItems.unshift(newItem);
     }
     calculateTaxes();
     saveOrderItemsToLocalStorage();
