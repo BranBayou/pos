@@ -14,6 +14,14 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  gstRate: {
+    type: Number,
+    required: true,
+  },
+  pstRate: {
+    type: Number,
+    required: true,
+  },
 });
 
 // Check if props.item is defined and has discountPercentage; provide a fallback of 0 if not.
@@ -51,6 +59,8 @@ const cancelComment = () => {
   orderStore.state.overallDiscount = 0;
   if (props.item) {
     orderStore.resetDiscount(props.item);
+    orderStore.resetTaxRate(props.item, 'GST');
+    orderStore.resetTaxRate(props.item, 'PST');
   }
   emit('close');
 };

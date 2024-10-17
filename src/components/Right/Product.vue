@@ -192,6 +192,8 @@ const checkTaxRateChanged = (item) => {
   <CommentPopup 
     v-if="showCommentPopup" 
     :item="selectedItemForComment" 
+    :gstRate="selectedItemForComment?.gstRate"  
+    :pstRate="selectedItemForComment?.pstRate" 
     @commentSubmitted="handleCommentSubmitted" 
     @close="showCommentPopup = false" 
   />

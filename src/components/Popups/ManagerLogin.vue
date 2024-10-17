@@ -17,12 +17,22 @@ const props = defineProps({
   item: {
     type: Object,
     required: true
-  }
+  },
+  gstRate: {
+    type: Number,
+    required: true,
+  },
+  pstRate: {
+    type: Number,
+    required: true,
+  },
 });
 
 function handleClose () {
   if (props.item) {
     orderStore.resetDiscount(props.item);
+    orderStore.resetTaxRate(props.item, 'GST');
+    orderStore.resetTaxRate(props.item, 'PST');
   }
   authStore.toggleManagerLoginPopup(); 
 }

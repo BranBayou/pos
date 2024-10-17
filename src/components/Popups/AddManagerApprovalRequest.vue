@@ -48,6 +48,8 @@ const handleClick = () => {
       <div class="">
         <ManagerLoginPopup
          :item="props.item"
+         :gstRate="props.gstRate"
+         :pstRate="props.pstRate"
         />
         <div v-show="authStore.isAddManagerApprovalRequest" class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
           <Transition name="modal-inner" class="rounded-2xl">
