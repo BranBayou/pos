@@ -127,11 +127,11 @@ const isOverallDiscountDisabled = computed(() => {
 
     <div>
       <div class="flex items-center justify-between rounded-2xl bg-[#f4f5f7] mx-3 my-2 py-4 px-3">
-        <p>GST %</p>
+        <p>GST</p>
         <p>${{ gstAmount }}</p>
       </div>
       <div class="flex items-center justify-between rounded-2xl bg-[#f4f5f7] mx-3 my-2 py-4 px-3">
-        <p>PST %</p>
+        <p>PST</p>
         <p>${{ pstAmount }}</p>
       </div>
     </div>

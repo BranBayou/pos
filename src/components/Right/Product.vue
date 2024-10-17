@@ -271,31 +271,34 @@ const pstRate = computed({
             />
           </span>
 
-          <!-- Editable GST input, default set to 5% -->
-         <span class="flex items-center justify-start gap-2">
-           <p class="font-semibold">GST</p>
-           <input 
-             type="number" 
-             class="border-2 rounded-lg w-28 text-center py-1" 
-             v-model.number="gstRate" 
-             @input="updateGstRate(gstRate)" 
-             :min="0" 
-             :max="100"
-           />
-         </span>
-     
-         <!-- PST Input, default set to 7% -->
-         <span class="flex items-center justify-start gap-2 pt-5">
-           <p class="font-semibold">PST</p>
-           <input 
-             type="number" 
-             class="border-2 rounded-lg w-28 text-center py-1" 
-             v-model.number="pstRate" 
-             @input="updatePstRate(pstRate)" 
-             :min="0" 
-             :max="100"
-           />
-         </span>
+          <!-- Editable GST input for individual item -->
+          <span class="flex items-center justify-start gap-2">
+            <p class="font-semibold">GST %</p>
+            <input 
+              type="number" 
+              class="border-2 rounded-lg w-28 text-center py-1" 
+              v-model.number="item.gstRate" 
+              @input="orderStore.updateItemTaxRate(item, 'GST', item.gstRate)" 
+              :min="0" 
+              :max="100"
+            />
+            ${{ orderStore.getItemTaxAmounts(item).gstAmount }}
+          </span>
+
+          <!-- Editable PST input for individual item -->
+          <span class="flex items-center justify-start gap-2 pt-5">
+            <p class="font-semibold">PST %</p>
+            <input 
+              type="number" 
+              class="border-2 rounded-lg w-28 text-center py-1" 
+              v-model.number="item.pstRate" 
+              @input="orderStore.updateItemTaxRate(item, 'PST', item.pstRate)" 
+              :min="0" 
+              :max="100"
+            />
+            ${{ orderStore.getItemTaxAmounts(item).pstAmount }}
+          </span>
+
         </div>
       </div>
     </div>
