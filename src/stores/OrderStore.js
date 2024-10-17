@@ -163,6 +163,21 @@ export const useOrderStore = defineStore('orders', () => {
           { type: 'PST', rate: 7, amount: 0 }
         ];
       }
+
+      state.orderItems.forEach(item => {
+        const comment = state.comments.find(c => c.item.sku === item.Sku);
+  
+        // If the comment is missing or empty, reset the discount
+        if (!comment || !comment.text.trim()) {
+          resetDiscount(item); // Reset discount if no valid comment
+        } else {
+          // If a valid comment exists, calculate price with discount
+          if (item.Discount && item.OriginalPrice) {
+            item.Price = (item.OriginalPrice * (1 - item.Discount / 100)).toFixed(2);
+          }
+        }
+      });
+  
   
       state.orderItems.forEach(item => {
         if (item.Discount && item.OriginalPrice) {

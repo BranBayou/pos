@@ -33,6 +33,7 @@ const isCommentProvided = ref(false);
 // Emit event when the comment is submitted
 const emit = defineEmits(['close', 'commentSubmitted']);
 
+// Handle page reload by resetting discount and price
 
 
 // Submit comment
