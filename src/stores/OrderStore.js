@@ -258,6 +258,19 @@ export const useOrderStore = defineStore('orders', () => {
     return { gstAmount, pstAmount };
   };
 
+  function resetTaxRate(item, taxType) {
+    const defaultTax = state.taxes.find(tax => tax.type === taxType);
+    
+    if (defaultTax) {
+      if (taxType === 'GST') {
+        item.gstRate = defaultTax.rate;  // Reset GST rate to default
+      } else if (taxType === 'PST') {
+        item.pstRate = defaultTax.rate;  // Reset PST rate to default
+      }
+    }
+    saveOrderItemsToLocalStorage();  // Save the updated order items
+  }
+
   // handle update state total
   function updateOrderTotal(newTotal) {
     const roundedTotal = parseFloat(newTotal.toFixed(2));
@@ -586,6 +599,7 @@ function toggleDraftList() {
     formatDate,
     updateItemTaxRate,
     getItemTaxAmounts,
+    resetTaxRate,
   };
 });
 
