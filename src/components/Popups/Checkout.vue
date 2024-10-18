@@ -113,23 +113,36 @@ function setCashAmount(amount) {
 
 // Prevent negative input on typing
 function preventNegativeInput(event) {
-  if (event.key === '-' || event.key === 'e') {
+  const invalidChars = ['-', 'e', '+'];
+  if (invalidChars.includes(event.key)) {
     event.preventDefault();
   }
 }
 
+
 // update the amount for a specific payment method
 function updatePaymentAmount(method, amount) {
+  // Allow free input but only store valid numbers
   const methodToUpdate = selectedPaymentMethods.value.find(m => m.id === method.id);
-  if (methodToUpdate) {
-    const newAmount = Math.max(0, parseFloat(amount)).toFixed(2);
-    const currentRemaining = totalAmount.value - selectedPaymentMethods.value.reduce((acc, m) => acc + (m.id === method.id ? 0 : parseFloat(m.amount || 0)), 0);
 
-    if (newAmount > currentRemaining) {
-      toast.error('Amount exceeds remaining balance.');
-      methodToUpdate.amount = currentRemaining.toFixed(2);
+  if (methodToUpdate) {
+    const cleanedAmount = amount.replace(/[^\d.]/g, ''); // Remove invalid characters
+    const parsedAmount = parseFloat(cleanedAmount); // Parse valid decimal number
+
+    if (!isNaN(parsedAmount)) {
+      const currentRemaining = totalAmount.value - selectedPaymentMethods.value.reduce(
+        (acc, m) => acc + (m.id === method.id ? 0 : parseFloat(m.amount || 0)), 
+        0
+      );
+
+      if (parsedAmount > currentRemaining) {
+        toast.error('Amount exceeds remaining balance.');
+        methodToUpdate.amount = currentRemaining.toFixed(2);
+      } else {
+        methodToUpdate.amount = cleanedAmount; // Let the user enter the amount freely
+      }
     } else {
-      methodToUpdate.amount = newAmount;
+      methodToUpdate.amount = ''; // Allow clearing the input
     }
   }
 }
@@ -243,12 +256,12 @@ async function handleCheckout() {
 
 
 const generateInvoice = computed(() => {
-  const invoiceItems = orderStore.state.orderItems?.map(item => ({
+  const invoiceItems = orderStore.state.orderItems.map(item => ({
     name: item.ItemName || 'Unknown Item',
     quantity: item.Qty || 1,
     price: item.Price || 0,
-    total: ((item.Qty || 1) * (item.Price || 0)).toFixed(2)
-  })) || [];
+    total: (item.Qty * item.Price).toFixed(2)
+  }));
 
   const subtotal = invoiceItems.reduce((acc, item) => acc + parseFloat(item.total), 0).toFixed(2);
 
@@ -259,24 +272,29 @@ const generateInvoice = computed(() => {
   // Calculate the taxable amount (after discount)
   const taxableAmount = (subtotal - discountAmount).toFixed(2);
 
-  const gstRate = orderStore.gstRate || 5; 
-  const pstRate = orderStore.pstRate || 7; 
+  // Use the store's tax amounts per item
+  const gstTotal = orderStore.state.orderItems.reduce((acc, item) => {
+    const gstAmount = (item.Price * (item.gstRate / 100)) * item.Qty;
+    return acc + gstAmount;
+  }, 0).toFixed(2);
 
-  // Calculate GST and PST as portions of the subtotal (included in the total)
-  const gst = ((gstRate / (100 + gstRate + pstRate)) * taxableAmount).toFixed(2);
-  const pst = ((pstRate / (100 + gstRate + pstRate)) * taxableAmount).toFixed(2);
+  const pstTotal = orderStore.state.orderItems.reduce((acc, item) => {
+    const pstAmount = (item.Price * (item.pstRate / 100)) * item.Qty;
+    return acc + pstAmount;
+  }, 0).toFixed(2);
 
-  const totalAmount = taxableAmount;
+  const totalAmount = (parseFloat(taxableAmount) + parseFloat(gstTotal) + parseFloat(pstTotal)).toFixed(2);
 
   return {
     items: invoiceItems,
     subtotal: subtotal || '0.00',
     discountAmount: discountAmount || '0.00',
-    gst: gst || '0.00',
-    pst: pst || '0.00',
+    gst: gstTotal || '0.00',
+    pst: pstTotal || '0.00',
     totalAmount: totalAmount || '0.00'
   };
 });
+
 
 
 function generatePDF() {
@@ -360,10 +378,13 @@ function generatePDF() {
                       <div class="flex w-full justify-between px-5 py-3">
                         <img :src="paymentMethods.find(pm => pm.id === method.id).icon" alt="" class="w-10 h-10">
                         <div class="relative flex items-center gap-4">
-                          <input type="number" v-model.number="method.amount"
-                            @input="updatePaymentAmount(method, method.amount)" @keydown="preventNegativeInput"
-                            :max="remainingAmount"
+                          <input 
+                            type="text" 
+                            v-model="method.amount" 
+                            @input="updatePaymentAmount(method, method.amount)" 
+                            @keydown="preventNegativeInput"
                             class="border-2 border-gray-300 rounded-md py-1 px-3 w-32 text-right focus:ring focus:ring-purple-200 focus:outline-none focus:border-purple-500 pr-10">
+
                           <!-- Clear Button inside Input -->
                           <button v-if="method.amount > 0" @click="clearPaymentAmount(method)"
                             class="absolute right-2 top-2 text-gray-500 hover:text-gray-700 text-lg"

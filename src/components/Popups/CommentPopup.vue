@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useOrderStore } from '@/stores/OrderStore';
 import { useToast } from 'vue-toastification';
@@ -22,7 +22,12 @@ const props = defineProps({
     type: Number,
     required: true,
   },
+  isTaxChange: {
+    type: Boolean,
+    default: true
+  }
 });
+
 
 // Check if props.item is defined and has discountPercentage; provide a fallback of 0 if not.
 const discountPercentage = ref(props.item?.discountPercentage ?? 0); 
@@ -66,6 +71,13 @@ const cancelComment = () => {
   emit('close');
 };
 
+// Watch for changes in isTaxChange to ensure reactivity
+watch(() => props.isTaxChange, (newValue) => {
+  console.log('isTaxChange changed:', newValue);
+});
+
+console.log("isTaxChange in CommentPopup:", props.isTaxChange);
+
 // Computed property to dynamically change image background color
 const imageBackgroundColor = computed(() => {
   return comment.value.trim() ? 'bg-green-400' : 'bg-red-400';
@@ -88,10 +100,18 @@ const imageBackgroundColor = computed(() => {
                   <div class="flex">
                     <img v-if="props.item.ItemImage" :src="`https://replicagunsca.b-cdn.net/images/products/small/${props.item?.ItemImage ?? ''}`"
                       class="w-14 rounded-lg" alt="product-img" />
-                    <div>
+                    <div class="flex flex-col">
                       <p class="font-semibold">{{ props.item?.ItemName ?? 'Overall Discount' }}</p>
-                      <p v-if="props.item.Price" class="text-sm text-gray-500">Price: ${{ props.item?.Price ?? 0 }}</p>
-                      <p class="text-sm text-gray-500">Discount: {{ props.item?.Discount ?? discountPercentage }}%</p>
+                      <div class="flex items-center gap-12">
+                        <div class="">
+                          <p v-if="props.item.Price" class="text-sm text-gray-500">Price: ${{ props.item?.Price ?? 0 }}</p>
+                          <p class="text-sm text-gray-500">Discount: {{ props.item?.Discount ?? discountPercentage }}%</p>
+                        </div>
+                        <div class="">
+                          <p class="text-sm text-gray-500">GST Rate: {{ gstRate }}%</p>
+                          <p class="text-sm text-gray-500">PST Rate: {{ pstRate }}%</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div class="flex">

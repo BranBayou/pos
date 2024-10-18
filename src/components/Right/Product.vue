@@ -175,6 +175,18 @@ const checkTaxRateChanged = (item) => {
 
   // Check if GST or PST rates have changed
   if (currentGST !== originalGST || currentPST !== originalPST) {
+    selectedItemForComment.value = { 
+      ...item, 
+      gstRate: currentGST,  // Pass updated GST rate
+      pstRate: currentPST,  // Pass updated PST rate
+      isTaxChange: true,
+    };
+    console.log(currentGST, currentPST)
+    console.log("isTaxChange: ", selectedItemForComment.value.isTaxChange);
+    console.log("Selected Item for Comment: ", selectedItemForComment.value);
+    console.log("isTaxChange Parent: ", selectedItemForComment.value?.isTaxChange);
+
+
     checkManagerPermission(item);
   }
 };
@@ -193,7 +205,8 @@ const checkTaxRateChanged = (item) => {
     v-if="showCommentPopup" 
     :item="selectedItemForComment" 
     :gstRate="selectedItemForComment?.gstRate"  
-    :pstRate="selectedItemForComment?.pstRate" 
+    :pstRate="selectedItemForComment?.pstRate"
+    :isTaxChange="selectedItemForComment?.isTaxChange || false"
     @commentSubmitted="handleCommentSubmitted" 
     @close="showCommentPopup = false" 
   />
