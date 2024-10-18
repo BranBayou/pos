@@ -91,6 +91,8 @@ const predictiveCashAmounts = computed(() => {
       return [50, 100, 200]; 
     } else if (total <= 100) {
       return [100, 200]; 
+    } else if (total <= 200) {
+      return [200, 300]; 
     } else {
       return [100, 200]; 
     }
@@ -453,8 +455,15 @@ function generatePDF() {
                 </div>
               </div>
               <!-- Invoice Section -->
-              <div v-if="isInvoiceVisible" class="invoice-div w-6/12 mx-16 p-6 bg-gray-100 rounded-lg shadow-lg">
+              <div v-if="isInvoiceVisible" class="invoice-div w-6/12 mx-16 p-6 bg-gray-100 rounded-lg shadow-lg relative group">
                 <h2 class="text-xl font-bold mb-3">DefaultPOSDowntown</h2>
+                <button 
+                  @click="closeInvoice"
+                  class="absolute top-2 right-2 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style="font-size: 16px;"
+                >
+                  <i class="pi pi-times text-gray-500"></i>
+                </button>
                 <div class="mb-5">
                   <p><strong>Customer:</strong> {{ orderStore.state.customer.name || 'N/A' }}</p>
                   <p><strong>Date:</strong> {{ orderStore.formatDate(Date.now()) }}</p>
