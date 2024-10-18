@@ -100,7 +100,7 @@ const startCountdown = () => {
       authStore.logout(authStore.userRole); 
       authStore.logout(authStore.managerRole);
     }
-  }, 1000000);
+  }, 1000);
 };
 
 
