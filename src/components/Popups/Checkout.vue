@@ -93,8 +93,9 @@ const predictiveCashAmounts = computed(() => {
       return [100, 200]; 
     } else if (total <= 200) {
       return [200, 300]; 
-    } else {
-      return [100, 200]; 
+    } 
+    else {
+      return [500, 1000]; 
     }
   }
   return [];
@@ -112,9 +113,6 @@ function setCashAmount(amount) {
   }
 }
 
-
-
-
 // Prevent negative input on typing
 function preventNegativeInput(event) {
   const invalidChars = ['-', 'e', '+'];
@@ -126,7 +124,6 @@ function preventNegativeInput(event) {
 
 // update the amount for a specific payment method
 function updatePaymentAmount(method, amount) {
-  // Allow free input but only store valid numbers
   const methodToUpdate = selectedPaymentMethods.value.find(m => m.id === method.id);
 
   if (methodToUpdate) {
@@ -134,22 +131,29 @@ function updatePaymentAmount(method, amount) {
     const parsedAmount = parseFloat(cleanedAmount); // Parse valid decimal number
 
     if (!isNaN(parsedAmount)) {
-      const currentRemaining = totalAmount.value - selectedPaymentMethods.value.reduce(
-        (acc, m) => acc + (m.id === method.id ? 0 : parseFloat(m.amount || 0)), 
-        0
-      );
-
-      if (parsedAmount > currentRemaining) {
-        toast.error('Amount exceeds remaining balance.');
-        methodToUpdate.amount = currentRemaining.toFixed(2);
-      } else {
-        methodToUpdate.amount = cleanedAmount; // Let the user enter the amount freely
-      }
+      // Allow user to input freely and handle cash logic only for Cash payment method
+      methodToUpdate.amount = cleanedAmount; // Set the input field to the cleaned amount
     } else {
       methodToUpdate.amount = ''; // Allow clearing the input
     }
   }
 }
+
+// Watcher to automatically adjust remaining amount for the last payment method
+watch(selectedPaymentMethods, (newVal) => {
+  const cashMethod = selectedPaymentMethods.value.find(method => method.name === 'Cash');
+  if (cashMethod) {
+    const cashPaid = parseFloat(cashMethod.amount || 0);
+    const totalOrder = parseFloat(totalAmount.value);
+
+    // Automatically set the change when cash exceeds total
+    if (cashPaid > totalOrder) {
+      changeAmount.value = (cashPaid - totalOrder).toFixed(2);
+    } else {
+      changeAmount.value = '0.00';
+    }
+  }
+}, { deep: true });
 
 // Watcher to automatically adjust remaining amount for the last payment method
 watch(selectedPaymentMethods, (newVal) => {
@@ -260,16 +264,26 @@ async function handleCheckout() {
 
 // Calculating the change when cash payment exceeds the total (specific to the cash method)
 const changeAmount = computed(() => {
-  const cashMethod = selectedPaymentMethods.value.find(method => method.name === 'Cash');
-  if (cashMethod) {
-    const cashPaid = parseFloat(cashMethod.amount || 0);
-    const totalOrder = parseFloat(totalAmount.value);
-    if (cashPaid > totalOrder) {
-      return (cashPaid - totalOrder).toFixed(2); // Return the change amount
+  const totalAllocated = selectedPaymentMethods.value.reduce(
+    (acc, method) => acc + parseFloat(method.amount || 0), 0
+  ); // Sum up amounts from all payment methods
+  
+  const totalOrder = parseFloat(totalAmount.value); // Total order amount
+  
+  if (totalAllocated > totalOrder) {
+    const cashMethod = selectedPaymentMethods.value.find(method => method.name === 'Cash');
+    if (cashMethod) {
+      const cashPaid = parseFloat(cashMethod.amount || 0);
+      const remainingToCover = totalOrder - (totalAllocated - cashPaid); // Remaining amount to be covered by cash
+      
+      if (cashPaid > remainingToCover) {
+        return (cashPaid - remainingToCover).toFixed(2); // Return the change
+      }
     }
   }
   return '0.00'; // Default value when no change
 });
+
 
 const generateInvoice = computed(() => {
   // Map items to calculate item totals
