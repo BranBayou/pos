@@ -17,7 +17,10 @@ const doc = new jsPDF();
 const isInvoiceVisible = ref(false);
 
 function showInvoice() {
-  if (remainingAmount.value === '0.00') {
+  const remaining = parseFloat(remainingAmount.value);
+
+  // Check if remaining amount is effectively zero, allowing for small floating-point inaccuracies
+  if (Math.abs(remaining) < 0.01) {
     isInvoiceVisible.value = true;
     console.log("Invoice is visible:", isInvoiceVisible.value);
   } else {
@@ -25,6 +28,7 @@ function showInvoice() {
     console.log("Invoice is not visible. Remaining amount:", remainingAmount.value);
   }
 }
+
 
 
 function closeInvoice() {
@@ -46,11 +50,12 @@ const paymentMethods = [
 // Total order amount
 const totalAmount = computed(() => orderStore.getOrderTotal);
 
-// Remaining balance to be paid
+// Remaining balance to be paid (will not go negative)
 const remainingAmount = computed(() => {
   const allocatedAmount = selectedPaymentMethods.value.reduce((acc, method) => acc + parseFloat(method.amount || 0), 0);
-  return (totalAmount.value - allocatedAmount).toFixed(2);
+  return Math.max(totalAmount.value - allocatedAmount, 0).toFixed(2);
 });
+
 
 // Function to add a payment method
 function addPaymentMethod(paymentMethod) {
@@ -86,8 +91,11 @@ const predictiveCashAmounts = computed(() => {
       return [50, 100, 200]; 
     } else if (total <= 100) {
       return [100, 200]; 
-    } else {
-      return [100, 200]; 
+    } else if (total <= 200) {
+      return [200, 300]; 
+    } 
+    else {
+      return [500, 1000]; 
     }
   }
   return [];
@@ -98,41 +106,54 @@ const predictiveCashAmounts = computed(() => {
 function setCashAmount(amount) {
   const cashMethod = selectedPaymentMethods.value.find(method => method.name === 'Cash');
   if (cashMethod) {
-    const remaining = parseFloat(remainingAmount.value);
-    if (amount > remaining) {
-      cashMethod.amount = remaining.toFixed(2);
-    } else {
-      cashMethod.amount = amount.toFixed(2);
-    }
+    cashMethod.amount = amount.toFixed(2); // Allow larger amounts to be set
   } else {
     addPaymentMethod({ id: '5', name: 'Cash', icon: '/cash.svg' });
     setCashAmount(amount);
   }
 }
 
-
 // Prevent negative input on typing
 function preventNegativeInput(event) {
-  if (event.key === '-' || event.key === 'e') {
+  const invalidChars = ['-', 'e', '+'];
+  if (invalidChars.includes(event.key)) {
     event.preventDefault();
   }
 }
 
+
 // update the amount for a specific payment method
 function updatePaymentAmount(method, amount) {
   const methodToUpdate = selectedPaymentMethods.value.find(m => m.id === method.id);
-  if (methodToUpdate) {
-    const newAmount = Math.max(0, parseFloat(amount)).toFixed(2);
-    const currentRemaining = totalAmount.value - selectedPaymentMethods.value.reduce((acc, m) => acc + (m.id === method.id ? 0 : parseFloat(m.amount || 0)), 0);
 
-    if (newAmount > currentRemaining) {
-      toast.error('Amount exceeds remaining balance.');
-      methodToUpdate.amount = currentRemaining.toFixed(2);
+  if (methodToUpdate) {
+    const cleanedAmount = amount.replace(/[^\d.]/g, ''); // Remove invalid characters
+    const parsedAmount = parseFloat(cleanedAmount); // Parse valid decimal number
+
+    if (!isNaN(parsedAmount)) {
+      // Allow user to input freely and handle cash logic only for Cash payment method
+      methodToUpdate.amount = cleanedAmount; // Set the input field to the cleaned amount
     } else {
-      methodToUpdate.amount = newAmount;
+      methodToUpdate.amount = ''; // Allow clearing the input
     }
   }
 }
+
+// Watcher to automatically adjust remaining amount for the last payment method
+watch(selectedPaymentMethods, (newVal) => {
+  const cashMethod = selectedPaymentMethods.value.find(method => method.name === 'Cash');
+  if (cashMethod) {
+    const cashPaid = parseFloat(cashMethod.amount || 0);
+    const totalOrder = parseFloat(totalAmount.value);
+
+    // Automatically set the change when cash exceeds total
+    if (cashPaid > totalOrder) {
+      changeAmount.value = (cashPaid - totalOrder).toFixed(2);
+    } else {
+      changeAmount.value = '0.00';
+    }
+  }
+}, { deep: true });
 
 // Watcher to automatically adjust remaining amount for the last payment method
 watch(selectedPaymentMethods, (newVal) => {
@@ -179,8 +200,7 @@ async function handleCheckout() {
       TaxesWaived: item.TaxesWaived,
       SalesPersonId: item.SalesPersonId || 'defaultSalesPersonId'
     })),
-    
-    // Approval list if any (empty for now)
+
     // Approval list (updated structure)
     ApprovalList: orderStore.state.approvalList.map(approval => ({
       ManagerId: approval.ManagerId || 'defaultManagerId',
@@ -242,32 +262,58 @@ async function handleCheckout() {
   }
 }
 
+// Calculating the change when cash payment exceeds the total (specific to the cash method)
+const changeAmount = computed(() => {
+  const totalAllocated = selectedPaymentMethods.value.reduce(
+    (acc, method) => acc + parseFloat(method.amount || 0), 0
+  ); // Sum up amounts from all payment methods
+  
+  const totalOrder = parseFloat(totalAmount.value); // Total order amount
+  
+  if (totalAllocated > totalOrder) {
+    const cashMethod = selectedPaymentMethods.value.find(method => method.name === 'Cash');
+    if (cashMethod) {
+      const cashPaid = parseFloat(cashMethod.amount || 0);
+      const remainingToCover = totalOrder - (totalAllocated - cashPaid); // Remaining amount to be covered by cash
+      
+      if (cashPaid > remainingToCover) {
+        return (cashPaid - remainingToCover).toFixed(2); // Return the change
+      }
+    }
+  }
+  return '0.00'; // Default value when no change
+});
+
 
 const generateInvoice = computed(() => {
-  const invoiceItems = orderStore.state.orderItems?.map(item => ({
+  // Map items to calculate item totals
+  const invoiceItems = orderStore.state.orderItems.map(item => ({
     name: item.ItemName || 'Unknown Item',
     quantity: item.Qty || 1,
     price: item.Price || 0,
-    total: ((item.Qty || 1) * (item.Price || 0)).toFixed(2)
-  })) || [];
+    total: (item.Qty * item.Price).toFixed(2)  // Total price per item
+  }));
 
+  // Calculate subtotal
   const subtotal = invoiceItems.reduce((acc, item) => acc + parseFloat(item.total), 0).toFixed(2);
 
-  // Calculate overall discount
+  // Calculate overall discount on the subtotal
   const overallDiscount = orderStore.state.overallDiscount || 0;
   const discountAmount = (subtotal * (overallDiscount / 100)).toFixed(2);
 
-  // Calculate the taxable amount (after discount)
+  // Calculate the taxable amount (subtotal minus the discount)
   const taxableAmount = (subtotal - discountAmount).toFixed(2);
 
-  const gstRate = orderStore.gstRate || 5; 
-  const pstRate = orderStore.pstRate || 7; 
+  // Get GST and PST rates
+  const gstRate = orderStore.state.taxes.find(tax => tax.type === 'GST').rate || 5;
+  const pstRate = orderStore.state.taxes.find(tax => tax.type === 'PST').rate || 7;
 
-  // Calculate GST and PST as portions of the subtotal (included in the total)
-  const gst = ((gstRate / (100 + gstRate + pstRate)) * taxableAmount).toFixed(2);
-  const pst = ((pstRate / (100 + gstRate + pstRate)) * taxableAmount).toFixed(2);
+  // Calculate GST and PST based on the pre-tax subtotal (taxable amount)
+  const gst = (taxableAmount * (gstRate / 100)).toFixed(2);
+  const pst = (taxableAmount * (pstRate / 100)).toFixed(2);
 
-  const totalAmount = taxableAmount;
+  // Calculate the final total amount (subtotal - discount + taxes)
+  const totalAmount = parseFloat(taxableAmount).toFixed(2);
 
   return {
     items: invoiceItems,
@@ -278,6 +324,7 @@ const generateInvoice = computed(() => {
     totalAmount: totalAmount || '0.00'
   };
 });
+
 
 
 function generatePDF() {
@@ -361,10 +408,13 @@ function generatePDF() {
                       <div class="flex w-full justify-between px-5 py-3">
                         <img :src="paymentMethods.find(pm => pm.id === method.id).icon" alt="" class="w-10 h-10">
                         <div class="relative flex items-center gap-4">
-                          <input type="number" v-model.number="method.amount"
-                            @input="updatePaymentAmount(method, method.amount)" @keydown="preventNegativeInput"
-                            :max="remainingAmount"
+                          <input 
+                            type="text" 
+                            v-model="method.amount" 
+                            @input="updatePaymentAmount(method, method.amount)" 
+                            @keydown="preventNegativeInput"
                             class="border-2 border-gray-300 rounded-md py-1 px-3 w-32 text-right focus:ring focus:ring-purple-200 focus:outline-none focus:border-purple-500 pr-10">
+
                           <!-- Clear Button inside Input -->
                           <button v-if="method.amount > 0" @click="clearPaymentAmount(method)"
                             class="absolute right-2 top-2 text-gray-500 hover:text-gray-700 text-lg"
@@ -381,7 +431,7 @@ function generatePDF() {
                       </button>
 
                       <!-- Predictive Cash Amounts if Cash is selected -->
-                      <div v-if="method.name === 'Cash'" class="mt-2 w-full flex gap-2 justify-end px-5">
+                      <div v-if="method.name === 'Cash'" class="w-full flex gap-2 justify-end px-5">
                         <button 
                           v-for="amount in predictiveCashAmounts" 
                           :key="amount" 
@@ -391,6 +441,9 @@ function generatePDF() {
                           ${{ amount }}
                         </button>
                       </div>
+                      <p v-if="method.name === 'Cash' && parseFloat(changeAmount) > 0" class="text-purple-500 ml-auto mr-5 mt-2">
+                        Change: ${{ changeAmount }}
+                      </p>
                     </li>
                   </ul>
 
@@ -416,8 +469,15 @@ function generatePDF() {
                 </div>
               </div>
               <!-- Invoice Section -->
-              <div v-if="isInvoiceVisible" class="invoice-div w-6/12 mx-16 p-6 bg-gray-100 rounded-lg shadow-lg">
+              <div v-if="isInvoiceVisible" class="invoice-div w-6/12 mx-16 p-6 bg-gray-100 rounded-lg shadow-lg relative group">
                 <h2 class="text-xl font-bold mb-3">DefaultPOSDowntown</h2>
+                <button 
+                  @click="closeInvoice"
+                  class="absolute top-2 right-2 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style="font-size: 16px;"
+                >
+                  <i class="pi pi-times text-gray-500"></i>
+                </button>
                 <div class="mb-5">
                   <p><strong>Customer:</strong> {{ orderStore.state.customer.name || 'N/A' }}</p>
                   <p><strong>Date:</strong> {{ orderStore.formatDate(Date.now()) }}</p>
@@ -504,8 +564,6 @@ function generatePDF() {
                   </button>
                 </div>
               </div>
-
-
             </div>
           </div>
         </Transition>

@@ -63,23 +63,32 @@ const storeOriginalValue = (key, item) => {
 };
 
 const checkValueChanged = (key, item) => {
-  const originalValue = originalValues.value[item.ItemId]?.[key];
-  if (item[key] !== originalValue) {
+  const originalValue = parseFloat(originalValues.value[item.ItemId]?.[key] || 0);
+  const currentValue = parseFloat(item[key] || 0);
+
+  // Only trigger manager permission if the value has changed
+  if (currentValue !== originalValue) {
     checkManagerPermission(item);
   }
 };
 
 
+
 // Handle price input and recalculate discount based on the original price
 const handlePriceInput = (item) => {
-  if (item.Price <= 0) {
-    item.Price = item.OriginalPrice; 
-  } else {
-    const discount = ((1 - item.Price / item.OriginalPrice) * 100).toFixed(2);
-    item.Discount = discount > 0 ? discount : 0;
+  if (item.Price < 0) {
+    item.Price = 0; // Prevent negative prices
+  } else if (item.Price > item.OriginalPrice) {
+    item.Price = item.OriginalPrice; // Cap the price to original
   }
-  orderStore.updateDiscountPercentage(item, item.Discount);
+  
+  // Avoid applying discount while user is typing
+  const discount = ((1 - item.Price / item.OriginalPrice) * 100).toFixed(2);
+  item.Discount = discount > 0 ? discount : 0;
+
+  // Delay store update until blur event
 };
+
 
 // Handle discount input and recalculate the price based on the original price
 const handleDiscountInput = (item) => {
@@ -127,35 +136,77 @@ nextTick(() => {
   });
 });
 
-const gstRate = computed({
-  get() {
-    return orderStore.state.taxes.find(tax => tax.type === 'GST').rate;
-  },
-  set(value) {
-    // Update GST rate in the store
-    orderStore.updateGstRate(value);  
+// const gstRate = computed({
+//   get() {
+//     return orderStore.state.taxes.find(tax => tax.type === 'GST').rate;
+//   },
+//   set(value) {
+//     // Update GST rate in the store
+//     orderStore.updateGstRate(value);  
+//   }
+// })
+// const pstRate = computed({
+//   get() {
+//     return orderStore.state.taxes.find(tax => tax.type === 'PST').rate;
+//   },
+//   set(value) {
+//     // Update PST rate in the store
+//     orderStore.updatePstRate(value);  
+//   }
+// });
+
+const originalTaxRates = ref({});
+
+const storeOriginalTaxRates = (item) => {
+  if (!originalTaxRates.value[item.ItemId]) {
+    originalTaxRates.value[item.ItemId] = {
+      gstRate: item.gstRate,
+      pstRate: item.pstRate
+    };
   }
-})
-const pstRate = computed({
-  get() {
-    return orderStore.state.taxes.find(tax => tax.type === 'PST').rate;
-  },
-  set(value) {
-    // Update PST rate in the store
-    orderStore.updatePstRate(value);  
+};
+
+const checkTaxRateChanged = (item) => {
+  const originalGST = originalTaxRates.value[item.ItemId]?.gstRate;
+  const originalPST = originalTaxRates.value[item.ItemId]?.pstRate;
+
+  const currentGST = item.gstRate;
+  const currentPST = item.pstRate;
+
+  // Check if GST or PST rates have changed
+  if (currentGST !== originalGST || currentPST !== originalPST) {
+    selectedItemForComment.value = { 
+      ...item, 
+      gstRate: currentGST,  // Pass updated GST rate
+      pstRate: currentPST,  // Pass updated PST rate
+      isTaxChange: true,
+    };
+    console.log(currentGST, currentPST)
+    console.log("isTaxChange: ", selectedItemForComment.value.isTaxChange);
+    console.log("Selected Item for Comment: ", selectedItemForComment.value);
+    console.log("isTaxChange Parent: ", selectedItemForComment.value?.isTaxChange);
+
+
+    checkManagerPermission(item);
   }
-});
+};
+
 
 </script>
 
 <template>
   <AddManagerApprovalRequest 
-   :item="selectedItemForComment" 
-  />
+      :item="selectedItemForComment"
+      :gstRate="selectedItemForComment?.gstRate"  
+      :pstRate="selectedItemForComment?.pstRate"  
+    />
   <AddSales :item="selectedItemForSalesmen" />
   <CommentPopup 
     v-if="showCommentPopup" 
     :item="selectedItemForComment" 
+    :gstRate="selectedItemForComment?.gstRate"  
+    :pstRate="selectedItemForComment?.pstRate"
+    :isTaxChange="selectedItemForComment?.isTaxChange || false"
     @commentSubmitted="handleCommentSubmitted" 
     @close="showCommentPopup = false" 
   />
@@ -227,10 +278,14 @@ const pstRate = computed({
               type="number" 
               class="border-2 rounded-lg w-28 text-center py-1" 
               v-model.number="item.Price" 
-              :min="0"
+              :min="0" 
               @focus="storeOriginalValue('Price', item)"  
               @input="handlePriceInput(item)" 
-              @blur="checkValueChanged('Price', item)"  
+              @blur="() => {
+                item.Price = parseFloat(item.Price).toFixed(2);
+                checkValueChanged('Price', item); 
+                orderStore.updateDiscountPercentage(item, item.Discount);
+              }"
               :disabled="isOverallDiscountApplied"
               :class="{
                 'bg-purple-500 opacity-30 text-white cursor-not-allowed': isOverallDiscountApplied,
@@ -258,31 +313,38 @@ const pstRate = computed({
             />
           </span>
 
-          <!-- Editable GST input, default set to 5% -->
-         <span class="flex items-center justify-start gap-2">
-           <p class="font-semibold">GST</p>
-           <input 
-             type="number" 
-             class="border-2 rounded-lg w-28 text-center py-1" 
-             v-model.number="gstRate" 
-             @input="updateGstRate(gstRate)" 
-             :min="0" 
-             :max="100"
-           />
-         </span>
-     
-         <!-- PST Input, default set to 7% -->
-         <span class="flex items-center justify-start gap-2 pt-5">
-           <p class="font-semibold">PST</p>
-           <input 
-             type="number" 
-             class="border-2 rounded-lg w-28 text-center py-1" 
-             v-model.number="pstRate" 
-             @input="updatePstRate(pstRate)" 
-             :min="0" 
-             :max="100"
-           />
-         </span>
+          <!-- Editable GST input for individual item -->
+          <span class="flex items-center justify-start gap-2">
+            <p class="font-semibold">GST %</p>
+            <input 
+              type="number" 
+              class="border-2 rounded-lg w-28 text-center py-1" 
+              v-model.number="item.gstRate" 
+              @focus="storeOriginalTaxRates(item)"
+              @input="orderStore.updateItemTaxRate(item, 'GST', item.gstRate)" 
+              @blur="checkTaxRateChanged(item)"
+              :min="0" 
+              :max="100"
+            />
+            ${{ orderStore.getItemTaxAmounts(item).gstAmount }}
+          </span>
+
+          <!-- Editable PST input for individual item -->
+          <span class="flex items-center justify-start gap-2 pt-5">
+            <p class="font-semibold">PST %</p>
+            <input 
+              type="number" 
+              class="border-2 rounded-lg w-28 text-center py-1" 
+              v-model.number="item.pstRate" 
+              @focus="storeOriginalTaxRates(item)"
+              @input="orderStore.updateItemTaxRate(item, 'PST', item.pstRate)" 
+              @blur="checkTaxRateChanged(item)"
+              :min="0" 
+              :max="100"
+            />
+            ${{ orderStore.getItemTaxAmounts(item).pstAmount }}
+          </span>
+
         </div>
       </div>
     </div>

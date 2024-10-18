@@ -144,7 +144,7 @@ const handlePasswordInput = (num) => {
                 <!-- Password Input -->
                 <div class="flex justify-center items-center gap-2 border-2 rounded-2xl py-3 px-3">
                   <i class="pi pi-lock"></i>
-                  <Password v-model="password" @keyup.enter="login" :feedback="false" placeholder="Enter PIN" class="w-full mx-auto" />
+                  <Password v-model="password" @keyup.enter="login" :feedback="false" placeholder="" class="w-full mx-auto" />
                 </div>
               </div>
 

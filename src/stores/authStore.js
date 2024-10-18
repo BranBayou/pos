@@ -214,13 +214,13 @@ export const useAuthStore = defineStore('auth', () => {
      selectedCustomer.value = customer;
    };
 
-   //
+   // handle toggle toggle checkout popup
    function toggleCheckoutPopup () {
      isCheckoutPopupVisible.value =!isCheckoutPopupVisible.value;
      console.log('Show checkout popup:', !isCheckoutPopupVisible.value);
    }
 
-   // 
+   // handle toggle show comment modal
    function toggleShowCommentsModal () {
      showCommentsModal.value = !showCommentsModal.value;
      console.log('Show comments modal:', !showCommentsModal.value);

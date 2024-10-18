@@ -12,17 +12,27 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  gstRate: {
+    type: Number,
+    required: true,
+  },
+  pstRate: {
+    type: Number,
+    required: true,
+  },
 });
 
 // Function to handle click and toggle popups correctly
-const handleCacel = () => {
+const handleCancel = () => {
   authStore.toggleAddManagerApprovalRequest();
-  orderStore.state.overallDiscount = 0;
+
+  // Reset the discount and tax rates if approval is canceled
   if (props.item) {
     orderStore.resetDiscount(props.item);
+    orderStore.resetTaxRate(props.item, 'GST');
+    orderStore.resetTaxRate(props.item, 'PST');
   }
-  console.log("when cancel", orderStore.state.overallDiscount);
-}
+};
 
 const handleClick = () => {
   if (authStore.isAddManagerApprovalRequest) {
@@ -38,13 +48,15 @@ const handleClick = () => {
       <div class="">
         <ManagerLoginPopup
          :item="props.item"
+         :gstRate="props.gstRate"
+         :pstRate="props.pstRate"
         />
         <div v-show="authStore.isAddManagerApprovalRequest" class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
           <Transition name="modal-inner" class="rounded-2xl">
             <div v-if="authStore.isAddManagerApprovalRequest" class="fixed top-44 z-50 flex items-center justify-center bg-black bg-opacity-50 w-2/5">
               <div class="bg-white rounded-2xl shadow-lg p-6 w-full">
                 <!-- Manager Login Popup Component -->
-                <i @click="handleCacel" class="pi pi-times-circle w-full text-right" style="font-size: 24px;"></i>
+                <i @click="handleCancel" class="pi pi-times-circle w-full text-right" style="font-size: 24px;"></i>
                 <h3 class="text-lg font-semibold mb-4 text-center">Manager is required to approve this Discount</h3>
                 <div class="flex justify-end gap-4 w-full">
                   <button 

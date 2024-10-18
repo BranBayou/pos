@@ -17,12 +17,22 @@ const props = defineProps({
   item: {
     type: Object,
     required: true
-  }
+  },
+  gstRate: {
+    type: Number,
+    required: true,
+  },
+  pstRate: {
+    type: Number,
+    required: true,
+  },
 });
 
 function handleClose () {
   if (props.item) {
     orderStore.resetDiscount(props.item);
+    orderStore.resetTaxRate(props.item, 'GST');
+    orderStore.resetTaxRate(props.item, 'PST');
   }
   authStore.toggleManagerLoginPopup(); 
 }
@@ -112,7 +122,7 @@ const handlePasswordInput = (num) => {
               </div>
               <div class="flex justify-center items-center gap-2 border-2 rounded-2xl py-3 px-3">
                 <i class="pi pi-lock"></i>
-                <Password v-model="password" @keyup.enter="loginManager" :feedback="false" placeholder="******" class=" w-full mx-auto" />
+                <Password v-model="password" @keyup.enter="loginManager" :feedback="false" placeholder="" class=" w-full mx-auto" />
               </div>
               <div class="grid grid-cols-3 gap-4">
                 <button @click="handlePasswordInput(i)" v-for="i in 9" :key="i"
