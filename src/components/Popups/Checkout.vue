@@ -17,7 +17,10 @@ const doc = new jsPDF();
 const isInvoiceVisible = ref(false);
 
 function showInvoice() {
-  if (remainingAmount.value === '0.00') {
+  const remaining = parseFloat(remainingAmount.value);
+
+  // Check if remaining amount is effectively zero, allowing for small floating-point inaccuracies
+  if (Math.abs(remaining) < 0.01) {
     isInvoiceVisible.value = true;
     console.log("Invoice is visible:", isInvoiceVisible.value);
   } else {
@@ -25,6 +28,7 @@ function showInvoice() {
     console.log("Invoice is not visible. Remaining amount:", remainingAmount.value);
   }
 }
+
 
 
 function closeInvoice() {
@@ -46,11 +50,12 @@ const paymentMethods = [
 // Total order amount
 const totalAmount = computed(() => orderStore.getOrderTotal);
 
-// Remaining balance to be paid
+// Remaining balance to be paid (will not go negative)
 const remainingAmount = computed(() => {
   const allocatedAmount = selectedPaymentMethods.value.reduce((acc, method) => acc + parseFloat(method.amount || 0), 0);
-  return (totalAmount.value - allocatedAmount).toFixed(2);
+  return Math.max(totalAmount.value - allocatedAmount, 0).toFixed(2);
 });
+
 
 // Function to add a payment method
 function addPaymentMethod(paymentMethod) {
@@ -98,17 +103,14 @@ const predictiveCashAmounts = computed(() => {
 function setCashAmount(amount) {
   const cashMethod = selectedPaymentMethods.value.find(method => method.name === 'Cash');
   if (cashMethod) {
-    const remaining = parseFloat(remainingAmount.value);
-    if (amount > remaining) {
-      cashMethod.amount = remaining.toFixed(2);
-    } else {
-      cashMethod.amount = amount.toFixed(2);
-    }
+    cashMethod.amount = amount.toFixed(2); // Allow larger amounts to be set
   } else {
     addPaymentMethod({ id: '5', name: 'Cash', icon: '/cash.svg' });
     setCashAmount(amount);
   }
 }
+
+
 
 
 // Prevent negative input on typing
@@ -254,43 +256,55 @@ async function handleCheckout() {
   }
 }
 
+// Calculating the change when cash payment exceeds the total (specific to the cash method)
+const changeAmount = computed(() => {
+  const cashMethod = selectedPaymentMethods.value.find(method => method.name === 'Cash');
+  if (cashMethod) {
+    const cashPaid = parseFloat(cashMethod.amount || 0);
+    const totalOrder = parseFloat(totalAmount.value);
+    if (cashPaid > totalOrder) {
+      return (cashPaid - totalOrder).toFixed(2); // Return the change amount
+    }
+  }
+  return '0.00'; // Default value when no change
+});
 
 const generateInvoice = computed(() => {
+  // Map items to calculate item totals
   const invoiceItems = orderStore.state.orderItems.map(item => ({
     name: item.ItemName || 'Unknown Item',
     quantity: item.Qty || 1,
     price: item.Price || 0,
-    total: (item.Qty * item.Price).toFixed(2)
+    total: (item.Qty * item.Price).toFixed(2)  // Total price per item
   }));
 
+  // Calculate subtotal
   const subtotal = invoiceItems.reduce((acc, item) => acc + parseFloat(item.total), 0).toFixed(2);
 
-  // Calculate overall discount
+  // Calculate overall discount on the subtotal
   const overallDiscount = orderStore.state.overallDiscount || 0;
   const discountAmount = (subtotal * (overallDiscount / 100)).toFixed(2);
 
-  // Calculate the taxable amount (after discount)
+  // Calculate the taxable amount (subtotal minus the discount)
   const taxableAmount = (subtotal - discountAmount).toFixed(2);
 
-  // Use the store's tax amounts per item
-  const gstTotal = orderStore.state.orderItems.reduce((acc, item) => {
-    const gstAmount = (item.Price * (item.gstRate / 100)) * item.Qty;
-    return acc + gstAmount;
-  }, 0).toFixed(2);
+  // Get GST and PST rates
+  const gstRate = orderStore.state.taxes.find(tax => tax.type === 'GST').rate || 5;
+  const pstRate = orderStore.state.taxes.find(tax => tax.type === 'PST').rate || 7;
 
-  const pstTotal = orderStore.state.orderItems.reduce((acc, item) => {
-    const pstAmount = (item.Price * (item.pstRate / 100)) * item.Qty;
-    return acc + pstAmount;
-  }, 0).toFixed(2);
+  // Calculate GST and PST based on the pre-tax subtotal (taxable amount)
+  const gst = (taxableAmount * (gstRate / 100)).toFixed(2);
+  const pst = (taxableAmount * (pstRate / 100)).toFixed(2);
 
-  const totalAmount = (parseFloat(taxableAmount) + parseFloat(gstTotal) + parseFloat(pstTotal)).toFixed(2);
+  // Calculate the final total amount (subtotal - discount + taxes)
+  const totalAmount = parseFloat(taxableAmount).toFixed(2);
 
   return {
     items: invoiceItems,
     subtotal: subtotal || '0.00',
     discountAmount: discountAmount || '0.00',
-    gst: gstTotal || '0.00',
-    pst: pstTotal || '0.00',
+    gst: gst || '0.00',
+    pst: pst || '0.00',
     totalAmount: totalAmount || '0.00'
   };
 });
@@ -401,7 +415,7 @@ function generatePDF() {
                       </button>
 
                       <!-- Predictive Cash Amounts if Cash is selected -->
-                      <div v-if="method.name === 'Cash'" class="mt-2 w-full flex gap-2 justify-end px-5">
+                      <div v-if="method.name === 'Cash'" class="w-full flex gap-2 justify-end px-5">
                         <button 
                           v-for="amount in predictiveCashAmounts" 
                           :key="amount" 
@@ -411,6 +425,9 @@ function generatePDF() {
                           ${{ amount }}
                         </button>
                       </div>
+                      <p v-if="method.name === 'Cash' && parseFloat(changeAmount) > 0" class="text-purple-500 ml-auto mr-5 mt-2">
+                        Change: ${{ changeAmount }}
+                      </p>
                     </li>
                   </ul>
 
@@ -524,8 +541,6 @@ function generatePDF() {
                   </button>
                 </div>
               </div>
-
-
             </div>
           </div>
         </Transition>
