@@ -268,8 +268,8 @@ export const useOrderStore = defineStore('orders', () => {
   }
 
   const getItemTaxAmounts = (item) => {
-    const gstAmount = (item.Price * (item.gstRate / 100)).toFixed(2);
-    const pstAmount = (item.Price * (item.pstRate / 100)).toFixed(2);
+    const gstAmount = (item.Qty * item.Price * (item.gstRate / 100)).toFixed(2);
+    const pstAmount = (item.Qty * item.Price * (item.pstRate / 100)).toFixed(2);
     return { gstAmount, pstAmount };
   };
 
