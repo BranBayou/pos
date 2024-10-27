@@ -29,6 +29,7 @@ const props = defineProps({
 });
 
 function handleClose () {
+  orderStore.state.overallDiscount = 0;
   if (props.item) {
     orderStore.resetDiscount(props.item);
     orderStore.resetTaxRate(props.item, 'GST');

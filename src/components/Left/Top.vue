@@ -96,14 +96,16 @@ const startCountdown = () => {
         managerRole: authStore.managerRole,
       }));
 
-      // Perform the logout
-      authStore.logout(authStore.userRole); 
-      authStore.logout(authStore.managerRole);
+      // Perform the logout for both roles
+      if (authStore.userRole) {
+        authStore.logout(authStore.userRole);
+      }
+      if (authStore.managerRole) {
+        authStore.logout(authStore.managerRole);
+      }
     }
   }, 1000);
 };
-
-
 
 const resetCountdown = () => {
   startCountdown();
@@ -124,7 +126,7 @@ const handleCommentAdded = () => {
 };
 
 // Watch for login status and manage countdown accordingly
-watch(() => authStore.isUserLoggedIn, (isLoggedIn) => {
+watch(() => authStore.isUserLoggedIn || authStore.isManagerLoggedIn, (isLoggedIn) => {
   if (isLoggedIn) {
     startCountdown();
     window.addEventListener('mousemove', resetCountdown);
@@ -138,7 +140,7 @@ watch(() => authStore.isUserLoggedIn, (isLoggedIn) => {
 });
 
 onMounted(() => {
-  if (authStore.isUserLoggedIn) {
+  if (authStore.isUserLoggedIn || authStore.isManagerLoggedIn) {
     startCountdown();
     window.addEventListener('mousemove', resetCountdown);
     window.addEventListener('keydown', resetCountdown);
@@ -219,12 +221,12 @@ window.addEventListener('comment-saved', updateComments);
       />
     </div>
 
-    <ItemsSearch v-if="authStore.isUserLoggedIn" />
-    <OpenDrawer v-if="authStore.isUserLoggedIn" />
-    <AddBehavior />
-    <AddComment 
-     v-if="authStore.isAddCommentButtonMoved"
-     @click="handleCommentAdded"
+    <ItemsSearch v-if="authStore.isUserLoggedIn || authStore.isManagerLoggedIn" />
+    <OpenDrawer v-if="authStore.isUserLoggedIn || authStore.isManagerLoggedIn" />
+    <AddBehavior v-if="authStore.isUserLoggedIn || authStore.isManagerLoggedIn"  />
+    <AddComment
+      v-if="authStore.isAddCommentButtonMoved && (authStore.isUserLoggedIn || authStore.isManagerLoggedIn)"
+      @click="handleCommentAdded"
     />
     <AddManagerApproval 
      v-if="authStore.isAddManagerApprovalButtonMoved" 
@@ -244,7 +246,7 @@ window.addEventListener('comment-saved', updateComments);
     </button>
 
     <!-- Comments Modal -->
-    <Comments v-if="authStore.showCommentsModal" @close="authStore.toggleShowCommentsModal" />
+    <Comments v-if="authStore.showCommentsModal && (authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" @close="authStore.toggleShowCommentsModal" />
   </div>
 </template>
 
