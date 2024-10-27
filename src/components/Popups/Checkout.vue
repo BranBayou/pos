@@ -60,13 +60,25 @@ const remainingAmount = computed(() => {
 // Function to add a payment method
 function addPaymentMethod(paymentMethod) {
   const existingMethod = selectedPaymentMethods.value.find(method => method.id === paymentMethod.id);
-  
+
   if (!existingMethod) {
-    selectedPaymentMethods.value.push({
-      id: paymentMethod.id,
-      name: paymentMethod.name,
-      amount: remainingAmount.value > 0 ? remainingAmount.value : 0
-    });
+    const remaining = parseFloat(remainingAmount.value);
+    
+    // If this is the first payment method, set its amount to the total order amount
+    if (selectedPaymentMethods.value.length === 0) {
+      selectedPaymentMethods.value.push({
+        id: paymentMethod.id,
+        name: paymentMethod.name,
+        amount: totalAmount.value.toFixed(2) // Set to total price
+      });
+    } else {
+      // For subsequent methods, set amount to 0 initially
+      selectedPaymentMethods.value.push({
+        id: paymentMethod.id,
+        name: paymentMethod.name,
+        amount: '0.00'
+      });
+    }
   } else {
     toast.error(`${paymentMethod.name} is already selected.`);
   }
@@ -131,15 +143,36 @@ function updatePaymentAmount(method, amount) {
     const parsedAmount = parseFloat(cleanedAmount); // Parse valid decimal number
 
     if (!isNaN(parsedAmount)) {
-      // Allow user to input freely and handle cash logic only for Cash payment method
-      methodToUpdate.amount = cleanedAmount; // Set the input field to the cleaned amount
+      // Update the current method's amount
+      methodToUpdate.amount = cleanedAmount;
+
+      // Calculate the total allocated amount
+      const totalAllocated = selectedPaymentMethods.value.reduce((acc, m) => acc + parseFloat(m.amount || 0), 0);
+      const totalOrder = parseFloat(totalAmount.value);
+
+      // If total allocated exceeds total order, adjust the previous method
+      if (totalAllocated > totalOrder) {
+        const excessAmount = totalAllocated - totalOrder;
+        adjustPreviousPaymentMethod(excessAmount, method.id);
+      }
     } else {
       methodToUpdate.amount = ''; // Allow clearing the input
     }
   }
 }
 
+function adjustPreviousPaymentMethod(excessAmount, currentMethodId) {
+  // Find the last payment method before the current one
+  const previousMethod = selectedPaymentMethods.value.find(method => method.id !== currentMethodId);
+
+  if (previousMethod) {
+    const adjustedAmount = Math.max(parseFloat(previousMethod.amount) - excessAmount, 0);
+    previousMethod.amount = adjustedAmount.toFixed(2);
+  }
+}
+
 // Watcher to automatically adjust remaining amount for the last payment method
+/*
 watch(selectedPaymentMethods, (newVal) => {
   const cashMethod = selectedPaymentMethods.value.find(method => method.name === 'Cash');
   if (cashMethod) {
@@ -152,6 +185,17 @@ watch(selectedPaymentMethods, (newVal) => {
     } else {
       changeAmount.value = '0.00';
     }
+  }
+}, { deep: true });
+*/
+watch(selectedPaymentMethods, (newVal) => {
+  const totalAllocated = newVal.reduce((acc, m) => acc + parseFloat(m.amount || 0), 0);
+  const totalOrder = parseFloat(totalAmount.value);
+
+  // Ensure total allocation matches the total order amount
+  if (totalAllocated > totalOrder) {
+    const excessAmount = totalAllocated - totalOrder;
+    adjustPreviousPaymentMethod(excessAmount, newVal[newVal.length - 1].id);
   }
 }, { deep: true });
 
@@ -402,7 +446,7 @@ function generatePDF() {
 
                 <div class="mb-5">
                   <h2 class="font-semibold text-lg mb-2">Selected Payments</h2>
-                  <ul class="space-y-3">
+                  <ul class="space-y-3 max-h-80 overflow-auto">
                     <li v-for="method in selectedPaymentMethods" :key="method.id"
                       class="flex flex-col items-center justify-between bg-gray-100 p-3 rounded-lg shadow-sm relative group">
                       <div class="flex w-full justify-between px-5 py-3">
@@ -469,7 +513,7 @@ function generatePDF() {
                 </div>
               </div>
               <!-- Invoice Section -->
-              <div v-if="isInvoiceVisible" class="invoice-div w-6/12 mx-16 p-6 bg-gray-100 rounded-lg shadow-lg relative group">
+              <div v-if="isInvoiceVisible" class="invoice-div w-6/12 ml-16 p-6 bg-gray-100 rounded-lg shadow-lg relative group max-h-[700px] overflow-y-scroll">
                 <h2 class="text-xl font-bold mb-3">DefaultPOSDowntown</h2>
                 <button 
                   @click="closeInvoice"

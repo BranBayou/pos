@@ -25,7 +25,7 @@ const props = defineProps({
 // Function to handle click and toggle popups correctly
 const handleCancel = () => {
   authStore.toggleAddManagerApprovalRequest();
-
+  orderStore.state.overallDiscount = 0;
   // Reset the discount and tax rates if approval is canceled
   if (props.item) {
     orderStore.resetDiscount(props.item);
