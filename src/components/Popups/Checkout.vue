@@ -222,6 +222,8 @@ function removePaymentMethod(methodId) {
 
 // handle checkout and API submission
 async function handleCheckout() {
+
+  const remaining = parseFloat(remainingAmount.value);
   if (selectedPaymentMethods.value.length === 0) {
     toast.error('Please select a payment method.');
     return;
@@ -234,7 +236,12 @@ async function handleCheckout() {
   );
 
   // Ensure the allocated amount matches the total order amount
-  if (Math.abs(totalAllocated.toFixed(2) - orderStore.state.total.toFixed(2)) > 0.01) {
+  // if (Math.abs(totalAllocated.toFixed(2) - orderStore.state.total.toFixed(2)) > 0.01) {
+  //   toast.error('Payment allocation does not match the total amount.');
+  //   return;
+  // }
+
+  if (Math.abs(remaining > 0.01)) {
     toast.error('Payment allocation does not match the total amount.');
     return;
   }
