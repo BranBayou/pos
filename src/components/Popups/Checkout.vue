@@ -62,7 +62,6 @@ function addPaymentMethod(paymentMethod) {
   const existingMethod = selectedPaymentMethods.value.find(method => method.id === paymentMethod.id);
 
   if (!existingMethod) {
-    const remaining = parseFloat(remainingAmount.value);
     
     // If this is the first payment method, set its amount to the total order amount
     if (selectedPaymentMethods.value.length === 0) {
@@ -94,20 +93,25 @@ function clearPaymentAmount(method) {
 
 // handle predictive cash amounts
 const predictiveCashAmounts = computed(() => {
-  const total = parseFloat(totalAmount.value);
-  if (!isNaN(total)) {
+  const remaining = parseFloat(remainingAmount.value);
+  //const total = parseFloat(totalAmount.value);
+  if (!isNaN(remaining)) {
     // Calculate the next nearest amounts to the total price
-    if (total <= 20) {
+    if (remaining <= 20) {
       return [20, 50, 100]; 
-    } else if (total <= 50) {
+    } else if (remaining <= 50) {
       return [50, 100, 200]; 
-    } else if (total <= 100) {
+    } else if (remaining <= 100) {
       return [100, 200]; 
-    } else if (total <= 200) {
-      return [200, 300]; 
+    } else if (remaining <= 200) {
+      return [200, 250, 300]; 
+    } else if (remaining <= 300) {
+      return [300, 400, 500]; 
+    } else if (remaining <= 400) {
+      return [400, 500, 600]; 
     } 
     else {
-      return [500, 1000]; 
+      return [500, 600, 700]; 
     }
   }
   return [];
@@ -133,7 +137,7 @@ function preventNegativeInput(event) {
   }
 }
 
-
+/*
 // update the amount for a specific payment method
 function updatePaymentAmount(method, amount) {
   const methodToUpdate = selectedPaymentMethods.value.find(m => m.id === method.id);
@@ -172,7 +176,7 @@ function adjustPreviousPaymentMethod(excessAmount, currentMethodId) {
 }
 
 // Watcher to automatically adjust remaining amount for the last payment method
-/*
+
 watch(selectedPaymentMethods, (newVal) => {
   const cashMethod = selectedPaymentMethods.value.find(method => method.name === 'Cash');
   if (cashMethod) {
@@ -188,6 +192,7 @@ watch(selectedPaymentMethods, (newVal) => {
   }
 }, { deep: true });
 */
+
 watch(selectedPaymentMethods, (newVal) => {
   const totalAllocated = newVal.reduce((acc, m) => acc + parseFloat(m.amount || 0), 0);
   const totalOrder = parseFloat(totalAmount.value);
@@ -195,7 +200,7 @@ watch(selectedPaymentMethods, (newVal) => {
   // Ensure total allocation matches the total order amount
   if (totalAllocated > totalOrder) {
     const excessAmount = totalAllocated - totalOrder;
-    adjustPreviousPaymentMethod(excessAmount, newVal[newVal.length - 1].id);
+    //adjustPreviousPaymentMethod(excessAmount, newVal[newVal.length - 1].id);
   }
 }, { deep: true });
 
@@ -426,7 +431,7 @@ function generatePDF() {
 <template>
   <Teleport to="body">
     <Transition name="modal-outer">
-      <div v-show="authStore.isCheckoutPopupVisible" @click="authStore.toggleCheckoutPopup"
+      <div v-show="authStore.isCheckoutPopupVisible && authStore.isUserLoggedIn || authStore.isManagerLoggedIn" @click="authStore.toggleCheckoutPopup"
         class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
         <Transition name="modal-inner" class="rounded-2xl">
           <div v-if="authStore.isCheckoutPopupVisible" @click.stop
