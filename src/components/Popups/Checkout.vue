@@ -438,7 +438,7 @@ function generatePDF() {
 <template>
   <Teleport to="body">
     <Transition name="modal-outer">
-      <div v-show="authStore.isCheckoutPopupVisible && authStore.isUserLoggedIn || authStore.isManagerLoggedIn" @click="authStore.toggleCheckoutPopup"
+      <div v-show="authStore.isCheckoutPopupVisible && authStore.isUserLoggedIn" @click="authStore.toggleCheckoutPopup"
         class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8" style="z-index: 2;">
         <Transition name="modal-inner" class="rounded-2xl">
           <div v-if="authStore.isCheckoutPopupVisible" @click.stop
