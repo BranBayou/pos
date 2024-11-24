@@ -3,8 +3,10 @@ import { useAuthStore } from '@/stores/authStore';
 import { useCustomerStore } from '@/stores/customerStore';
 import { useOrderStore } from '@/stores/OrderStore'; // Import the order store
 import { ref, computed, onMounted } from 'vue';
+import { useToast } from 'vue-toastification';
 import InputMask from 'primevue/inputmask';
 
+const toast = useToast();
 const authStore = useAuthStore();
 const customerStore = useCustomerStore();
 const orderStore = useOrderStore(); // Initialize the order store
@@ -86,7 +88,7 @@ const submitNewCustomer = () => {
     // Reset the form after submission
     resetForm();
   } else {
-    alert('Please fill in all fields');
+    toast.error("Add customer first")
   }
 };
 
