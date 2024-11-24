@@ -444,7 +444,7 @@ function generatePDF() {
           <div v-if="authStore.isCheckoutPopupVisible" @click.stop
             class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-30 w-10/12">
             <div class="flex bg-white rounded-2xl shadow-lg p-6 w-full">
-              <i @click="authStore.toggleCheckoutPopup" class="pi pi-times-circle w-full text-right absolute top-1 right-1 cursor-pointer" style="font-size: 24px;"></i>
+              <i @click="authStore.toggleCheckoutPopup" class="pi pi-times-circle w-full text-right absolute top-3 right-3 cursor-pointer" style="font-size: 24px;"></i>
               <div class="w-6/12">
                 <h1 class="font-semibold text-[24px] pb-4">Checkout</h1>
 
@@ -526,7 +526,7 @@ function generatePDF() {
                 </div>
               </div>
               <!-- Invoice Section -->
-              <div v-if="isInvoiceVisible" class="invoice-div w-6/12 ml-16 p-6 bg-gray-100 rounded-lg shadow-lg relative group max-h-[700px] overflow-y-scroll">
+              <div v-if="isInvoiceVisible" class="invoice-div w-6/12 ml-16 mr-5 p-6 bg-gray-100 rounded-lg shadow-lg relative group max-h-[700px] overflow-y-scroll">
                 <h2 class="text-xl font-bold mb-3">DefaultPOSDowntown</h2>
                 <button 
                   @click="closeInvoice"
