@@ -5,7 +5,7 @@ import LogoutConfirmation from '../Popups/LogoutConfirmation.vue';
 import OpenDrawer from './OpenDrawer.vue';
 import ItemsSearch from './ItemsSearchButton.vue';
 import AddBehavior from '../Popups/AddBehavior.vue';
-import AddComment from './AddCommentButton.vue';
+//import AddComment from './AddCommentButton.vue';
 import AddManagerApproval from './AddManagerApprovalButton.vue';
 import WalkInCustomer from './WalkInCustomerButton.vue';
 import ManagerLogin from '../Popups/ManagerLogin.vue';
@@ -224,10 +224,12 @@ window.addEventListener('comment-saved', updateComments);
     <ItemsSearch v-if="authStore.isUserLoggedIn || authStore.isManagerLoggedIn" />
     <OpenDrawer v-if="authStore.isUserLoggedIn || authStore.isManagerLoggedIn" />
     <AddBehavior v-if="authStore.isUserLoggedIn || authStore.isManagerLoggedIn"  />
+    <!--
     <AddComment
       v-if="authStore.isAddCommentButtonMoved && (authStore.isUserLoggedIn || authStore.isManagerLoggedIn)"
       @click="handleCommentAdded"
     />
+    -->
     <AddManagerApproval 
      v-if="authStore.isAddManagerApprovalButtonMoved" 
      @click="handleManagerApproval" 

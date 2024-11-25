@@ -2,14 +2,14 @@
 import { useAuthStore } from '@/stores/authStore';
 import { useOrderStore } from '@/stores/OrderStore';
 import { ref } from 'vue';
-import AddComment from '../Left/AddCommentButton.vue';
+//import AddComment from '../Left/AddCommentButton.vue';
 import AddManagerApproval from '../Left/AddManagerApprovalButton.vue';
 import WalkInCustomer from '../Left/WalkInCustomerButton.vue';
 
 const authStore = useAuthStore();
 const orderStore = useOrderStore();
 
-const isAddCommentButtonMovedFromAddBeaviour = ref(false);
+//const isAddCommentButtonMovedFromAddBeaviour = ref(false);
 const isAddManagerApprovalButtonMovedFromAddBeaviour = ref(false);
 const isWalkinCustomerMovedFromAddBeaviour = ref(false);
 
@@ -28,10 +28,10 @@ function moveButtonToParent(buttonName) {
   buttons.value = buttons.value.filter(button => button.name !== buttonName);
 }
 
-function handleClickAddComment() {
-  authStore.toggleAddCommentButtonMoved();
-  isAddCommentButtonMovedFromAddBeaviour.value = true;
-}
+// function handleClickAddComment() {
+//   authStore.toggleAddCommentButtonMoved();
+//   isAddCommentButtonMovedFromAddBeaviour.value = true;
+// }
 
 function handleClickAddManager () {
   authStore.toggleAddManagerApprovalButtonMoved();
@@ -60,10 +60,12 @@ function handleClickWalkinCustomer () {
               <i @click.self="authStore.toggleAddBehaviourPopup" class="pi pi-times-circle w-full text-right absolute top-4 right-4 cursor-pointer" style="font-size: 24px;"></i>
               <h1 class="font-semibold text-[24px]">Add Behaviour</h1>
               <div class="bg-[#f4f5f7] rounded-2xl p-3 flex gap-3">
+                <!--
                 <AddComment 
                  v-if="!isAddCommentButtonMovedFromAddBeaviour"
                  @click="handleClickAddComment"
                 />
+                -->
                 <AddManagerApproval 
                   v-if="!isAddManagerApprovalButtonMovedFromAddBeaviour"
                   @click="handleClickAddManager"
