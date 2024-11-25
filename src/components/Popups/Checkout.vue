@@ -439,11 +439,12 @@ function generatePDF() {
   <Teleport to="body">
     <Transition name="modal-outer">
       <div v-show="authStore.isCheckoutPopupVisible && authStore.isUserLoggedIn || authStore.isManagerLoggedIn" @click="authStore.toggleCheckoutPopup"
-        class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
+        class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8" style="z-index: 2;">
         <Transition name="modal-inner" class="rounded-2xl">
           <div v-if="authStore.isCheckoutPopupVisible" @click.stop
             class="fixed top-10 z-50 flex items-center justify-center bg-black bg-opacity-30 w-10/12">
             <div class="flex bg-white rounded-2xl shadow-lg p-6 w-full">
+              <i @click="authStore.toggleCheckoutPopup" class="pi pi-times-circle w-full text-right absolute top-1 right-1 cursor-pointer" style="font-size: 24px;"></i>
               <div class="w-6/12">
                 <h1 class="font-semibold text-[24px] pb-4">Checkout</h1>
 

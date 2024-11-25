@@ -39,7 +39,7 @@ const addSalesPerson = () => {
         <Transition name="modal-outer">
             <div v-show="authStore.isAddSalesPopupVisible"
                  @click="authStore.toggleAddSalesPopup"
-                class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
+                class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8" style="z-index: 2;">
                 <Transition name="modal-inner">
                     <!-- Prevent popup from closing when clicking inside -->
                     <div v-if="authStore.isAddSalesPopupVisible" @click.stop class="flex p-4 w-5/12 bg-white self-start mt-24 rounded-2xl relative">
