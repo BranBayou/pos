@@ -104,7 +104,7 @@ const startCountdown = () => {
         authStore.logout(authStore.managerRole);
       }
     }
-  }, 1000);
+  }, 1000000);
 };
 
 const resetCountdown = () => {
