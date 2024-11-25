@@ -44,7 +44,7 @@ function handleCheckoutPopup() {
 
 
 <template>
-  <div class="bg-white w-full rounded-2xl flex items-center content-between gap-5 my-5 px-5">
+  <div class="bg-white rounded-2xl flex items-center content-between gap-5 my-5 mx-5 px-5 fixed left-0 bottom-1" style="width: 48%;">
     <Checkout />
     <div class="flex gap-5">
       <p class="font-semibold">Items: {{ totalItems }}</p>
