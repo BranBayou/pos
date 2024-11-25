@@ -1,3 +1,4 @@
+<!-- this component is disabled 
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
 const emit = defineEmits(['commentAdded']);
@@ -28,3 +29,4 @@ const handleCommentAdded = () => {
 <style scoped>
 
 </style>
+-->

@@ -3,8 +3,10 @@ import { useAuthStore } from '@/stores/authStore';
 import { useCustomerStore } from '@/stores/customerStore';
 import { useOrderStore } from '@/stores/OrderStore'; // Import the order store
 import { ref, computed, onMounted } from 'vue';
+import { useToast } from 'vue-toastification';
 import InputMask from 'primevue/inputmask';
 
+const toast = useToast();
 const authStore = useAuthStore();
 const customerStore = useCustomerStore();
 const orderStore = useOrderStore(); // Initialize the order store
@@ -86,7 +88,7 @@ const submitNewCustomer = () => {
     // Reset the form after submission
     resetForm();
   } else {
-    alert('Please fill in all fields');
+    toast.error("Add customer first")
   }
 };
 
@@ -107,13 +109,13 @@ const resetForm = () => {
   <Teleport to="body">
     <Transition name="modal-outer">
       <div v-show="authStore.isAddCustomerPopupVisible" @click="authStore.toggleAddCustomerPopup"
-        class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
+        class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8" style="z-index: 2;">
         <Transition name="modal-inner">
           <!-- Prevent popup from closing when clicking inside -->
           <div v-if="authStore.isAddCustomerPopupVisible" @click.stop
-            class="flex p-4 my-10 w-10/12 bg-white self-start rounded-2xl">
+            class="flex p-4 my-10 w-10/12 bg-white self-start rounded-2xl z-10 relative">
             <div class="p-8 flex gap-3 w-full">
-
+              <i @click="authStore.toggleAddCustomerPopup" class="pi pi-times-circle w-full text-right absolute top-4 right-4 cursor-pointer" style="font-size: 24px;"></i>
               <!-- Customer List and Search -->
               <div class="w-6/12">
                 <!-- Search Input -->

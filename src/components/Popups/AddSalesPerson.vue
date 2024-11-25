@@ -39,10 +39,11 @@ const addSalesPerson = () => {
         <Transition name="modal-outer">
             <div v-show="authStore.isAddSalesPopupVisible"
                  @click="authStore.toggleAddSalesPopup"
-                class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8">
+                class="absolute w-full bg-black bg-opacity-30 h-screen top-0 left-0 flex justify-center px-8" style="z-index: 2;">
                 <Transition name="modal-inner">
                     <!-- Prevent popup from closing when clicking inside -->
-                    <div v-if="authStore.isAddSalesPopupVisible" @click.stop class="flex p-4 w-5/12 bg-white self-start mt-24 rounded-2xl">
+                    <div v-if="authStore.isAddSalesPopupVisible" @click.stop class="flex p-4 w-5/12 bg-white self-start mt-24 rounded-2xl relative">
+                        <i @click="authStore.toggleAddSalesPopup" class="pi pi-times-circle w-full text-right absolute top-4 right-4 cursor-pointer" style="font-size: 24px;"></i>
                         <div class="p-8 w-6/12">
                             <div class="w-full space-y-3">
                                 <div class="flex gap-x-1 my-1">
@@ -73,7 +74,7 @@ const addSalesPerson = () => {
                         <div class="mt-4 w-6/12 flex flex-col justify-between items-center">
                             <h1 class="py-4 text-2xl font-semibold">Select Sales Person</h1>
                             <button @click="addSalesPerson"
-                              class="mb-5 bg-purple-200 rounded-2xl py-2 px-4 flex items-center gap-2"
+                              class="mb-5 bg-purple-200 rounded-2xl py-2 px-4 flex items-center gap-2 z-10"
                             >
                                 <i class="pi pi-arrow-circle-right"></i>
                                 <span>Add Sales Person</span>
