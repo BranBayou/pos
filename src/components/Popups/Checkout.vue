@@ -68,7 +68,8 @@ function addPaymentMethod(paymentMethod) {
       selectedPaymentMethods.value.push({
         id: paymentMethod.id,
         name: paymentMethod.name,
-        amount: totalAmount.value.toFixed(2) // Set to total price
+        amount:'0.00' // Set to total price
+        //amount: totalAmount.value.toFixed(2) // Set to total price
       });
     } else {
       // For subsequent methods, set amount to 0 initially
@@ -92,30 +93,61 @@ function clearPaymentAmount(method) {
 }
 
 // handle predictive cash amounts
+// const predictiveCashAmounts = computed(() => {
+//   const remaining = parseFloat(remainingAmount.value);
+//   //const total = parseFloat(totalAmount.value);
+//   if (!isNaN(remaining)) {
+//     // Calculate the next nearest amounts to the total price
+//     if (remaining <= 20) {
+//       return [20, 50, 100]; 
+//     } else if (remaining <= 50) {
+//       return [50, 100, 200]; 
+//     } else if (remaining <= 100) {
+//       return [100, 200]; 
+//     } else if (remaining <= 200) {
+//       return [200, 250, 300]; 
+//     } else if (remaining <= 300) {
+//       return [300, 400, 500]; 
+//     } else if (remaining <= 400) {
+//       return [400, 500, 600]; 
+//     } 
+//     else {
+//       return [500, 600, 700]; 
+//     }
+//   }
+//   return [];
+// });
+
 const predictiveCashAmounts = computed(() => {
   const remaining = parseFloat(remainingAmount.value);
-  //const total = parseFloat(totalAmount.value);
-  if (!isNaN(remaining)) {
-    // Calculate the next nearest amounts to the total price
-    if (remaining <= 20) {
-      return [20, 50, 100]; 
-    } else if (remaining <= 50) {
-      return [50, 100, 200]; 
-    } else if (remaining <= 100) {
-      return [100, 200]; 
-    } else if (remaining <= 200) {
-      return [200, 250, 300]; 
-    } else if (remaining <= 300) {
-      return [300, 400, 500]; 
-    } else if (remaining <= 400) {
-      return [400, 500, 600]; 
-    } 
-    else {
-      return [500, 600, 700]; 
+
+  if (isNaN(remaining) || remaining <= 0) {
+    return [];
+  }
+
+  // Initialize suggestions set to avoid duplicates
+  const suggestions = new Set();
+
+  // Bill denominations for suggestions
+  const billDenominations = [10, 20, 50, 100];
+
+  // Start at the next multiple of 10 above the remaining amount
+  let startAmount = Math.ceil(remaining / 10) * 10;
+  suggestions.add(startAmount);
+
+  // Generate suggestions based on bill denominations
+  for (let increment of billDenominations) {
+    let suggestedAmount = Math.ceil(remaining / increment) * increment;
+
+    if (suggestedAmount > remaining) {
+      suggestions.add(suggestedAmount);
     }
   }
-  return [];
+
+  // Return sorted suggestions as an array
+  return Array.from(suggestions).sort((a, b) => a - b);
 });
+
 
 
 // handle update cash amount based on button click
