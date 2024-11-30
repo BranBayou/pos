@@ -68,7 +68,9 @@ const checkValueChanged = (key, item) => {
 
   // Only trigger manager permission if the value has changed
   if (currentValue !== originalValue) {
-    checkManagerPermission(item);
+    if (currentValue < originalValue) { // Only if the new price is less than the original price trigger discount permission
+      checkManagerPermission(item);
+    }
   }
 };
 
@@ -79,7 +81,7 @@ const handlePriceInput = (item) => {
   if (item.Price < 0) {
     item.Price = 0; // Prevent negative prices
   } else if (item.Price > item.OriginalPrice) {
-    item.Price = item.OriginalPrice; // Cap the price to original
+    item.Price = item.Price; // If the new price is greater than the original should be the new price
   }
   
   // Avoid applying discount while user is typing
@@ -284,7 +286,9 @@ const checkTaxRateChanged = (item) => {
               @blur="() => {
                 item.Price = parseFloat(item.Price).toFixed(2);
                 checkValueChanged('Price', item); 
-                orderStore.updateDiscountPercentage(item, item.Discount);
+                if (item.Price < item.OriginalPrice) {
+                  orderStore.updateDiscountPercentage(item, item.Discount);
+                }
               }"
               :disabled="isOverallDiscountApplied"
               :class="{
