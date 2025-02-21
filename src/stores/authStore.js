@@ -38,7 +38,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isWalkInCustomerButtonMoved = ref(false)
 
 
-  const storeId = '3XoymAusFEOcrifyfM1Tfw';
+  const storeId = 'R-qbuRxyn0iAi2dvDVSA6g';
 
   // Fetch Cashier
   async function fetchCashiers() {

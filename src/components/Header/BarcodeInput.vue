@@ -23,14 +23,13 @@ const filteredProducts = computed(() => {
 
     // Filter products based on the barcode and ensure uniqueness by SKU
     const result = store.products.filter(product => {
-        const barcode = product.BarCode ? product.BarCode.toLowerCase() : '';
         const isUnique = !uniqueProducts.has(product.Sku);
-        
-        if (barcode.includes(query) && isUnique) {
+
+        if (isUnique && product.Barcodes.some(barcode => barcode.toLowerCase().includes(query))) {
             uniqueProducts.set(product.Sku, true);
-            return true; 
+            return true;
         }
-        return false; 
+        return false;
     });
 
     // Always limit the results to a maximum of 5 items
