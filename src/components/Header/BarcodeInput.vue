@@ -46,15 +46,28 @@ function handleClick(product) {
   toast.success('Item added');
   searchQuery.value = '';
 }
+
+function handleEnterKey() {
+    if (filteredProducts.value.length > 0) {
+        const firstProduct = filteredProducts.value[0];
+        handleClick(firstProduct);
+    }
+}
 </script>
 
 <template>
     <div class="relative w-full">
-        <input v-model="searchQuery" :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" type="text"
-            name="barcode-search" id="barcode-search"
+        <input 
+            v-model="searchQuery" 
+            :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" 
+            type="text"
+            name="barcode-search" 
+            id="barcode-search"
             class="bg-gray-100 border-0 outline-none p-2 rounded-lg w-full pr-10"
             :class="{ 'opacity-50 cursor-not-allowed': !(authStore.isUserLoggedIn || authStore.isManagerLoggedIn) }"
-            placeholder="Scan or Enter Barcode">
+            placeholder="Scan or Enter Barcode"
+            @keydown.enter="handleEnterKey"
+        >
 
         <!-- Clear Button (X) -->
         <button v-if="searchQuery" @click="clearSearch"
@@ -94,7 +107,6 @@ function handleClick(product) {
                 </tr>
             </tbody>
         </table>
-
     </div>
 </template>
 
