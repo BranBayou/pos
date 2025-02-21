@@ -13,26 +13,26 @@ const orderStore = useOrderStore();
 const searchQuery = ref('');
 
 const filteredProducts = computed(() => {
-    const query = searchQuery.value.trim().toLowerCase();
-    
+    const query = searchQuery.value.trim();
+
     if (!query) {
         return [];
     }
 
     const uniqueProducts = new Map();
 
-    // Filter products based on the barcode and ensure uniqueness by SKU
+    // Filter products where at least one barcode exactly matches the query
     const result = store.products.filter(product => {
         const isUnique = !uniqueProducts.has(product.Sku);
-
-        if (isUnique && product.Barcodes.some(barcode => barcode.toLowerCase().includes(query))) {
+        
+        if (isUnique && product.Barcodes.includes(query)) {
             uniqueProducts.set(product.Sku, true);
             return true;
         }
         return false;
     });
 
-    // Always limit the results to a maximum of 5 items
+    // Limit results to a maximum of 5 items
     return result.slice(0, 5);
 });
 
