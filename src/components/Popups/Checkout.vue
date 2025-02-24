@@ -225,6 +225,8 @@ watch(selectedPaymentMethods, (newVal) => {
 }, { deep: true });
 */
 
+const storeId = 'R-qbuRxyn0iAi2dvDVSA6g';
+
 watch(selectedPaymentMethods, (newVal) => {
   const totalAllocated = newVal.reduce((acc, m) => acc + parseFloat(m.amount || 0), 0);
   const totalOrder = parseFloat(totalAmount.value);
@@ -335,8 +337,22 @@ async function handleCheckout() {
   console.log('Payload data:', payload);
 
   try {
+    // Retrieve the token from local storage
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        toast.error('Authorization token not found. Please log in again.');
+        return;
+    }
+
     // API call to place the order
-    const response = await axios.post('/api/NewOrder', payload);
+    const response = await axios.post('/api/Order/NewOrder', payload, {
+      headers: {
+        'store-id': storeId,
+        'Authorization': `Bearer ${token}`
+      }
+    }); 
+
     if (response.status === 200) {
       toast.success('Order placed successfully');
       authStore.toggleCheckoutPopup(); // Close the checkout popup

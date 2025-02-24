@@ -45,7 +45,7 @@ export const useProductStore = defineStore('product', {
 
                 // First, get the total size of all files
                 for (const file of fileUrls) {
-                    const fileUrl = `/GenJs/${file.fileUrl}?${Date.now()}`;
+                    const fileUrl = `https://localhost:7293/GenJs/${file.fileUrl}?${Date.now()}`;
                     const fileSize = await getFileSize(fileUrl);  // Get size of each file
                     this.totalFileSize += fileSize;
                 }
@@ -75,7 +75,7 @@ export const useProductStore = defineStore('product', {
                 const loadFile = async (file) => {
                     return new Promise((resolve, reject) => {
                         const xhr = new XMLHttpRequest();
-                        const fileUrl = `/GenJs/${file.fileUrl}?${Date.now()}`;
+                        const fileUrl = `https://localhost:7293/GenJs/${file.fileUrl}?${Date.now()}`;
                         xhr.open('GET', fileUrl, true);
                         xhr.responseType = 'text';  // Expecting JavaScript code as text
 
