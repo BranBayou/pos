@@ -13,27 +13,26 @@ const orderStore = useOrderStore();
 const searchQuery = ref('');
 
 const filteredProducts = computed(() => {
-    const query = searchQuery.value.trim().toLowerCase();
-    
+    const query = searchQuery.value.trim();
+
     if (!query) {
         return [];
     }
 
     const uniqueProducts = new Map();
 
-    // Filter products based on the barcode and ensure uniqueness by SKU
+    // Filter products where at least one barcode exactly matches the query
     const result = store.products.filter(product => {
-        const barcode = product.BarCode ? product.BarCode.toLowerCase() : '';
         const isUnique = !uniqueProducts.has(product.Sku);
         
-        if (barcode.includes(query) && isUnique) {
+        if (isUnique && product.Barcodes.includes(query)) {
             uniqueProducts.set(product.Sku, true);
-            return true; 
+            return true;
         }
-        return false; 
+        return false;
     });
 
-    // Always limit the results to a maximum of 5 items
+    // Limit results to a maximum of 5 items
     return result.slice(0, 5);
 });
 
@@ -47,15 +46,28 @@ function handleClick(product) {
   toast.success('Item added');
   searchQuery.value = '';
 }
+
+function handleEnterKey() {
+    if (filteredProducts.value.length > 0) {
+        const firstProduct = filteredProducts.value[0];
+        handleClick(firstProduct);
+    }
+}
 </script>
 
 <template>
     <div class="relative w-full">
-        <input v-model="searchQuery" :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" type="text"
-            name="barcode-search" id="barcode-search"
+        <input 
+            v-model="searchQuery" 
+            :disabled="!(authStore.isUserLoggedIn || authStore.isManagerLoggedIn)" 
+            type="text"
+            name="barcode-search" 
+            id="barcode-search"
             class="bg-gray-100 border-0 outline-none p-2 rounded-lg w-full pr-10"
             :class="{ 'opacity-50 cursor-not-allowed': !(authStore.isUserLoggedIn || authStore.isManagerLoggedIn) }"
-            placeholder="Scan or Enter Barcode">
+            placeholder="Scan or Enter Barcode"
+            @keydown.enter="handleEnterKey"
+        >
 
         <!-- Clear Button (X) -->
         <button v-if="searchQuery" @click="clearSearch"
@@ -95,7 +107,6 @@ function handleClick(product) {
                 </tr>
             </tbody>
         </table>
-
     </div>
 </template>
 

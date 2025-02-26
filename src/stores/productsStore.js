@@ -11,7 +11,7 @@ export const useProductStore = defineStore('product', {
     }),
     actions: {
         async fetchProducts() {
-            const storeId = '3XoymAusFEOcrifyfM1Tfw';
+            const storeId = 'R-qbuRxyn0iAi2dvDVSA6g';
             const chunkSize = 10000;  // Number of products per chunk
 
             try {
@@ -21,7 +21,7 @@ export const useProductStore = defineStore('product', {
                         'store-id': storeId,
                     }
                 });
-
+                
                 const fileUrls = await response.json();
                 const totalFiles = fileUrls.length;
 
@@ -45,7 +45,7 @@ export const useProductStore = defineStore('product', {
 
                 // First, get the total size of all files
                 for (const file of fileUrls) {
-                    const fileUrl = `/GenJs/${file.fileUrl}?${Date.now()}`;
+                    const fileUrl = `https://localhost:7293/GenJs/${file.fileUrl}?${Date.now()}`;
                     const fileSize = await getFileSize(fileUrl);  // Get size of each file
                     this.totalFileSize += fileSize;
                 }
@@ -75,7 +75,7 @@ export const useProductStore = defineStore('product', {
                 const loadFile = async (file) => {
                     return new Promise((resolve, reject) => {
                         const xhr = new XMLHttpRequest();
-                        const fileUrl = `/GenJs/${file.fileUrl}?${Date.now()}`;
+                        const fileUrl = `https://localhost:7293/GenJs/${file.fileUrl}?${Date.now()}`;
                         xhr.open('GET', fileUrl, true);
                         xhr.responseType = 'text';  // Expecting JavaScript code as text
 
@@ -130,7 +130,7 @@ export const useProductStore = defineStore('product', {
                 this.loadingPercentage = 100;
                 this.isLoading = false;
                 console.log('All products loaded.');
-
+                console.log('Final product:', this.products);
             } catch (error) {
                 console.error('Error fetching files:', error);
                 this.loadingPercentage = 0;

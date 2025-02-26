@@ -14,6 +14,8 @@ const doc = new jsPDF();
 // doc.text("Hello world!", 10, 10);
 // doc.save("a4.pdf");
 
+const invoiceId = ref(null); 
+
 const isInvoiceVisible = ref(false);
 
 function showInvoice() {
@@ -169,61 +171,8 @@ function preventNegativeInput(event) {
   }
 }
 
-/*
-// update the amount for a specific payment method
-function updatePaymentAmount(method, amount) {
-  const methodToUpdate = selectedPaymentMethods.value.find(m => m.id === method.id);
+const storeId = "R-qbuRxyn0iAi2dvDVSA6g";
 
-  if (methodToUpdate) {
-    const cleanedAmount = amount.replace(/[^\d.]/g, ''); // Remove invalid characters
-    const parsedAmount = parseFloat(cleanedAmount); // Parse valid decimal number
-
-    if (!isNaN(parsedAmount)) {
-      // Update the current method's amount
-      methodToUpdate.amount = cleanedAmount;
-
-      // Calculate the total allocated amount
-      const totalAllocated = selectedPaymentMethods.value.reduce((acc, m) => acc + parseFloat(m.amount || 0), 0);
-      const totalOrder = parseFloat(totalAmount.value);
-
-      // If total allocated exceeds total order, adjust the previous method
-      if (totalAllocated > totalOrder) {
-        const excessAmount = totalAllocated - totalOrder;
-        adjustPreviousPaymentMethod(excessAmount, method.id);
-      }
-    } else {
-      methodToUpdate.amount = ''; // Allow clearing the input
-    }
-  }
-}
-
-function adjustPreviousPaymentMethod(excessAmount, currentMethodId) {
-  // Find the last payment method before the current one
-  const previousMethod = selectedPaymentMethods.value.find(method => method.id !== currentMethodId);
-
-  if (previousMethod) {
-    const adjustedAmount = Math.max(parseFloat(previousMethod.amount) - excessAmount, 0);
-    previousMethod.amount = adjustedAmount.toFixed(2);
-  }
-}
-
-// Watcher to automatically adjust remaining amount for the last payment method
-
-watch(selectedPaymentMethods, (newVal) => {
-  const cashMethod = selectedPaymentMethods.value.find(method => method.name === 'Cash');
-  if (cashMethod) {
-    const cashPaid = parseFloat(cashMethod.amount || 0);
-    const totalOrder = parseFloat(totalAmount.value);
-
-    // Automatically set the change when cash exceeds total
-    if (cashPaid > totalOrder) {
-      changeAmount.value = (cashPaid - totalOrder).toFixed(2);
-    } else {
-      changeAmount.value = '0.00';
-    }
-  }
-}, { deep: true });
-*/
 
 watch(selectedPaymentMethods, (newVal) => {
   const totalAllocated = newVal.reduce((acc, m) => acc + parseFloat(m.amount || 0), 0);
@@ -282,11 +231,11 @@ async function handleCheckout() {
   const payload = {
     // Map order items to API format
     ItemList: orderStore.state.orderItems.map(item => ({
-      ItemId: item.ItemId,
-      Qty: item.Qty,
-      Discount: item.Discount || 0,
-      TaxesWaived: item.TaxesWaived,
-      SalesPersonId: item.SalesPersonId || 'defaultSalesPersonId'
+    ItemId: item.ItemId,
+    Qty: item.Qty,
+    Discount: parseInt(item.Discount) || 0,
+    TaxesWaived: item.TaxesWaived,
+    SalesPersonId: item.SalesPersonId || 'defaultSalesPersonId'
     })),
 
     // Approval list (updated structure)
@@ -335,15 +284,34 @@ async function handleCheckout() {
   console.log('Payload data:', payload);
 
   try {
-    // API call to place the order
-    const response = await axios.post('/api/NewOrder', payload);
-    if (response.status === 200) {
-      toast.success('Order placed successfully');
-      authStore.toggleCheckoutPopup(); // Close the checkout popup
-      orderStore.clearOrder(); 
-    } else {
-      toast.error('Failed to place the order.');
+  const token = localStorage.getItem('token');
+
+  if (!token) {
+    toast.error('Authorization token not found. Please log in again.');
+    return;
+  }
+
+  const response = await axios.post('/api/Order/NewOrder', payload, {
+    headers: {
+      'store-id': storeId,
+      'Authorization': `Bearer ${token}`
     }
+  });
+
+  console.log('Full response:', response);
+  
+  // response.data.status = "200";
+  // response.data.InvoiceId = "5678";
+
+  if (response.data.status === "200") {
+    toast.success('Order placed successfully');
+    invoiceId.value = response.data.invoiceId; // Store the invoice ID
+    orderStore.clearOrder();
+  } else if (response.data.status === "500") {
+    toast.error(`Error: ${response.data.message.join(', ')}`);
+  } else {
+    toast.error('Failed to place the order.');
+  }
   } catch (error) {
     console.error('Checkout error:', error);
     toast.error('An error occurred during checkout.');
@@ -560,6 +528,7 @@ function generatePDF() {
               <!-- Invoice Section -->
               <div v-if="isInvoiceVisible" class="invoice-div w-6/12 ml-16 mr-5 p-6 bg-gray-100 rounded-lg shadow-lg relative group max-h-[700px] overflow-y-scroll">
                 <h2 class="text-xl font-bold mb-3">DefaultPOSDowntown</h2>
+                <p><strong>Invoice ID:</strong> {{ invoiceId || 'N/A' }}</p> 
                 <button 
                   @click="closeInvoice"
                   class="absolute top-2 right-2 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
