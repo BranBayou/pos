@@ -63,12 +63,16 @@ const storeOriginalValue = (key, item) => {
 };
 
 const checkValueChanged = (key, item) => {
+  console.log('checkValueChanged triggered for:', key, item);
   const originalValue = parseFloat(originalValues.value[item.ItemId]?.[key] || 0);
   const currentValue = parseFloat(item[key] || 0);
 
-  // Only trigger manager permission if the value has changed
+  // console.log('Original Value:', originalValue);
+  // console.log('Current Value:', currentValue);
+
   if (currentValue !== originalValue) {
-    if (currentValue < originalValue) { // Only if the new price is less than the original price trigger discount permission
+    if (currentValue > originalValue) {
+      // console.log('Value has decreased, triggering manager permission check');
       checkManagerPermission(item);
     }
   }
@@ -90,7 +94,6 @@ const handlePriceInput = (item) => {
 
   // Delay store update until blur event
 };
-
 
 // Handle discount input and recalculate the price based on the original price
 const handleDiscountInput = (item) => {
@@ -305,10 +308,10 @@ const checkTaxRateChanged = (item) => {
               class="border-2 rounded-lg w-28 text-center py-1"
               v-model.number="item.Discount" 
               :min="0" 
-              :max="100" 
+              :max="100"
               @focus="storeOriginalValue('Discount', item)"  
               @input="handleDiscountInput(item)"
-              @blur="checkValueChanged('Discount', item)" 
+              @blur="checkValueChanged('Discount', item)"
               :disabled="isOverallDiscountApplied"
               :class="{
                 'bg-purple-500 opacity-30 text-white cursor-not-allowed': isOverallDiscountApplied,
