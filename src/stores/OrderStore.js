@@ -31,15 +31,18 @@ export const useOrderStore = defineStore('orders', () => {
 
   // Add or increment an order item
   function addOrderItem(item) {
+    // Check if the product already exists in the order
     const existingItem = state.orderItems.find(orderItem =>
-      orderItem.ItemId === item.BarCode
+      orderItem.Sku === item.Sku
     );
-
+  
     if (existingItem) {
+      // If the product already exists, increment the quantity
       existingItem.Qty++;
     } else {
+      // If the product doesn't exist, create a new order item
       const newItem = {
-        ItemId: item.BarCode,
+        ItemId: item.Sku,
         Sku: item.Sku,
         ItemName: item.Name,
         ItemImage: item.ImageUrl,
@@ -50,25 +53,27 @@ export const useOrderStore = defineStore('orders', () => {
         OriginalPrice: item.Price,
         Price: null,
         SalesPersonId: selectedSalesPerson.value?.SalesPersonId || null,
-        gstRate: state.taxes.find(tax => tax.type === 'GST').rate,  // Link GST from state.taxes
-        pstRate: state.taxes.find(tax => tax.type === 'PST').rate   // Link PST from state.taxes
-      };      
-
+        gstRate: state.taxes.find(tax => tax.type === 'GST').rate,
+        pstRate: state.taxes.find(tax => tax.type === 'PST').rate
+      };
+  
       // Apply the overall discount to newly added items
-    if (state.overallDiscount > 0) {
-      newItem.Price = Number(
-        (newItem.OriginalPrice * (1 - state.overallDiscount / 100)).toFixed(2)
-      );
-    } else {
-      newItem.Price = Number(newItem.OriginalPrice);
-    }
-
-    // Automatically assign the salesperson to the new item
-    if (applySelectedSalesPersonForAll.value && selectedSalesPerson.value) {
-      newItem.SalesPersonId = selectedSalesPerson.value;
-    }
+      if (state.overallDiscount > 0) {
+        newItem.Price = Number(
+          (newItem.OriginalPrice * (1 - state.overallDiscount / 100)).toFixed(2)
+        );
+      } else {
+        newItem.Price = Number(newItem.OriginalPrice);
+      }
+  
+      // Automatically assign the salesperson to the new item
+      if (applySelectedSalesPersonForAll.value && selectedSalesPerson.value) {
+        newItem.SalesPersonId = selectedSalesPerson.value;
+      }
+  
       state.orderItems.push(newItem);
     }
+  
     calculateTaxes();
     saveOrderItemsToLocalStorage();
   }
@@ -117,6 +122,7 @@ export const useOrderStore = defineStore('orders', () => {
     // If all items are deleted, reset the overall discount but keep other state information intact
     if (state.orderItems.length === 0) {
       state.overallDiscount = 0;
+      state.approvalList = [];
       // Optionally, you can reset other parts of the order as needed
       state.customer = { id: '', name: '', phone: '', email: '', note: '' };
       state.payments = [];
@@ -378,7 +384,7 @@ function updateOriginalPrice(item, originalPrice) {
       ManagerId: ManagerId,  
       ManagerApprovalId: ManagerApprovalId, 
       ItemId: ItemId || null, 
-      isOverallDiscount: isOverallDiscount || false, 
+      isOverallDiscount: isOverallDiscount > 0 ? true : false, 
       id: '' 
     };
   
@@ -428,7 +434,7 @@ function updateOriginalPrice(item, originalPrice) {
       updateDiscountPercentage(item, discountValue);
       addToApprovalList({
         ManagerId: managerUser,
-        ItemId: item?.ItemId, 
+        ItemId: item?.Sku, 
         ManagerApprovalId: '',
         isOverallDiscount: state.overallDiscount
       })
@@ -552,9 +558,6 @@ function loadDraftOrder(draftIndex) {
   }
 }
 
-
-
-
 // Remove a draft order
 function removeDraftOrder(draftIndex) {
   if (draftIndex >= 0 && draftIndex < draftOrders.value.length) {
@@ -572,6 +575,34 @@ const showDraftList = ref(false);
 function toggleDraftList() {
   showDraftList.value = !showDraftList.value;
   console.log('order notification toggeled');
+}
+
+function clearOrder() {
+  // Reset the state to its initial values
+  state.orderItems = [];
+  state.approvalList = [];
+  state.overallDiscount = 0;
+  state.customer = {
+    id: '',
+    name: '',
+    phone: '',
+    email: '',
+    note: ''
+  };
+  state.comments = [];
+  state.payments = [];
+  state.total = 0;
+  state.taxes = [
+    { type: 'GST', rate: 5, amount: 0 },
+    { type: 'PST', rate: 7, amount: 0 }
+  ];
+
+  selectedSalesPerson.value = null;
+  applySelectedSalesPersonForAll.value = false;
+
+  localStorage.removeItem('newOrder');
+
+  toast.success('Order cleared successfully!');
 }
   
   onMounted(() => {
@@ -614,6 +645,7 @@ function toggleDraftList() {
     updateItemTaxRate,
     getItemTaxAmounts,
     resetTaxRate,
+    clearOrder,
   };
 });
 
